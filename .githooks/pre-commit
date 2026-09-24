@@ -1,0 +1,3 @@
+#!/bin/sh
+# Runs the same gate as CI (CI also runs `npm run build`). Enabled per clone with: git config core.hooksPath .githooks
+exec npm run -s check

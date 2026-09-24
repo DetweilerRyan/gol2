@@ -1,0 +1,7 @@
+node_modules/
+dist/
+
+# Claude Code: per-agent worktrees and personal, uncommitted settings
+.claude/worktrees/
+.claude/settings.local.json
+CLAUDE.local.md

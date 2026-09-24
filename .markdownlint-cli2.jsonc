@@ -1,0 +1,12 @@
+{
+  // Formatting (including line wrapping) is oxfmt's job; markdownlint checks structure.
+  "config": {
+    "MD013": false,
+    "relative-links": true,
+  },
+  "customRules": ["markdownlint-rule-relative-links"],
+  "globs": ["**/*.md"],
+  // Also skips .gitignore'd paths, such as agent worktrees under .claude/worktrees/.
+  "gitignore": true,
+  "ignores": ["**/node_modules/**", "**/dist/**"],
+}
