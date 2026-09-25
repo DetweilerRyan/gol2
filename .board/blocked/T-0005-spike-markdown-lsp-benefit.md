@@ -184,6 +184,34 @@ production plugin (T-0002).
 
 ## Handoff
 
+**Blocked on the user's decision: the graded pilot hits stop conditions** (grading records and scores:
+`study/T-0005/grading/pilot/` at `e7ad475`).
+
+The skeptic panel agreed on 8 issues (real: I1 split the task, I2 worktrees lack `node_modules/`, I3 session
+criteria name no command, I4 CLAUDE.md doesn't point to the new doc; not real: I11, I14, I16, I18). The user
+settled the other 11: real I10 (question whether the LSP part is needed now) and I17 (protect the existing hooks),
+not real the rest, overruling the panel's majority on I5 and I6. Six issues are verified. In stage 2 the user
+confirmed every proposed key match except I10 (key 7 to no match); the verified issues cover key items 1, 2, and 5.
+
+| Measure, median (range)                  | Baseline         | LSP, refined wording |
+| ---------------------------------------- | ---------------- | -------------------- |
+| Verified issues per run (main score)     | 5 (3-5)          | 3 (3-4)              |
+| Unverified issues raised                 | 4 (2-5)          | 4 (2-6)              |
+| Key recall (of 7)                        | 0.43 (0.29-0.43) | 0.43 (0.43-0.57)     |
+| Issues the user would act on (old score) | 6 (6-10)         | 8 (5-9)              |
+
+Stop conditions: **hit**: the gate's gain is out of reach on this task (6 verified issues exist and the baseline
+median is 5, so the LSP condition would need all 6 in every run); **hit (projected)**: the user's time was about 47
+minutes for one task's 6 runs (25 rating, 22 settling and matching), so 3 tasks plus pair ratings would pass the
+3-hour limit. Not hit: uptake (3 of 3), the agentpatterns share (lower), cost (about $0.8 a run; $9.52 so far). The
+pilot's direction also runs against the hypothesis: fewer verified issues with the LSP, the same key recall, the
+same cost, and more than twice the turns. Three runs per condition give only a rough estimate.
+
+Options for the user: (a) stop: record the result as "not shown" (pilot: no gain in verified issues or key recall,
+and the gate is out of reach on this task) and move T-0008 to `dropped/`; (b) run the study anyway, with the
+workload changed to fit the time limit (for example fewer tasks or no pair ratings) and the gate adjusted to the
+ceiling; (c) something else the user names.
+
 **Pilot grading (session 00fe2a0f, 2026-09-25).** Grading covers the 3 baseline runs and the 3 refined-LSP runs,
 labelled R1 to R6 in shuffled order. Blind agents split each answer into findings and removed traces of tool use
 (52 findings). Residual risk: LSP runs reported their own session's rumdl diagnostics and `workspaceSymbol`
