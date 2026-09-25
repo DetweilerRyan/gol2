@@ -184,6 +184,34 @@ production plugin (T-0002).
 
 ## Handoff
 
+**The user's second decision (session 00fe2a0f, 2026-09-25)**, answering options (a) and (b) below: "let's
+refine the instructions to include telling coach to prefer reading sections via lsp and not through bash". The LSP
+tool returns headings and start lines, not section text, so the refined wording has the coach locate sections with
+the LSP and read them with the Read tool's offset and limit instead of Bash: "Before reading an agentpatterns page,
+use the LSP tool's documentSymbol to see its sections, and workspaceSymbol to find headings across pages. Then read
+only the sections you need with the Read tool's offset and limit, not through Bash (cat, sed, grep)." The LSP arm was
+rerun with it (`57f4210`, runs `pilot3-T-0001-lsp-1` to `-3`, back to back). Median (range), against the same
+baseline runs:
+
+| Measure                             | Baseline          | LSP, refined wording |
+| ----------------------------------- | ----------------- | -------------------- |
+| Cost, USD                           | 0.78 (0.56-0.80)  | 0.80 (0.68-0.81)     |
+| Turns                               | 13 (12-16)        | 33 (22-40)           |
+| LSP calls                           | 0                 | 12 (4-14)            |
+| Ranged Reads / Bash reads of pages  | 0 / most reads    | 10 (7-16) / 3 (2-5)  |
+| Peak context, tokens                | 57K (43K-69K)     | 56K (53K-57K)        |
+| agentpatterns share at peak         | 0.57 (0.55-0.72)  | 0.52 (0.50-0.53)     |
+| agentpatterns tool tokens           | 32K (24K-49K)     | 28K (28K-30K)        |
+| Pages opened / cited                | 16 / 10           | 9 / 9                |
+| Opened-not-cited tokens             | 5.6K (5.4K-16.5K) | 0.6K (0-1.2K)        |
+| Cited pages whose backfire was read | 0.78 (0.67-1.00)  | 1.00 (1.00-1.00)     |
+
+Uptake 3 of 3. The agentpatterns share at peak is now below every baseline run, so that stop condition no longer
+holds; the gap (0.05) is small next to the baseline's spread (0.55 to 0.72). Cost is about the same, with more than
+twice the turns. The transcript check flagged only `git worktree list` (2). Spend $2.29; total so far $9.52.
+Stop conditions not yet known: whether the gate's gain is within reach, and the user's rating time; both need the
+pilot graded. Next step: grade the baseline and refined-LSP pilot runs against Key 1.
+
 **The user's decision (session 00fe2a0f, 2026-09-25): option 2**, answering the options at the end with "2": test a
 stronger instruction and rerun the pilot's LSP arm. New wording (now `lsp_instruction` in `tasks.json`; the first
 wording is kept in `lsp_instruction_history`): "Before reading an agentpatterns page, use the LSP tool's
