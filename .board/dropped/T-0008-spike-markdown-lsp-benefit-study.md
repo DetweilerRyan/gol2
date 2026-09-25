@@ -35,6 +35,16 @@ The user's time is part of the cost: rating the off-key findings and the pairs. 
 Out of scope: changing the setup, scripts, or rules (reopen T-0005's work instead), and building the production
 plugin (T-0002).
 
+## Dropped
+
+Dropped on the user's decision (session 00fe2a0f, 2026-09-25), answering "a" to T-0005's options after its graded
+pilot hit stop conditions. Result: **not shown**, not "the LSP doesn't help". On the T-0001 review, 3 runs per
+condition, the LSP condition (with the user's refined instruction) found a median of 3 evidence-verified issues
+against the baseline's 5, with the same key recall (0.43), about the same cost, and more than twice the turns. The
+gate's gain is out of reach on this task (6 verified issues exist; the baseline median is 5), and the full study
+would pass the user's 3-hour rating limit. Details: T-0005's Handoff and evidence; grading records and scores in
+`study/T-0005/grading/pilot/` on `prototype/T-0005-lsp-benefit` (`e7ad475`).
+
 ## Handoff
 
 Not started.
