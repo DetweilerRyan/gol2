@@ -1,6 +1,6 @@
 ---
 id: T-0001
-title: Replace markdownlint-cli2 with rumdl for Markdown linting and document its LSP for agents
+title: Replace markdownlint-cli2 with rumdl for Markdown linting and set up its LSP for agents
 depends_on: []
 claimed_by: null
 verified_by: null
@@ -11,7 +11,11 @@ acceptance:
   - "A temporary Markdown file containing a link to a missing file, a missing same-file anchor, and a missing cross-file anchor makes `npm run lint:md` exit non-zero and report all three"
   - "A Markdown file with a lint error in a gitignored path such as `.claude/worktrees/` does not fail `npm run lint:md`"
   - "`rumdl fmt` is not wired into any script, hook, or CI step"
-  - "A doc in `docs/tools/` explains how agents use rumdl's LSP to navigate Markdown: list a file's headings with their section line ranges and read only the section needed, search headings across files, follow links, and find backlinks from a body line rather than a heading"
+  - "A Claude Code plugin committed in the repo runs rumdl as an LSP server for `.md` files, and `.claude/settings.json` enables it for the project, so a new session needs no manual plugin install"
+  - "The plugin starts the rumdl version pinned in `package.json` from the project's `node_modules/`, not a global install"
+  - "In a new Claude Code session in the main checkout and in one in a worktree under `.claude/worktrees/`, the LSP tool's `documentSymbol` on a doc returns its headings with section line ranges"
+  - "The task's Handoff records, for the Claude Code version tested, whether `workspaceSymbol`, `goToDefinition`, and `findReferences` return results on Markdown files in the main checkout and in a worktree"
+  - "A doc in `docs/tools/` explains how agents use rumdl's LSP to navigate Markdown: list a file's headings with their section line ranges and read only the section needed, search headings across files, follow links, and find backlinks from a body line rather than a heading. It marks any operation the Handoff found not working, with the Claude Code version"
   - "`docs/README.md` lists `tools/` and says what it holds"
   - "`npm run check` exits 0"
 evidence: []
@@ -52,13 +56,34 @@ the gate and rumdl for the LSP would mean two configs, and agents would see diag
     heading, it returns links to that heading's anchor only. On a link target, it returns links to the same
     target. On any other line, it returns every link to the current file. On the link text `[...]`, it
     returns nothing. So to find what links to a file, ask from a body line, not the `#` title on line 1.
-  - A research subagent reported (not verified) that Claude Code's LSP tool currently returns empty results for
-    workspace symbol, go-to-definition, and find-references, because it fails to map file URIs back to paths
-    (anthropics/claude-code#72316). Check this before documenting those operations as usable by agents.
+- **Claude Code LSP tool bug** ([anthropics/claude-code#72316](https://github.com/anthropics/claude-code/issues/72316)).
+  `workspaceSymbol`, `goToDefinition`, and `findReferences` return nothing while `hover` and `documentSymbol` work.
+  A maintainer traced it: since 2.1.47 the tool drops results located in gitignored files, but wrongly drops all of
+  them when the queried file is gitignored, including by a `.gitignore` in a parent directory's repo. The fix was
+  promised, but the issue was closed as not planned by the stale bot on 2026-09-14; Claude Code here is 2.1.282.
+  The main checkout's `.gitignore` ignores `.claude/worktrees/`, where agents work. From inside a worktree,
+  `git check-ignore` says its files aren't ignored, so worktree sessions may be fine, but that's untested.
+- **Plugin setup** (from the Claude Code docs, via a research subagent; verify while implementing):
+  - The plugin is a directory with `.claude-plugin/plugin.json` and an `.lsp.json` whose entry has `command`,
+    `args`, and `extensionToLanguage` (`{ ".md": "markdown" }`). Optional fields include `initializationOptions`,
+    `settings`, `env`, `workspaceFolder`, `startupTimeout`, and `restartOnCrash`.
+  - To ship it with the repo: a local marketplace directory with `.claude-plugin/marketplace.json` listing the
+    plugin by relative `source`, registered in `.claude/settings.json` under `extraKnownMarketplaces` (a
+    `directory` source) and switched on in `enabledPlugins` as `<plugin>@<marketplace>`. Docs:
+    [plugins shared through a repository](https://code.claude.com/docs/en/plugins/loading#plugins-shared-through-a-repository),
+    [LSP servers](https://code.claude.com/docs/en/plugins/components#lsp-servers).
+  - `command` must be on `PATH`, but `args` can use `${CLAUDE_PROJECT_DIR}`. rumdl's npm launcher,
+    `node_modules/rumdl/bin/rumdl`, is a Node script that runs the platform binary, so `command: "node"` with
+    `args: ["${CLAUDE_PROJECT_DIR}/node_modules/rumdl/bin/rumdl", "server"]` uses the pinned version. The
+    subcommand is `server`, not `serve`.
+  - Don't rely on symlinks inside the repo; the virtiofs mount drops them (see `CLAUDE.md`).
+  - Check loading with `claude plugin list` or `/plugin`, and `claude --debug` for server start errors.
+  - `.claude/settings.json` already holds the project's hooks; add to it without disturbing them.
 - **Ownership.** The coach maintains `docs/`, so the coach writes or reviews the `docs/tools/` doc. Per
   `docs/README.md`, the doc should cover only what agents can't learn by reading the repo.
 
-Out of scope: the Claude Code LSP plugin for rumdl (a separate task), and rumdl's autofix-on-save (leave it off).
+Out of scope: rumdl's autofix-on-save (leave it off), and working around the Claude Code LSP tool bug beyond
+recording which operations work.
 
 ## Handoff
 
