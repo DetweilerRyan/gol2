@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { parse } from "yaml";
 
 const BOARD = ".board";
-const LANES = ["backlog", "ready", "active", "blocked", "review", "done"] as const;
+const LANES = ["backlog", "ready", "active", "blocked", "review", "done", "dropped"] as const;
 const OTHER_ENTRIES = new Set(["README.md", "retros"]);
 const FILE_NAME = /^(T-\d{4})-[a-z0-9-]+\.md$/;
 
@@ -27,6 +27,14 @@ const asList = (value: unknown): unknown[] | undefined =>
   Array.isArray(value) ? value : undefined;
 const optionalName = (value: unknown): string | null | "invalid" =>
   value === null || value === undefined ? null : isNonEmptyString(value) ? value : "invalid";
+// The text under a level-2 heading, up to the next level-2 heading; undefined if the heading is absent.
+const section = (body: string, heading: string): string | undefined => {
+  const lines = body.split("\n");
+  const start = lines.findIndex((line) => line.trim() === `## ${heading}`);
+  if (start === -1) return undefined;
+  const end = lines.findIndex((line, i) => i > start && /^##\s/.test(line));
+  return lines.slice(start + 1, end === -1 ? undefined : end).join("\n");
+};
 
 // Anything unexpected at the top level is probably a misspelled lane whose tasks would go unchecked.
 for (const entry of existsSync(BOARD) ? readdirSync(BOARD) : []) {
@@ -59,11 +67,13 @@ for (const lane of LANES) {
     }
 
     const source = readFileSync(path, "utf8").replaceAll("\r\n", "\n");
-    const frontmatter = /^---\n([\s\S]*?)\n---(?:\n|$)/.exec(source)?.[1];
-    if (frontmatter === undefined) {
+    const match = /^---\n([\s\S]*?)\n---(?:\n|$)/.exec(source);
+    if (!match) {
       fail("missing YAML frontmatter");
       continue;
     }
+    const frontmatter = match[1] ?? "";
+    const body = source.slice(match[0].length);
 
     let data: Record<string, unknown>;
     try {
@@ -88,8 +98,8 @@ for (const lane of LANES) {
     if (!acceptance) fail("acceptance must be a list");
     else if (!acceptance.every(isNonEmptyString))
       fail("acceptance criteria must be non-empty strings");
-    else if (lane !== "backlog" && acceptance.length === 0) {
-      fail("acceptance criteria are required outside backlog/");
+    else if (lane !== "backlog" && lane !== "dropped" && acceptance.length === 0) {
+      fail("acceptance criteria are required outside backlog/ and dropped/");
     }
 
     const claimedBy = optionalName(data.claimed_by);
@@ -132,6 +142,10 @@ for (const lane of LANES) {
       fail("only done/ tasks have verified_by");
     }
 
+    if (lane === "dropped" && !section(body, "Dropped")?.trim()) {
+      fail("dropped/ tasks need a non-empty ## Dropped section saying why");
+    }
+
     tasks.set(fileId, {
       id: fileId,
       lane,
@@ -155,11 +169,18 @@ for (const [agent, ids] of wip) {
 }
 
 // Dependencies must exist, be done before a task leaves backlog/, and not form a cycle.
+// A task whose dependency was dropped can't proceed: it stays in backlog/ or is dropped too.
+const settledLanes: Lane[] = ["backlog", "done", "dropped"];
 for (const task of tasks.values()) {
   for (const dep of task.dependsOn) {
     const target = tasks.get(dep);
     if (!target) errors.push(`${task.path}: depends_on ${dep}, which doesn't exist`);
-    else if (task.lane !== "backlog" && task.lane !== "done" && target.lane !== "done") {
+    else if (settledLanes.includes(task.lane) || target.lane === "done") continue;
+    else if (target.lane === "dropped") {
+      errors.push(
+        `${task.path}: depends_on ${dep}, which is dropped; move this task to backlog/ or dropped/`,
+      );
+    } else {
       errors.push(`${task.path}: depends_on ${dep}, which is in ${target.lane}/, not done/`);
     }
   }
