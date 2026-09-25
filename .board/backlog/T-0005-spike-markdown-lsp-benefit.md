@@ -1,83 +1,101 @@
 ---
 id: T-0005
-title: "Spike: does a Markdown LSP make the coach's agentpatterns reviews better, without making them costlier?"
+title: "Spike setup and pilot: Markdown LSP benefit study for the coach's agentpatterns reviews"
 depends_on: []
 claimed_by: null
 verified_by: null
 acceptance:
-  - "A Claude Code session serves rumdl's LSP over the agentpatterns corpus (`/c/Users/User/Documents/projects/agentpatterns`), shown by raw `documentSymbol` and `workspaceSymbol` output for agentpatterns files; if that isn't possible, the Handoff shows why with evidence, and the remaining study criteria are recorded as not applicable"
-  - "A runner script and a metrics script are committed on branch `prototype/T-0005-lsp-benefit` (pushed, kept, never merged): the runner sets up an isolated run, runs one coach review, and redacts its transcript; the metrics script computes every per-run measure below from the run's JSON output and transcript, so grading can be redone without new runs"
-  - "Every run (pilot and study) happens in a fresh clone holding only its snapshot commit, with no other branches or tags, no remote, and no reflog, and with a Claude config directory of its own, so no earlier transcripts or memory are visible; the runner's output for each run shows `git rev-parse HEAD`, `git for-each-ref`, and `git remote`"
-  - "A check over every run's transcript finds no command reaching other refs or remotes and no read under `~/.claude` or the original gol2 checkout; its output is in the evidence, and any run it flags is discarded and rerun"
-  - "A pilot of at least two runs per condition on one review task is run before the workload is fixed; the Handoff records its cost and cost spread, the baseline's answer-key recall, LSP use, peak context, and an estimate of the user's rating time, and the pilot is excluded from the study data"
-  - "Each answer key contains only findings the user accepted from the review it comes from, and the user confirmed each key before the first study run; the keys are committed (redacted) on the prototype branch"
-  - "Before any study run, a workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the quality rubric, how findings are matched to the key, the grader's calibration rule, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest recall and cost differences the study can detect, derived from the pilot; the evidence gives its commit"
-  - "The two conditions differ only in whether the coach has the LSP tool and the one-line LSP instruction; the model, Claude Code version, effort level, prompt, other tools (including Bash), review tasks, and agentpatterns commit are the same, and the evidence shows each configuration"
-  - "Each review task is run at least 3 times per condition, alternating conditions run by run, and each run's agentpatterns commit is recorded and matches the workload file"
-  - "Each run's `claude -p --output-format json` output and its redacted transcript (the user's email, secrets, and sandbox identifiers removed) are committed as files on the prototype branch"
-  - 'The metrics script records, per run, the effectiveness scores (answer-key recall, off-key findings the user accepted and rejected, and citations that don''t say what the review claims), the context measures (peak context tokens, agentpatterns share of it, tokens from agentpatterns pages opened but not cited, and whether each cited page''s "When this backfires" section was read), and the efficiency measures (cost in USD, tokens by type, turns, tokens returned by each tool that read agentpatterns content including Bash and LSP, pages opened versus cited, whole-page versus section reads, and LSP calls)'
-  - "The answer-key matching and citation checks are graded from the same redacted, condition-hidden outputs the user rates, by a grader whose judgments agreed with the user's on a sample the user graded first, per the calibration rule; the evidence records the sample and the agreement"
-  - "The user rates each finding not in the answer key on its own merits before seeing the key, and then rates each pair of review outputs against the rubric, with the condition hidden, left/right order randomized, and mentions of LSP, symbols, or line anchors removed; the evidence records the ratings and how this was done"
-  - "Every agentpatterns page cited in each review is checked to exist and to have been opened in that run by any tool, by a command whose output is in the evidence"
-  - "The Handoff gives a separate verdict on each hypothesis (effectiveness: better, not better, or not measurable; efficiency guardrail: held or breached), reports every metric per review task and condition as a median with its range, and describes, within each task and condition, how tokens from pages opened but not cited relate to the effectiveness scores"
-  - "The Handoff applies the uptake rule, the effectiveness gate, and the efficiency guardrail fixed in the workload file, and recommends go, no-go, or not tested for T-0002, as a screen rather than a ranking"
-  - 'The Handoff describes the corpus''s structure (pages, lines per page, headings per page, links between pages) with the command that measured it, and, if effectiveness wasn''t shown to be better, states whether that structure, the context measures, or the study''s detection limits rather than the LSP could explain it; such a result is recorded as "not measurable" or "not shown on this corpus", not as "the LSP doesn''t help"'
+  - "A runner script and a metrics script are committed on branch `prototype/T-0005-lsp-benefit` (pushed, kept, never merged): the runner builds an isolated environment, runs one coach review, and redacts its transcript; the metrics script computes every per-run measure in this file's Context from a run's JSON output and transcript, so grading can be redone without new runs"
+  - "Each run the runner builds happens in an environment where the original gol2 checkout, the shared agentpatterns checkout, and `~/.claude/projects/` don't exist (for example a separate home directory or user, or a container), holding only a fresh clone of its snapshot commit (no other branches or tags, no remote, no reflog), a separate checkout of agentpatterns at commit `86da49a` at the `../agentpatterns` path relative to that clone, and a Claude config directory of its own; the runner's output for each run shows `git rev-parse HEAD`, `git for-each-ref`, and `git remote` for the clone, the agentpatterns commit, and a listing of the home directory"
+  - "Inside a run the runner built, the coach's LSP tool is listed and `documentSymbol` and `workspaceSymbol` calls on agentpatterns files return results, shown by the raw output; if that can't be made to work, the Handoff shows why with evidence, the remaining criteria are recorded as not applicable, and T-0008 moves to `dropped/`"
+  - "A diff of the two conditions' agent definitions, and of the tool lists each pilot run started with, shows they differ only in the LSP tool and the one-line LSP instruction; the diff is in the evidence"
+  - "A check over every run's transcript finds no command reaching other refs or remotes and no read outside the run's environment; its output is in the evidence"
+  - "Before anything is pushed, a scan of the files to be committed for the user's email address, token and key patterns, and the sandbox name finds nothing, and its command and output are in the evidence; credentials a run needs are set up before its session starts"
+  - "Each answer key contains only findings the user accepted from the review it comes from, and the user confirmed each key; the keys are committed (redacted) on the prototype branch"
+  - "A pilot of at least two runs per condition on one review task records in the Handoff: cost and its spread per condition, accepted findings and key recall of the baseline, LSP uptake, peak context and the agentpatterns share of it per condition, and an estimate of the user's rating time for the study; pilot runs are excluded from the study data"
+  - "A grader agent's answer-key matches and citation judgments, made on redacted, condition-hidden pilot outputs, agree with the user's on a sample the user graded, measured by balanced accuracy or Cohen's kappa with at least 5 true matches in the sample, and meet the calibration rule in the workload file; the evidence records the sample and the result"
+  - "A workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the calibration rule, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
+  - "The Handoff states whether any pilot stop condition in this file's Context was hit, and if so the user decided whether to proceed before T-0008 leaves `backlog/`; it records the user's decision"
+  - "The Handoff notes how the study coach differs from the real one (for example, no user-level settings or plugins in its config directory)"
   - "`npm run check` exits 0 on the branch that carries this task file"
 evidence: []
 ---
 
 ## Context
 
-The user wants to know whether a Markdown LSP is worth adopting before building it (T-0002). gol2's own docs (11
-files, about 520 lines) are too small to show a difference; the agentpatterns corpus the coach reviews against is
-large enough, and T-0002 serves agentpatterns too, so a go here is a benefit T-0002 ships. A no-go is a valid
-result. This task can run in parallel with T-0004. The result is a screen: a small number of runs can show a clear,
-consistent difference, not rank close ones.
+The user wants to know whether a Markdown LSP is worth adopting before building it (T-0002). This task builds the
+study's isolated setup, confirms the LSP works inside it, runs a pilot, calibrates the grader, and fixes the
+workload; T-0008 runs the study. The pilot's Handoff is the user's decision point before the expensive part. This
+file is the home for the study's design; T-0008 points here. It can run in parallel with T-0004. Epic: T-0009.
+
+gol2's own docs (11 files, about 520 lines) are too small to show a difference; the agentpatterns corpus the coach
+reviews against is large enough, and T-0002 serves agentpatterns too, so a go is a benefit T-0002 ships. A no-go
+is a valid result. The result is a screen: a small number of runs can show a clear, consistent difference, not rank
+close ones.
 
 **The hypothesis.** When the coach performs a review using the Markdown LSP to navigate agentpatterns, it's more
 effective, because irrelevant text stays out of its context, and it also uses fewer tokens. The user decided
 (2026-09-25) that **effectiveness is the gate and efficiency is a guardrail**: the LSP is adopted only if reviews
 get better, and only as long as they don't get costlier. Lower cost is reported but doesn't earn a go by itself.
 
+**Main effectiveness score: accepted findings per run.** The findings the user accepts from a run, whether in the
+answer key or not, with off-key findings rated on their merits before the user sees the key (the user's decision,
+2026-09-25). Key recall is secondary. Recall alone mostly measures how closely a run repeats the baseline reviews
+the keys came from, which penalizes an LSP coach that finds different good problems.
+
+**Counting runs.** The main result counts every LSP-condition run as assigned, whether or not it called the LSP,
+because that's what adopting it looks like. Runs that did call it are a secondary result (the user's decision).
+
 **Effectiveness gate (proposed; fix it in the workload file before the first study run; the user may change the
 numbers when approving this task, never after runs start).** Go requires all of these:
 
-- Median answer-key recall is higher in the LSP condition in every review task, by at least 10 percentage points
-  in at least half of them, and each gap is larger than the spread of the runs within each condition.
+- The median number of accepted findings per run is higher in the LSP condition in every review task, by at least
+  one finding in at least half of them, and each gap is larger than the spread of the runs within each condition.
 - In the user's blind pair ratings of relevant findings, the LSP is rated better in more pairs than the baseline.
 - The LSP condition is not worse on incorrect citations, rejected findings (noise), or the share of cited pages
   whose "When this backfires" section was read.
 
-**Efficiency guardrail (proposed, fixed the same way).** A breach, which is a no-go even if the gate passes, needs
-both: in some review task, the LSP condition's median cost in USD or median tokens returned by agentpatterns-reading
-tools is more than 10% higher than the baseline's, and that gap is larger than the spread of the runs within each
-condition (the user's decision, 2026-09-25, matching how the gate treats noise).
+**Efficiency guardrail (proposed, fixed the same way).** Outcomes: held, breached, or not measurable. A breach,
+which is a no-go even if the gate passes, needs both: in some review task, the LSP condition's median cost in USD or
+median tokens returned by agentpatterns-reading tools is more than 10% higher than the baseline's, and that gap is
+larger than the spread of the runs within each condition. It's not measurable when the pilot shows the smallest
+detectable cost difference at the planned number of runs is above 10%; run-to-run cost for the same setup varies by
+about ×1.34, so at 3 runs "held" can be close to the default.
 
 **Uptake rule (proposed).** The LSP condition counts as tested only if the coach made at least one LSP call in at
 least two thirds of its runs. Otherwise the result is "not tested", not no-go: agents often skip an optional tool.
 
-**What the study can detect.** The keys have 7 to 10 accepted findings at most, so one finding moves recall by 10 to
-14 points, and the gate effectively needs about two more findings in every task. Cost varies a lot from run to run
-with the number of turns. The pilot estimates the cost spread and the baseline's recall; write the smallest
-detectable recall and cost differences into the workload file before the study runs, and if the gate or guardrail
-can't be met or tripped at that sample size, raise the runs or ask the user before starting.
+**Pilot stop conditions.** Stop and ask the user before fixing the workload if any of these hold: LSP uptake in the
+pilot is below the uptake rule; the baseline already finds so much that the gate's gain is out of reach; the
+agentpatterns share of context isn't lower in the LSP condition; or the estimated cost in dollars or the user's
+rating time looks larger than the decision is worth.
 
-**Measuring effectiveness.** The per-run scores against the answer keys (recall, noise, incorrect citations) are the
-primary measure; the ordinal pair ratings back them up, since "same" is likely to be common across 9 to 12 pairs.
-Fix how a review's finding matches a key finding in the workload file (for example, the same defect in the same
-criterion).
+**Per-run measures (computed by the metrics script):**
+
+- Effectiveness: accepted findings (in the key and off-key), key recall (key findings matched divided by key
+  size), rejected findings, and citations that don't say what the review claims.
+- Context: peak context tokens, the agentpatterns share of it, tokens from agentpatterns pages opened but not cited,
+  and whether each cited page's "When this backfires" section was read.
+- Efficiency: cost in USD, tokens by type (input, output, cache write, cache read), turns, tokens returned by each
+  tool that read agentpatterns content (Read, Grep, Glob, Bash, LSP), pages opened versus cited, whole-page versus
+  section reads, and the number of LSP calls.
+
+**What the study can detect.** The keys have 7 to 10 findings, and a review may add a few accepted off-key ones, so
+one finding is a large step. Cost varies a lot from run to run with the number of turns. The pilot estimates both;
+write the smallest detectable differences into the workload file, and if the gate or guardrail can't be met or
+tripped at that sample size, raise the runs or ask the user.
 
 **The grader.** The implementing agent is the same model family as the coach and can see which condition each run
-used, so it doesn't grade blind by default. An agent grades from the redacted, condition-hidden outputs, after its
-matching and citation judgments agree with the user's on a sample the user grades first (the user's decision,
-2026-09-25). Fix the agreement rule (for example, the same match decision on at least 90% of findings in the sample)
-in the workload file.
+used, so it doesn't grade blind by default. A grader agent works from the redacted, condition-hidden outputs, after
+its judgments agree with the user's on a sample the user grades (the user's decision). Use balanced accuracy or
+Cohen's kappa, not raw agreement: most findings are clear non-matches, so a grader that always says "no match" gets
+high raw agreement (across 21 judges, raw agreement overstated chance-corrected agreement by 33 to 41 points).
 
 **Answer keys.** Built only from the findings the user accepted from each 2026-09-25 coach review, and confirmed by
-the user before runs start. The keys come from reviews made without the LSP, and the user acted on them, so their
-findings will look familiar; a valid finding that only an LSP run surfaces could look like noise. So the user rates
-findings not in the key on their own merits before seeing the key, and those are reported separately from recall.
-Review tasks, snapshots from before each review so there's something to find:
+the user. The keys come from reviews made without the LSP, and the user acted on them, so their findings will look
+familiar; that's why off-key findings are rated before the user sees the key. The reviews cited agentpatterns at
+`86da49a` ("Release v1.8.67", 2026-09-24), which is why the study pins that commit. Review tasks, snapshots from
+before each review so there's something to find:
 
 - T-0001 at commit `648d64a` (the first review: 7 findings, led by splitting the task).
 - T-0004 at `f5f6bff` (9 findings).
@@ -89,26 +107,28 @@ The coach's outputs aren't in the repo. They're in the subagent transcripts unde
 The user's accept or reject decisions for each finding are in that session's main transcript alongside them.
 
 **Isolation.** Resetting a working tree doesn't hide the answers: from any snapshot, `git log --all` reaches the
-later commits that applied each review (for example, `c44ca0f`'s diff is the key for the T-0004 snapshot), the
-prototype branch holds the keys, earlier transcripts sit under `~/.claude/projects/` (a folder the coach's role file
-tells it to read), and memory is shared between runs. So each run gets a fresh clone with only its snapshot commit
-and a Claude config directory of its own, and a transcript check discards any run that reached other history or
-`~/.claude`. Fresh clones also keep the study from resetting the shared main checkout, which other agents use. The
-mechanism for a separate config directory (for example the `CLAUDE_CONFIG_DIR` environment variable) and whether it
-needs its own login are unverified; check both in the pilot.
+later commits that applied each review, the prototype branch holds the keys, earlier transcripts sit under
+`~/.claude/projects/` (a folder the coach's role file tells it to read), and memory is shared between runs.
+Catching reads afterwards and discarding runs would skew the sample if one condition explores more, so the user
+decided (2026-09-25) to hide these paths entirely: each run's environment contains only what it needs. The coach's
+role file points to `../agentpatterns`, so place the pinned agentpatterns checkout there relative to the clone;
+don't check out the pinned commit in the shared `../agentpatterns`, which other agents use. The transcript check
+stays as a backstop. The mechanism for a separate config directory (for example `CLAUDE_CONFIG_DIR`) and whether it
+needs its own login are unverified; check them first, and set up any credentials before the session starts so
+they never enter a transcript.
 
-**Pinned corpus.** `../agentpatterns` is a clone of a site that releases often (HEAD was `86da49a`, "Release
-v1.8.67", on 2026-09-24). A pull mid-study would change what pages say and which citations count as correct, so the
-workload file fixes the commit and each run records it.
+**Workspace trust.** Each run's clone is a new folder. `claude -p` doesn't grant workspace trust, and a project
+plugin was skipped in an untrusted folder (T-0002's Context), and in `-p` mode the LSP tool may also need a
+permission setting. That's why the LSP must be shown working inside a runner-built run before any pilot run
+counts.
 
-**The mechanism.** The claim is that irrelevant text in context lowers quality, so measure context too: peak
-context, the agentpatterns share of it, and tokens from pages opened but not cited. That last measure is only a
-proxy: opening a page and deciding not to cite it is legitimate review work, and the measure falls automatically
-with section reads. So describe its relation to the scores within each task and condition, not pooled, and don't
-treat it as proof. The coach measured the 2026-09-25 reviews that serve as answer keys: peak context about 35K to
-157K tokens, with agentpatterns reads about 55 to 90% of tool-result text (approximate, from character counts).
-That's inside the range where research sees quality start to degrade, though newer models degrade later, so the
-effect may be small. If the irrelevant share is small in both conditions, a quality null is "not measurable".
+**The mechanism.** The claim is that irrelevant text in context lowers quality, so the context measures matter.
+Tokens from pages opened but not cited is only a proxy: opening a page and deciding not to cite it is legitimate
+review work, and the measure falls automatically with section reads. Describe its relation to the scores within
+each task and condition, not pooled. The coach measured the 2026-09-25 reviews: peak context about 35K to 157K
+tokens, with agentpatterns reads about 55 to 90% of tool-result text (approximate). That's inside the range where
+research sees quality start to degrade, though newer models degrade later, so the effect may be small. If the
+irrelevant share is small in both conditions, a quality null is "not measurable".
 
 **Section reads can hurt quality.** The coach's role file says to read a page's "When this backfires" section
 before citing it. An LSP-guided coach reading a single section may skip it, and pruning context too hard can
@@ -123,22 +143,17 @@ sections in Markdown, use the LSP tool's documentSymbol and workspaceSymbol." An
 "avoid reading whole pages") can lower quality by itself, whatever the tool does.
 
 **False-negative risk: the corpus's structure.** agentpatterns may not be structured so that an LSP is materially
-effective, and the study could then show no benefit even if an LSP helps on larger or differently structured docs.
-Measured on 2026-09-25: 1,587 pages and 190,065 lines; lines per page median 112 (mean 120, range 24 to 1,825);
-headings per page median 10 (8 of them level 2); links to other pages median 9 per page, with 2 pages having none.
-A median section is about a dozen lines, but a whole median page is only about 112, so reading an outline plus
-one section may keep little text out of context compared with reading the page. The coach also often knows a
-page's path already, which grep or a direct read finds cheaply. The LSP's edge is more likely in heading search
-across pages and in long pages.
+effective. Measured on 2026-09-25: 1,587 pages and 190,065 lines; lines per page median 112 (mean 120, range 24 to
+1,825); headings per page median 10 (8 of them level 2); links to other pages median 9 per page, with 2 pages
+having none. A median section is about a dozen lines, but a whole median page is only about 112, so reading an
+outline plus one section may keep little text out of context. The coach also often knows a page's path already,
+which grep or a direct read finds cheaply. The LSP's edge is more likely in heading search across pages and in long
+pages.
 
 **Cost measurement.** In Claude Code, most input tokens are the cached prompt re-sent each turn. An LSP that
 replaces one whole-page read with several small calls lowers the tokens tools return but adds turns, which can
 raise cost; that's why the guardrail checks both cost and tool-returned tokens. Alternating conditions keeps
 prompt-cache warmth from favoring one side.
-
-**Budget.** The study costs dollars and the user's time: 12 or more pairs on 3 dimensions, plus the off-key
-findings and the calibration sample. If the pilot's estimate of either looks larger than the decision is worth,
-stop and ask the user before fixing the workload.
 
 **Setup notes (unverified; record what worked in the Handoff):**
 
@@ -147,18 +162,18 @@ stop and ask the user before fixing the workload.
   the two study variants with `claude -p --agents <file>` (or an equivalent), keeping the coach's instructions and
   adding only the LSP tool and the instruction in the LSP condition. `--agent <name>` selects one.
 - **Bash stays in both conditions,** as in the real coach, which reads pages with `cat`, `grep`, and `sed`. An
-  isolated worktree session refuses to start a nested `claude` session that has Bash, so run the study from a
-  session that isn't worktree-isolated, or have the user run the runner.
-- **Pointing rumdl at agentpatterns.** The LSP server's workspace is normally the session's project folder.
-  Options: the `.lsp.json` `workspaceFolder` field set to the pinned agentpatterns checkout; running the session
-  with it as the project folder (it must be a trusted workspace); or `--add-dir`. `--plugin-dir <path>` loads a
-  plugin for one session only, which keeps the study's plugin out of the repo. T-0002's Context has the plugin
-  layout that loaded in the 2026-09-25 spike, and T-0003's Context has how rumdl's LSP operations behave.
+  isolated worktree session refuses to start a nested `claude` session that has Bash, so run the runner from a
+  session that isn't worktree-isolated, or have the user run it.
+- **Pointing rumdl at agentpatterns.** Options: the `.lsp.json` `workspaceFolder` field set to the pinned
+  agentpatterns checkout, running the session with it as the project folder, or `--add-dir`. `--plugin-dir <path>`
+  loads a plugin for one session only, which keeps the study's plugin out of the repo. T-0002's Context has the
+  plugin layout that loaded in the 2026-09-25 spike, and T-0003's Context has how rumdl's LSP operations behave.
 - **Measuring.** `claude -p --output-format json` reports `usage` (input, output, cache tokens), `num_turns`, and
   `total_cost_usd` for the session. Tokens per tool, peak context, and which sections were read come from the
   transcript.
 
-Out of scope: changing the coach's role file or `CLAUDE.md`, and building the production plugin (T-0002).
+Out of scope: the study runs themselves (T-0008), changing the coach's role file or `CLAUDE.md`, and building the
+production plugin (T-0002).
 
 ## Handoff
 

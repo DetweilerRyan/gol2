@@ -42,6 +42,8 @@ raw LSP and through Claude Code 2.1.282 on 2026-09-25:
 - Claude Code's LSP tool has a known bug that can empty some results for gitignored files; see T-0002. The doc
   states what the evidence showed, not the bug's history.
 
+Epic: T-0009.
+
 ## Handoff
 
 Not started.

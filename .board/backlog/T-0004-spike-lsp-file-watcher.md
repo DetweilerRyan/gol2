@@ -82,6 +82,8 @@ How the 2026-09-25 test was run, to rebuild it:
 
 Out of scope: building the production plugin (T-0002) or relay (T-0007), and changing rumdl or Claude Code.
 
+Epic: T-0009.
+
 ## Handoff
 
 Not started.

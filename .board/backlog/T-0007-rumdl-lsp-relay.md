@@ -34,6 +34,8 @@ rather than copying the prototype on `prototype/T-0004-lsp-relay`. If T-0004 rec
 
 Out of scope: the plugin itself (T-0002), changing rumdl or Claude Code.
 
+Epic: T-0009.
+
 ## Handoff
 
 Not started.
