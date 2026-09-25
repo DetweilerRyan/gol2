@@ -25,7 +25,8 @@ and claiming it early would tie up an agent's single work-in-progress slot.
 The board has no epic type yet, so this is an ordinary task. Its `depends_on` is left empty on purpose: under
 T-0006's rule, a task that depends on a dropped task can't leave `backlog/`, and this epic must be able to close
 when some of its tasks are dropped. Membership is defined by the `Epic: T-0009.` line in each task's Context, and
-each task's own `depends_on` is the source of truth for dependencies; the list below is a reading aid only.
+each task's own `depends_on` is the source of truth for dependencies; the list and diagram below are reading aids,
+so update them by hand when a task is added, split, or dropped.
 
 ## Tasks
 
@@ -40,6 +41,28 @@ each task's own `depends_on` is the source of truth for dependencies; the list b
 | T-0007 | Production relay (TypeScript/Node) keeping LSP results fresh                                                                      |
 | T-0001 | Replace markdownlint-cli2 with rumdl in the gate                                                                                  |
 | T-0003 | `docs/tools/` doc and (on go) the coach's LSP configuration; no `CLAUDE.md` pointer until a retro shows one is needed             |
+
+## Plan
+
+Arrows point from a task to the tasks that depend on it. Diamonds are the user's decisions; a "no" or "no-go" at
+any of them moves every task after it to `dropped/`. Tasks with a thick border are in `ready/`.
+
+```mermaid
+flowchart LR
+  T0010["T-0010<br/>answer keys"] --> T0005
+  T0006["T-0006<br/>dropped/ lane"] --> T0005
+  T0005["T-0005<br/>study setup + pilot"] --> D1{"Proceed after<br/>the pilot?"}
+  D1 -->|yes| T0008["T-0008<br/>benefit study"]
+  D1 -->|yes| T0004["T-0004<br/>freshness spike"]
+  T0008 --> D2{"Both<br/>go?"}
+  T0004 --> D2
+  D2 -->|go| T0002["T-0002<br/>plugin"]
+  T0002 --> T0007["T-0007<br/>relay"]
+  T0007 --> T0001["T-0001<br/>linter swap"]
+  T0007 --> T0003["T-0003<br/>docs + coach config"]
+  classDef ready stroke-width:4px
+  class T0010,T0006 ready
+```
 
 ## Decision points
 
