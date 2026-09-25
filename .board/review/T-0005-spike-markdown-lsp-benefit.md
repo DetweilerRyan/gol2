@@ -13,14 +13,14 @@ acceptance:
   - "Before anything is pushed, a scan of the files to be committed for the user's email address, token and key patterns, and the sandbox name finds nothing, and its command and output are in the evidence; credentials a run needs are set up before its session starts"
   - "The study uses the answer keys T-0010 committed and the user confirmed, unchanged; the evidence gives their commit"
   - "A pilot of at least three runs per condition on one review task records in the Handoff: cost and its spread per condition, accepted findings and key recall of the baseline, LSP uptake, peak context and the agentpatterns share of it per condition, and an estimate of the user's rating time for the study; pilot runs are excluded from the study data"
-  - "A workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
+  - "If the user decides to proceed after the pilot, a workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
   - "The Handoff states whether any pilot stop condition in this file's Context was hit, and if so the user decided whether to proceed before T-0008 leaves `backlog/`; it records the user's decision"
   - "The Handoff notes how the study coach differs from the real one, including user-level settings and plugins, the project's and the coach's hooks and the `node_modules/` they need, and the sandbox's parent `CLAUDE.md`"
   - "`npm run check` exits 0 on the branch that carries this task file"
 evidence:
   - criterion: "A runner script and a metrics script are committed on branch `prototype/T-0005-lsp-benefit` (pushed, kept, never merged): the runner builds an isolated environment, runs one coach review, and redacts its transcript; the metrics script computes every per-run measure in this file's Context from a run's JSON output and transcript, so grading can be redone without new runs"
-    command: "git ls-tree --name-only origin/prototype/T-0005-lsp-benefit study/T-0005/; git merge-base --is-ancestor origin/prototype/T-0005-lsp-benefit origin/main"
-    result: "runner.sh (with preflight.sh, make_agents.mjs, redact.py) and metrics.py are on the branch, pushed (tip e7ad475); merge-base exits 1, so it is not merged. metrics.py computes the efficiency and context measures for every run (out/metrics.json in each pilot run folder); the effectiveness measures come from a grades file, and the pilot's were recomputed from grading/pilot/ without new runs (pilot_scores.json)."
+    command: "git ls-tree --name-only origin/prototype/T-0005-lsp-benefit study/T-0005/; git merge-base --is-ancestor origin/prototype/T-0005-lsp-benefit origin/main; python3 study/T-0005/metrics.py study/T-0005/runs/<run> --json; python3 study/T-0005/score_pilot.py study/T-0005/grading/pilot"
+    result: "runner.sh (with preflight.sh, make_agents.mjs, redact.py) and metrics.py are on the branch, pushed (tip 025c942); merge-base exits 1, so it is not merged. metrics.py computes the efficiency and context measures from each run's outputs (study/T-0005/runs/<run>/metrics.json; the coach reran two and got identical output). Effectiveness is computed from the grading records, not new runs: score_pilot.py rebuilds grading/pilot/pilot_scores.json from them and its output is identical to the committed file."
   - criterion: "Each run the runner builds happens in an environment where the original gol2 checkout, the shared agentpatterns checkout, and `~/.claude/projects/` don't exist (for example a separate home directory or user, or a container), holding only a fresh clone of its snapshot commit (no other branches or tags, no remote, no reflog), a separate checkout of agentpatterns at commit `86da49a` at the `../agentpatterns` path relative to that clone, and a Claude config directory of its own; the runner's output for each run shows `git rev-parse HEAD`, `git for-each-ref`, and `git remote` for the clone, the agentpatterns commit, and a listing of the home directory; the runner refuses to start a run unless these conditions hold"
     command: "for r in study/T-0005/runs/*/; do grep -c '^PASS' $r/preflight.txt; grep -c '^FAIL' $r/preflight.txt; done; sed -n '1,30p' study/T-0005/runs/pilot3-T-0001-lsp-1/preflight.txt"
     result: "All 14 runs: 14 PASS, 0 FAIL. Example output: HEAD 648d64a26916241145ee961ac581d5eb2df87a12, for-each-ref only refs/heads/main, git remote empty, reflog 0, agentpatterns HEAD 86da49a1..., home listing /study/home/.claude only; /c and /home absent. The runner refused setup-lsp-1's first attempt when a preflight check failed (a quoting bug), so the refusal path works."
@@ -29,7 +29,7 @@ evidence:
     result: "setup-lsp-1: init tools [Read, Edit, Write, Bash, LSP]; documentSymbol on instructions/instruction-compliance-ceiling.md returned 13 headings; workspaceSymbol 'Instruction Compliance Ceiling' returned 1 symbol; Bash sed of the page succeeded; hooks UserPromptSubmit, PreToolUse:Bash, Stop all exit 0. setup-baseline-1: tools [Read, Edit, Write, Bash], same three hooks. The conditional drop clause didn't apply."
   - criterion: "A diff of the two conditions' agent definitions, and of the tool lists each pilot run started with, shows they differ only in the LSP tool and the one-line LSP instruction; the diff is in the evidence"
     command: "difflib diff of make_agents.mjs baseline output vs study/T-0005/runs/pilot3-T-0001-lsp-1/agents.json; init tools of runs/pilot-T-0001-baseline-1 and runs/pilot3-T-0001-lsp-1"
-    result: 'Agent definitions differ in two places only: tools gains "LSP", and the Reference paragraph gains the instruction sentence (tasks.json lsp_instruction; earlier wordings in lsp_instruction_history). Session tool lists: baseline [Read, Edit, Write, Bash], plugins agents-md, telemetry; LSP [Read, Edit, Write, Bash, LSP], plugins rumdl-lsp, agents-md, telemetry.'
+    result: 'Diff of the agent definitions (make_agents.mjs baseline output vs pilot3-T-0001-lsp-1/agents.json), every differing line, separated by " || ": -  "Bash" || +  "Bash", || +  "LSP" || -"When this backfires" section, before citing it. The repo is meant to grow large with many agents, but apply a || +"When this backfires" section, before citing it. Before reading an agentpatterns page, use the LSP tool''s documentSymbol to see its sections, and workspaceSymbol to find headings across pages. Then read only the sections you need with the Read tool''s offset and limit, not through Bash (cat, sed, grep). The repo is meant to grow large with many agents, but apply a. Session tool lists (init message): pilot-T-0001-baseline-1 [Read, Edit, Write, Bash], plugins agents-md, telemetry; pilot3-T-0001-lsp-1 [Read, Edit, Write, Bash, LSP], plugins rumdl-lsp, agents-md, telemetry. Earlier wordings are in tasks.json lsp_instruction_history.'
   - criterion: "A check over every run's transcript finds no command reaching other refs or remotes and no read outside the run's environment; its output is in the evidence"
     command: "python3 study/T-0005/check_transcript.py study/T-0005/runs/*"
     result: "14 runs checked, 10 flags, none reaching another ref, remote, or path outside the environment: 8 are `git worktree list` (the sandbox clone has one worktree and no remote), 2 are regex false positives (`/d` and `/backfires/` inside sed patterns). No web tools or network commands."
@@ -41,10 +41,10 @@ evidence:
     result: "Last change bc19162 (T-0010's confirmed keys); the diff is empty, so the pilot used them unchanged (Key 1 via grading/pilot/, extracted from answer-keys.md)."
   - criterion: "A pilot of at least three runs per condition on one review task records in the Handoff: cost and its spread per condition, accepted findings and key recall of the baseline, LSP uptake, peak context and the agentpatterns share of it per condition, and an estimate of the user's rating time for the study; pilot runs are excluded from the study data"
     command: "The Handoff sections 'Pilot', 'Rerun of the LSP arm', 'Pilot grading', and 'Blocked on the user's decision: the graded pilot hits stop conditions'"
-    result: "Pilot: 3 baseline runs plus 3 LSP runs per wording on T-0001, pilot runs excluded from study data. Recorded: cost median and range per condition (baseline 0.78 (0.56-0.80), LSP 0.80 (0.68-0.81)); the baseline's accepted findings (6, 6-10) and key recall (0.43, 0.29-0.43), and the verified-issue score the user switched to (5, 3-5 vs LSP 3, 3-4); LSP uptake (0 of 3, then 3 of 3); peak context and agentpatterns share per condition (57K/0.57 vs 56K/0.52); rating time (about 47 minutes for one task's 6 runs) and the projection past 3 hours."
-  - criterion: "A workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
-    command: "Session 00fe2a0f, 2026-09-25: the user chose option (a) of the Handoff's options"
-    result: 'not applicable: the graded pilot hit stop conditions and the user answered "a" (stop, record "not shown", drop T-0008), so no workload file was fixed; the per-run rules the pilot settled are in tasks.json and the Handoff.'
+    result: "Pilot: 3 baseline runs plus 3 LSP runs per wording on T-0001, pilot runs excluded from study data. Recorded: cost median and range per condition (baseline 0.78 (0.56-0.80), LSP 0.80 (0.68-0.81)); the baseline's accepted issues (6, 6-10; the findings were grouped into issues) and key recall (0.43, 0.29-0.43), and the verified-issue score the user switched to (5, 3-5 vs LSP 3, 3-4); LSP uptake (0 of 3, then 3 of 3); peak context and agentpatterns share per condition (57K/0.57 vs 56K/0.52); rating time (about 47 minutes for one task's 6 runs) and the projection past 3 hours."
+  - criterion: "If the user decides to proceed after the pilot, a workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
+    command: 'Session 00fe2a0f, 2026-09-25: the user''s answer "a" to the Handoff''s options, and the amendment of this criterion recorded in the Handoff'
+    result: 'not applicable: the user decided not to proceed after the pilot (answered "a": stop, record "not shown", drop T-0008), so no workload file was fixed. The criterion was made conditional on the user''s instruction "amend criterion 9, apply all fixes and push" after the coach''s verification.'
   - criterion: "The Handoff states whether any pilot stop condition in this file's Context was hit, and if so the user decided whether to proceed before T-0008 leaves `backlog/`; it records the user's decision"
     command: "The Handoff sections recording each stop and decision"
     result: 'Stop conditions were hit three times and each was put to the user: uptake 0 of 3 (decision "2"), context share unchanged (decision "let''s refine the instructions..."), and after grading, gain out of reach and time over the limit (decision "a": stop and drop T-0008). T-0008 never left backlog/ and is now in dropped/.'
@@ -53,7 +53,7 @@ evidence:
     result: "It covers: runs as the main agent via --agent coach, not a subagent; no user-level settings, memory, or plugins (only built-in agents-md and telemetry); no parent CLAUDE.md; project and coach hooks run with the host node_modules/ mounted read-only; Grep and Glob not offered by this build in either condition; bypassPermissions inside the sandbox; prompt paths changed to /study."
   - criterion: "`npm run check` exits 0 on the branch that carries this task file"
     command: "npm run check  (on worktree-T-0005-claim, which carries this task file)"
-    result: "__CHECK__"
+    result: 'exit 0 on worktree-T-0005-claim with this evidence in place (the commit that fixed the coach''s verification findings): "All matched files use the correct format.", markdownlint "Summary: 0 issues in 0 files", "Board OK: 10 task(s).", typecheck and tests pass. The coach''s rerun on 229dbf1 also exited 0.'
 ---
 
 ## Context
@@ -73,7 +73,7 @@ effective, because irrelevant text stays out of its context, and it also uses fe
 (2026-09-25) that **effectiveness is the gate and efficiency is a guardrail**: the LSP is adopted only if reviews
 get better, and only as long as they don't get costlier. Lower cost is reported but doesn't earn a go by itself.
 
-**Main effectiveness score: accepted findings per run.** The findings the user accepts from a run, whether in the
+**Main effectiveness score: accepted findings per run.** (Changed during the pilot by the user's decisions: findings were grouped into issues, and the main score became evidence-verified issues; see the Handoff, "Pilot grading" and "The user's third decision".) The findings the user accepts from a run, whether in the
 answer key or not, with off-key findings rated on their merits before the user sees the key (the user's decision,
 2026-09-25). Key recall is secondary. Recall alone mostly measures how closely a run repeats the baseline reviews
 the keys came from, which penalizes an LSP coach that finds different good problems.
@@ -225,6 +225,16 @@ pilot showed no gain in verified issues or key recall, and the gate is out of re
 `dropped/`. No workload file was fixed. Needs attention: T-0002, T-0003, T-0004, T-0007, and the epic T-0009 depend
 on T-0008's result; under the board rules they can't proceed, and dropping them needs the user's agreement.
 
+**Caveats on the result** (from the coach's verification, 2026-09-25): the agreed capability wording was never
+tested (0 of 3 uptake, "not tested" under the uptake rule); the wording that was tested also tells the coach not to
+read pages through Bash, so it changes more than the tool; the LSP arm reruns ran back to back rather than
+alternating; the main score was changed after unblinded results were seen (against the hypothesis, for a stated
+reason), which makes this pilot's verdict exploratory; the skeptic panel wasn't checked against the answer key, and
+it ruled I16 unanimously not real although the user matched it to Key 1 item 3; the gap depends on those calls (3 vs
+5 as recorded, 4 vs 5 on the panel's majority alone or with I16 counted as real), while the direction doesn't: the
+LSP is never ahead on verified issues. On the user's acceptance, the score agreed before the pilot, the LSP was ahead
+(8 vs 6) within the spread.
+
 **Was blocked on the user's decision: the graded pilot hits stop conditions** (grading records and scores:
 `study/T-0005/grading/pilot/` at `e7ad475`).
 
@@ -241,8 +251,7 @@ confirmed every proposed key match except I10 (key 7 to no match); the verified 
 | Key recall (of 7)                        | 0.43 (0.29-0.43) | 0.43 (0.43-0.57)     |
 | Issues the user would act on (old score) | 6 (6-10)         | 8 (5-9)              |
 
-Stop conditions: **hit**: the gate's gain is out of reach on this task (6 verified issues exist and the baseline
-median is 5, so the LSP condition would need all 6 in every run); **hit (projected)**: the user's time was about 47
+Stop conditions: **hit**: the gate's gain is out of reach on this task (6 verified issues exist and the baseline median is 5; even 6 in every LSP run would be a gap of 1, not larger than the baseline's spread of 2, so the gate couldn't pass on T-0001 at 3 runs: not measurable on this task, as the coach's verification put it); **hit (projected)**: the user's time was about 47
 minutes for one task's 6 runs (25 rating, 22 settling and matching), so 3 tasks plus pair ratings would pass the
 3-hour limit. Not hit: uptake (3 of 3), the agentpatterns share (lower), cost (about $0.8 a run; $9.52 so far). The
 pilot's direction also runs against the hypothesis: fewer verified issues with the LSP, the same key recall, the

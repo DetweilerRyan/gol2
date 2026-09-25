@@ -42,7 +42,10 @@ pilot hit stop conditions. Result: **not shown**, not "the LSP doesn't help". On
 condition, the LSP condition (with the user's refined instruction) found a median of 3 evidence-verified issues
 against the baseline's 5, with the same key recall (0.43), about the same cost, and more than twice the turns. The
 gate's gain is out of reach on this task (6 verified issues exist; the baseline median is 5), and the full study
-would pass the user's 3-hour rating limit. Details: T-0005's Handoff and evidence; grading records and scores in
+would pass the user's 3-hour rating limit. Caveats: the agreed capability wording was never tested (0 of 3 uptake); the tested wording also
+told the coach not to read pages through Bash; on the user's acceptance, the score agreed before the pilot, the LSP
+was ahead (8 vs 6) within the spread; and this is one task, 3 runs per condition, with the baseline near the ceiling,
+so on this task the gate was not measurable. Details: T-0005's Handoff and evidence; grading records and scores in
 `study/T-0005/grading/pilot/` on `prototype/T-0005-lsp-benefit` (`e7ad475`).
 
 ## Handoff
