@@ -27,14 +27,33 @@ const asList = (value: unknown): unknown[] | undefined =>
   Array.isArray(value) ? value : undefined;
 const optionalName = (value: unknown): string | null | "invalid" =>
   value === null || value === undefined ? null : isNonEmptyString(value) ? value : "invalid";
-// The text under a level-2 heading, up to the next level-2 heading; undefined if the heading is absent.
-const section = (body: string, heading: string): string | undefined => {
-  const lines = body.split("\n");
-  const start = lines.findIndex((line) => line.trim() === `## ${heading}`);
-  if (start === -1) return undefined;
-  const end = lines.findIndex((line, i) => i > start && /^##\s/.test(line));
-  return lines.slice(start + 1, end === -1 ? undefined : end).join("\n");
+// The body of each `## <heading>` section, up to the next level-2 heading. Lines inside code fences are
+// never headings, so a quoted `## Dropped` in a code block doesn't count.
+const sections = (body: string, heading: string): string[] => {
+  const found: string[][] = [];
+  let current: string[] | undefined;
+  let fence: string | undefined;
+  for (const line of body.split("\n")) {
+    const marker = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+    if (fence) {
+      if (marker?.startsWith(fence)) fence = undefined;
+    } else if (marker) {
+      fence = marker;
+    } else if (/^##\s/.test(line)) {
+      current = line.trimEnd() === `## ${heading}` ? [] : undefined;
+      if (current) found.push(current);
+      continue;
+    }
+    current?.push(line);
+  }
+  return found.map((lines) => lines.join("\n"));
 };
+// Prose, as opposed to blank lines, headings, and HTML comments.
+const hasProse = (text: string): boolean =>
+  text
+    .replaceAll(/<!--[\s\S]*?-->/g, "")
+    .split("\n")
+    .some((line) => line.trim() !== "" && !/^\s*#{1,6}(\s|$)/.test(line));
 
 // Anything unexpected at the top level is probably a misspelled lane whose tasks would go unchecked.
 for (const entry of existsSync(BOARD) ? readdirSync(BOARD) : []) {
@@ -142,8 +161,12 @@ for (const lane of LANES) {
       fail("only done/ tasks have verified_by");
     }
 
-    if (lane === "dropped" && !section(body, "Dropped")?.trim()) {
-      fail("dropped/ tasks need a non-empty ## Dropped section saying why");
+    if (lane === "dropped") {
+      const dropped = sections(body, "Dropped");
+      if (dropped.length > 1) fail("has more than one ## Dropped section; keep one");
+      else if (!dropped.some(hasProse)) {
+        fail("dropped/ tasks need a ## Dropped section with text saying why");
+      }
     }
 
     tasks.set(fileId, {
