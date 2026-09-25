@@ -23,12 +23,28 @@ Run `git status`. Other agents share this working tree; don't build on someone e
 ## Boundaries
 
 - Always: add or update a test when changing simulation rules.
-- Ask first: adding runtime dependencies; changing the grid representation or the simulation module's public API.
+- Ask first: adding runtime dependencies; changing the grid representation or the simulation module's public API;
+  moving a task into `.board/ready/` (draft tasks in `backlog/`; the user approves each one before it's ready).
 - Never: bypass the gate with `--no-verify` or by disabling hooks.
 
-## Sandbox gotchas
+## Working with the user
+
+- Record practices, preferences, and decisions in the repo (this file, `docs/`, `.board/`), never in auto-memory.
+  If the right file is outside your scope, say so, and the coach's next retro picks it up.
+- Coach task reviews: ask the coach to review the task file(s) and add no checklist of your own; its role file
+  defines the review. Then put each item that needs the user's decision to them one at a time, with the options
+  and the coach's recommendation, and apply the remaining fixes only once the user agrees.
+
+## Environment gotchas
 
 - The repo's virtiofs mount silently drops symlinks, so `node_modules/` is a bind mount of
   `~/.local/share/gol2/node_modules`, recreated by `/etc/sandbox-persistent.sh`. Don't delete or replace the
   directory; if `node_modules/.bin` is empty, check `mountpoint node_modules`.
 - Git hooks live in `.githooks/`; a fresh clone needs `git config core.hooksPath .githooks`.
+- Agents act on GitHub as the user's account (`gh api user`), so the user is the author of every PR an agent opens
+  and can't approve it, and an agent's review would look like the user's. Record the user's approval as their merge
+  or their own message, never as a PR review.
+- In a worktree session, Claude Code refuses Bash commands it can't prove stay in the worktree: compound commands
+  that contain "git" anywhere (even `.github`, `.gitignore`, `github_pat_`), `git -C`, `source`, `HOME=…`, or
+  commands built at runtime (`$(…)`, loops over variables). Run one plain command per call; put scripts and commit
+  messages in files.
