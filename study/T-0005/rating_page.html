@@ -1,0 +1,575 @@
+<title>T-0005 Pilot Rating</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap"
+/>
+<style>
+  :root {
+    --bg: #f3f4f1;
+    --surface: #ffffff;
+    --ink: #1d2320;
+    --muted: #5e6862;
+    --line: #d9ddd8;
+    --accent: #2f5d8a;
+    --accent-soft: #e3ebf3;
+    --act: #2e7d4f;
+    --act-soft: #e2f1e7;
+    --rej: #b4432f;
+    --rej-soft: #f7e4df;
+    --na: #6f7672;
+    --na-soft: #e8eae8;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #141816;
+      --surface: #1c211e;
+      --ink: #e4e8e4;
+      --muted: #9ba59f;
+      --line: #2d3430;
+      --accent: #7ea8d6;
+      --accent-soft: #1f2c39;
+      --act: #5dbb84;
+      --act-soft: #1b2e22;
+      --rej: #e07a64;
+      --rej-soft: #36211c;
+      --na: #a3a9a5;
+      --na-soft: #262b28;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #141816;
+    --surface: #1c211e;
+    --ink: #e4e8e4;
+    --muted: #9ba59f;
+    --line: #2d3430;
+    --accent: #7ea8d6;
+    --accent-soft: #1f2c39;
+    --act: #5dbb84;
+    --act-soft: #1b2e22;
+    --rej: #e07a64;
+    --rej-soft: #36211c;
+    --na: #a3a9a5;
+    --na-soft: #262b28;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 var(--sans);
+    padding: 0 16px;
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding-block: 28px 64px;
+    display: grid;
+    gap: 22px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--serif);
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.25;
+  }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+  .lede {
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 6px 0 0;
+  }
+  .how {
+    display: grid;
+    gap: 6px;
+    max-width: 70ch;
+    margin: 0;
+    padding-left: 1.2em;
+    color: var(--ink);
+  }
+  .meter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .bar {
+    flex: 1 1 220px;
+    height: 8px;
+    background: var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar > i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .count {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .status {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .status.err {
+    color: var(--rej);
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    background: var(--bg);
+    padding-block: 10px;
+    z-index: 2;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab {
+    font: 500 0.9rem var(--sans);
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .tab[aria-selected="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .tab .n {
+    font: 400 0.78rem var(--mono);
+    opacity: 0.8;
+    font-variant-numeric: tabular-nums;
+  }
+  .tab.done:not([aria-selected="true"]) {
+    border-color: var(--act);
+  }
+  .tab:focus-visible,
+  .seg button:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  details.pre {
+    color: var(--muted);
+  }
+  details.pre summary {
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .list {
+    display: grid;
+    gap: 14px;
+  }
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: grid;
+    gap: 10px;
+    border-left: 4px solid var(--line);
+  }
+  .finding[data-v="act"] {
+    border-left-color: var(--act);
+  }
+  .finding[data-v="reject"] {
+    border-left-color: var(--rej);
+  }
+  .finding[data-v="not_finding"] {
+    border-left-color: var(--na);
+  }
+  .fhead {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .fid {
+    font: 500 0.8rem var(--mono);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .finding h3 {
+    font-size: 1.08rem;
+    font-weight: 600;
+  }
+  .body {
+    overflow-wrap: anywhere;
+  }
+  .body > :first-child {
+    margin-top: 0;
+  }
+  .body > :last-child {
+    margin-bottom: 0;
+  }
+  .body p,
+  .body ul,
+  .body ol {
+    margin: 0.5em 0;
+  }
+  .body code,
+  .cites code {
+    font: 0.86em var(--mono);
+    background: var(--accent-soft);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  .body pre {
+    overflow-x: auto;
+  }
+  .cites {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    align-items: center;
+  }
+  .rate {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    border-top: 1px dashed var(--line);
+    padding-top: 10px;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .seg button {
+    font: 500 0.88rem var(--sans);
+    background: var(--surface);
+    color: var(--ink);
+    border: 0;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .seg button + button {
+    border-left: 1px solid var(--line);
+  }
+  .seg button[aria-pressed="true"][data-v="act"] {
+    background: var(--act-soft);
+    color: var(--act);
+  }
+  .seg button[aria-pressed="true"][data-v="reject"] {
+    background: var(--rej-soft);
+    color: var(--rej);
+  }
+  .seg button[aria-pressed="true"][data-v="not_finding"] {
+    background: var(--na-soft);
+    color: var(--na);
+  }
+  .seg button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  textarea {
+    flex: 1 1 240px;
+    min-height: 36px;
+    font: 0.88rem var(--sans);
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 7px 9px;
+    resize: vertical;
+  }
+  .saved {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .nav button {
+    font: 500 0.9rem var(--sans);
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  .nav button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar > i {
+      transition: none;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>T-0005 pilot: rate the review findings</h1>
+    <p class="lede">
+      Six coach reviews of task T-0001 at commit 648d64a, labelled R1 to R6 in shuffled order. Which
+      condition each came from is hidden, and traces of tool use are removed. The answer key isn't
+      on this page.
+    </p>
+  </header>
+  <ol class="how">
+    <li>
+      <strong>Would act on it:</strong> you'd accept this finding if the coach brought it to you on
+      this task.
+    </li>
+    <li>
+      <strong>Wouldn't act on it:</strong> it's wrong, doesn't apply, or isn't worth doing (counts
+      as noise).
+    </li>
+    <li>
+      <strong>Not a finding:</strong> it proposes nothing, such as "checked and fine" notes or
+      praise.
+    </li>
+  </ol>
+  <p class="lede" style="margin: 0">
+    Judge each finding on its own merits, as if you hadn't seen the earlier reviews. The note is
+    optional. Each choice saves immediately; you can change it later.
+  </p>
+  <div class="meter">
+    <div class="bar"><i id="barfill"></i></div>
+    <span class="count" id="count">0 of 0 rated</span>
+  </div>
+  <p class="status" id="status" role="status">Connecting to storage…</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Reviews"></nav>
+  <details class="pre" id="pre">
+    <summary>Review introduction</summary>
+    <div class="body" id="pretext"></div>
+  </details>
+  <section class="list" id="list" aria-live="polite"></section>
+  <div class="nav">
+    <button id="prev" type="button">Previous review</button
+    ><button id="next" type="button">Next review</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script>
+  const RUNS = /*__DATA__*/ [];
+  const ratings = {}; // key "R1-3" -> {verdict, note, ratedAt}
+  let db = null,
+    current = 0,
+    writable = true;
+  const total = RUNS.reduce((n, r) => n + r.findings.length, 0);
+  const $ = (id) => document.getElementById(id);
+  const md = (t) => {
+    try {
+      return DOMPurify.sanitize(marked.parse(t || ""));
+    } catch {
+      const d = document.createElement("div");
+      d.textContent = t || "";
+      return d.innerHTML;
+    }
+  };
+  const key = (run, id) => `${run}-${id}`;
+  const LABELS = [
+    ["act", "Would act on it"],
+    ["reject", "Wouldn't act on it"],
+    ["not_finding", "Not a finding"],
+  ];
+
+  function setStatus(msg, err) {
+    const s = $("status");
+    s.textContent = msg;
+    s.classList.toggle("err", !!err);
+  }
+
+  function progress() {
+    const n = Object.values(ratings).filter((r) => r && r.verdict).length;
+    $("count").textContent = `${n} of ${total} rated`;
+    $("barfill").style.width = total ? `${(100 * n) / total}%` : "0";
+    document.querySelectorAll(".tab").forEach((t, i) => {
+      const r = RUNS[i];
+      const done = r.findings.filter((f) => ratings[key(r.run, f.id)]?.verdict).length;
+      t.querySelector(".n").textContent = `${done}/${r.findings.length}`;
+      t.classList.toggle("done", done === r.findings.length);
+    });
+  }
+
+  function renderTabs() {
+    const tabs = $("tabs");
+    tabs.textContent = "";
+    RUNS.forEach((r, i) => {
+      const b = document.createElement("button");
+      b.className = "tab";
+      b.type = "button";
+      b.id = `tab-${r.run}`;
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", String(i === current));
+      b.innerHTML = `<span></span><span class="n"></span>`;
+      b.firstChild.textContent = r.run;
+      b.addEventListener("click", () => {
+        current = i;
+        render();
+      });
+      tabs.append(b);
+    });
+  }
+
+  function render() {
+    const r = RUNS[current];
+    document
+      .querySelectorAll(".tab")
+      .forEach((t, i) => t.setAttribute("aria-selected", String(i === current)));
+    $("pretext").innerHTML = md(r.preamble);
+    $("pre").hidden = !r.preamble;
+    const list = $("list");
+    list.textContent = "";
+    for (const f of r.findings) {
+      const k = key(r.run, f.id),
+        cur = ratings[k] || {};
+      const el = document.createElement("article");
+      el.className = "finding";
+      if (cur.verdict) el.dataset.v = cur.verdict;
+      el.innerHTML = `<div class="fhead"><span class="fid"></span><h3></h3></div><div class="body"></div>
+      <div class="cites"></div><div class="rate"><div class="seg" role="group"></div>
+      <textarea rows="1" placeholder="Optional note"></textarea><span class="saved"></span></div>`;
+      el.querySelector(".fid").textContent = `${r.run} · ${f.id}`;
+      el.querySelector("h3").textContent = f.title;
+      el.querySelector(".body").innerHTML = md(f.text);
+      const cites = el.querySelector(".cites");
+      if (f.citations.length) {
+        cites.append("Cites");
+        for (const c of f.citations) {
+          const code = document.createElement("code");
+          code.textContent = c;
+          cites.append(code);
+        }
+      } else cites.hidden = true;
+      const seg = el.querySelector(".seg");
+      seg.setAttribute("aria-label", `Rating for ${r.run} finding ${f.id}`);
+      for (const [v, label] of LABELS) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.dataset.v = v;
+        b.textContent = label;
+        b.id = `${k}-${v}`;
+        b.setAttribute("aria-pressed", String(cur.verdict === v));
+        b.disabled = !writable || !db;
+        b.addEventListener("click", () => save(r.run, f.id, { verdict: v }, el));
+        seg.append(b);
+      }
+      const ta = el.querySelector("textarea");
+      ta.id = `${k}-note`;
+      ta.value = cur.note || "";
+      ta.disabled = !writable || !db;
+      let t = null;
+      ta.addEventListener("input", () => {
+        clearTimeout(t);
+        t = setTimeout(() => save(r.run, f.id, { note: ta.value }, el), 800);
+      });
+      el.querySelector(".saved").textContent = cur.ratedAt ? "Saved" : "";
+      list.append(el);
+    }
+    $("prev").disabled = current === 0;
+    $("next").disabled = current === RUNS.length - 1;
+    progress();
+  }
+
+  const inflight = {};
+  async function save(run, id, patch, el) {
+    if (!db || !writable) return;
+    const k = key(run, id);
+    const next = { ...(ratings[k] || { run, finding: id }), ...patch, run, finding: id };
+    if (patch.verdict) next.ratedAt = new Date().toISOString();
+    if (patch.note !== undefined) next.notedAt = new Date().toISOString();
+    ratings[k] = next;
+    if (patch.verdict) {
+      el.dataset.v = patch.verdict;
+      el.querySelectorAll(".seg button").forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.v === patch.verdict)),
+      );
+    }
+    el.querySelector(".saved").textContent = "Saving…";
+    progress();
+    await (inflight[k] || Promise.resolve());
+    inflight[k] = db
+      .doc(`ratings/${k}`)
+      .set(next)
+      .then(
+        () => {
+          el.querySelector(".saved").textContent = "Saved";
+          setStatus("All choices save as you make them.");
+        },
+        (e) => {
+          el.querySelector(".saved").textContent = "Not saved";
+          if (e && e.code === "invalid_argument") {
+            writable = false;
+            setStatus(
+              "This view can't save ratings; ask the page owner for Contributor access.",
+              true,
+            );
+            render();
+          } else setStatus("A choice didn't save. Pick it again in a moment.", true);
+        },
+      );
+    await inflight[k];
+  }
+
+  $("prev").addEventListener("click", () => {
+    if (current > 0) {
+      current--;
+      render();
+      window.scrollTo({ top: 0 });
+    }
+  });
+  $("next").addEventListener("click", () => {
+    if (current < RUNS.length - 1) {
+      current++;
+      render();
+      window.scrollTo({ top: 0 });
+    }
+  });
+  renderTabs();
+  render();
+
+  (async () => {
+    db = window.claude?.use ? await window.claude.use("db") : null;
+    if (!db) {
+      setStatus(
+        "Storage isn't available in this view, so ratings can't be saved. Open the page in Claude.",
+        true,
+      );
+      render();
+      return;
+    }
+    db.collection("ratings").onSnapshot(
+      (snap) => {
+        for (const d of snap.docs) if (d.exists) ratings[d.id] = { ...d.data() };
+        setStatus("All choices save as you make them.");
+        render();
+      },
+      (e) =>
+        setStatus(`Storage stopped responding (${e.code}). Reload the page to continue.`, true),
+    );
+  })();
+</script>
