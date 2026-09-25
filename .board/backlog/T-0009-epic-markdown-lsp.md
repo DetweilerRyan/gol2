@@ -5,7 +5,7 @@ depends_on: []
 claimed_by: null
 verified_by: null
 acceptance:
-  - "Every task listed under Tasks below is in `done/` or `dropped/`"
+  - "Every task whose Context contains the line `Epic: T-0009.` is in `done/` or `dropped/`, shown by a command that finds them all and lists their lanes"
   - "The Outcome section records whether rumdl was adopted, and links the Handoffs that decided it"
 evidence: []
 ---
@@ -24,35 +24,30 @@ and claiming it early would tie up an agent's single work-in-progress slot.
 
 The board has no epic type yet, so this is an ordinary task. Its `depends_on` is left empty on purpose: under
 T-0006's rule, a task that depends on a dropped task can't leave `backlog/`, and this epic must be able to close
-when some of its tasks are dropped. Each task's own `depends_on` is the source of truth for dependencies; keep the
-list and diagram below current by hand when a task is added, split, or dropped.
+when some of its tasks are dropped. Membership is defined by the `Epic: T-0009.` line in each task's Context, and
+each task's own `depends_on` is the source of truth for dependencies; the list below is a reading aid only.
 
 ## Tasks
 
-| Task   | What it does                                                                                                       |
-| ------ | ------------------------------------------------------------------------------------------------------------------ |
-| T-0010 | Extracts, confirms, and commits the benefit study's answer keys before their transcripts expire (about 2026-10-25) |
-| T-0006 | Adds a terminal `dropped/` lane and evidence conventions to the board                                              |
-| T-0004 | Spike: can a relay keep rumdl's LSP results fresh after shell and git changes?                                     |
-| T-0005 | Benefit study setup and pilot: isolated runner, LSP working, pilot, calibrated grader, fixed workload              |
-| T-0008 | Benefit study: are the coach's agentpatterns reviews better with the LSP, without being costlier?                  |
-| T-0002 | In-repo plugin running rumdl's LSP for gol2 and agentpatterns                                                      |
-| T-0007 | Production relay (TypeScript/Node) keeping LSP results fresh                                                       |
-| T-0001 | Replace markdownlint-cli2 with rumdl in the gate                                                                   |
-| T-0003 | `docs/tools/` doc, `CLAUDE.md` pointer, and (on go) the coach's LSP configuration                                  |
-
-```text
-T-0010 (answer keys) ──┐
-T-0006 (dropped/ lane) ┴─> T-0005 (setup, pilot) ─> T-0008 (study) ──┐
-T-0004 (freshness spike) ────────────────────────────────────────────┴─> T-0002 (plugin) ─> T-0007 (relay) ─┬─> T-0001 (linter swap)
-                                                                                                            └─> T-0003 (docs)
-```
+| Task   | What it does                                                                                                                      |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| T-0010 | Extracts, confirms, and commits the benefit study's answer keys before their transcripts expire (about 2026-10-25)                |
+| T-0006 | Adds a terminal `dropped/` lane and evidence conventions to the board                                                             |
+| T-0004 | Spike: can a relay keep rumdl's LSP results fresh after shell and git changes? Waits for the user's decision after T-0005's pilot |
+| T-0005 | Benefit study setup and pilot: isolated runner, LSP working, pilot, fixed workload                                                |
+| T-0008 | Benefit study: are the coach's agentpatterns reviews better with the LSP, without being costlier?                                 |
+| T-0002 | In-repo plugin running rumdl's LSP for gol2 and agentpatterns                                                                     |
+| T-0007 | Production relay (TypeScript/Node) keeping LSP results fresh                                                                      |
+| T-0001 | Replace markdownlint-cli2 with rumdl in the gate                                                                                  |
+| T-0003 | `docs/tools/` doc and (on go) the coach's LSP configuration; no `CLAUDE.md` pointer until a retro shows one is needed             |
 
 ## Decision points
 
 - **T-0010 first:** the answer keys exist only in transcripts that expire around 2026-10-25.
-- **After T-0005's pilot:** the user decides whether to run T-0008. If not, T-0008, T-0002, T-0007, T-0001, and
-  T-0003 move to `dropped/`.
+- **Budget:** the pilot and study together stop and ask the user if projected cost exceeds $50 or the user's
+  grading and rating time exceeds 3 hours.
+- **After T-0005's pilot:** the user decides whether to run T-0008 and T-0004. If not, T-0008, T-0004, T-0002,
+  T-0007, T-0001, and T-0003 move to `dropped/`.
 - **After T-0004 and T-0008:** both must recommend go for T-0002 to start. Either no-go drops T-0002, T-0007,
   T-0001, and T-0003.
 - **If T-0008 ends not tested, or effectiveness is not measurable:** the user chooses to rerun with changes (as a

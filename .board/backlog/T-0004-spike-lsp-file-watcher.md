@@ -1,7 +1,7 @@
 ---
 id: T-0004
 title: "Spike: can a relay alongside rumdl keep its LSP results fresh in Claude Code?"
-depends_on: []
+depends_on: [T-0005]
 claimed_by: null
 verified_by: null
 acceptance:
@@ -23,8 +23,10 @@ evidence: []
 The user wants rumdl only if its LSP plugin works (T-0002), and a test on 2026-09-25 found that its results go
 stale. This spike answers one question before any of it lands: can any relay between Claude Code and rumdl keep
 rumdl's LSP results fresh? A no-go is a valid result; the go rule is the acceptance criterion above, which matches
-T-0007's freshness criterion. This file is the home for the freshness findings and the test harness; other tasks
-point here.
+T-0007's freshness criterion. It waits until the user has reviewed T-0005's pilot and decided to proceed (the user's
+decision, 2026-09-25): freshness only matters for gol2's own changing files, so it isn't worth testing before the
+benefit looks real. If the user decides not to proceed, move this task to `dropped/` with the user's agreement. This
+file is the home for the freshness findings and the test harness; other tasks point here.
 
 **Branches.** The task file, its Handoff, and its evidence move through the lanes on the task's own branch, which
 merges to main like any task. The prototype relay and the raw logs go only on `prototype/T-0004-lsp-relay`, which

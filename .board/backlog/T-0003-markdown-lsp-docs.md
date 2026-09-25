@@ -11,7 +11,6 @@ acceptance:
   - "The doc lists each known limitation recorded in T-0007's Handoff (for example, changes made on the host), or says there are none"
   - "The doc contains no copy of `.rumdl.toml` settings or the plugin's config; it links to those files instead"
   - "`docs/README.md` lists `tools/` and says what it holds"
-  - "`CLAUDE.md` has a one-line pointer telling agents to navigate Markdown with the LSP tool, using the exact LSP instruction text fixed in T-0005's workload file and linking to the doc, and stays under its ~100-line limit"
   - "Only if T-0008 recommended go: with the user's approval, recorded in the evidence, `.claude/agents/coach.md` lists the LSP tool and contains the exact LSP instruction text fixed in T-0005's workload file, so the coach runs the configuration that was tested"
   - "`npm run check` exits 0"
 evidence: []
@@ -19,14 +18,16 @@ evidence: []
 
 ## Context
 
-Intended for the coach, which maintains `docs/` and `CLAUDE.md`. Per `docs/README.md`, the doc covers only what
+Intended for the coach, which maintains `docs/` and its own role file. Per `docs/README.md`, the doc covers only what
 agents can't learn by reading the repo: how the operations behave, which ones work in Claude Code, and their
 limits, not how rumdl is configured. Write it from the evidence and Handoffs of T-0002 and T-0007. If the spikes
 recommend no-go, move this task to `dropped/` (T-0006).
 
-The `CLAUDE.md` pointer is there because agents often skip an installed tool unless their always-loaded
-instructions name it. The pointer and the coach's role file reuse the instruction
-wording the study tested, not new wording. The coach's prediction to check at the next retro, matching the study's
+The coach's role file reuses the instruction wording the study tested, not new wording, because agents often skip
+an installed tool unless their instructions name it. There's no `CLAUDE.md` pointer yet: the study tests the
+instruction only for the coach reviewing agentpatterns, and a `CLAUDE.md` line would reach every agent, including
+ones working on gol2's own docs, where no benefit was measured. Add one only after a retro sees another agent skip
+the tool (the user's decision, 2026-09-25). The coach's prediction to check at the next retro, matching the study's
 uptake rule: in at least two thirds of the next coach reviews against agentpatterns (at least three), the coach
 makes an LSP call.
 

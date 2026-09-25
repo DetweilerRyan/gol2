@@ -6,17 +6,16 @@ claimed_by: null
 verified_by: null
 acceptance:
   - "A runner script and a metrics script are committed on branch `prototype/T-0005-lsp-benefit` (pushed, kept, never merged): the runner builds an isolated environment, runs one coach review, and redacts its transcript; the metrics script computes every per-run measure in this file's Context from a run's JSON output and transcript, so grading can be redone without new runs"
-  - "Each run the runner builds happens in an environment where the original gol2 checkout, the shared agentpatterns checkout, and `~/.claude/projects/` don't exist (for example a separate home directory or user, or a container), holding only a fresh clone of its snapshot commit (no other branches or tags, no remote, no reflog), a separate checkout of agentpatterns at commit `86da49a` at the `../agentpatterns` path relative to that clone, and a Claude config directory of its own; the runner's output for each run shows `git rev-parse HEAD`, `git for-each-ref`, and `git remote` for the clone, the agentpatterns commit, and a listing of the home directory"
-  - "Inside a run the runner built, the coach's LSP tool is listed and `documentSymbol` and `workspaceSymbol` calls on agentpatterns files return results, shown by the raw output; if that can't be made to work, the Handoff shows why with evidence, the remaining criteria are recorded as not applicable, and, with the user's agreement, T-0008 moves to `dropped/`"
+  - "Each run the runner builds happens in an environment where the original gol2 checkout, the shared agentpatterns checkout, and `~/.claude/projects/` don't exist (for example a separate home directory or user, or a container), holding only a fresh clone of its snapshot commit (no other branches or tags, no remote, no reflog), a separate checkout of agentpatterns at commit `86da49a` at the `../agentpatterns` path relative to that clone, and a Claude config directory of its own; the runner's output for each run shows `git rev-parse HEAD`, `git for-each-ref`, and `git remote` for the clone, the agentpatterns commit, and a listing of the home directory; the runner refuses to start a run unless these conditions hold"
+  - "Inside a run the runner built, the coach's LSP tool is listed and `documentSymbol` and `workspaceSymbol` calls on agentpatterns files return results, a Bash read of an agentpatterns page succeeds, and the hooks that ran are listed for each condition, shown by the raw output; if that can't be made to work, the Handoff shows why with evidence, the remaining criteria are recorded as not applicable, and, with the user's agreement, T-0008 moves to `dropped/`"
   - "A diff of the two conditions' agent definitions, and of the tool lists each pilot run started with, shows they differ only in the LSP tool and the one-line LSP instruction; the diff is in the evidence"
   - "A check over every run's transcript finds no command reaching other refs or remotes and no read outside the run's environment; its output is in the evidence"
   - "Before anything is pushed, a scan of the files to be committed for the user's email address, token and key patterns, and the sandbox name finds nothing, and its command and output are in the evidence; credentials a run needs are set up before its session starts"
   - "The study uses the answer keys T-0010 committed and the user confirmed, unchanged; the evidence gives their commit"
   - "A pilot of at least three runs per condition on one review task records in the Handoff: cost and its spread per condition, accepted findings and key recall of the baseline, LSP uptake, peak context and the agentpatterns share of it per condition, and an estimate of the user's rating time for the study; pilot runs are excluded from the study data"
-  - "A grader agent's answer-key matches and citation judgments, made on redacted, condition-hidden pilot outputs, reach Cohen's kappa of at least 0.7 against the user's grading of a sample containing at least 10 true key matches; if they don't, the grader's instructions are revised once and checked on a fresh sample, and if they still don't, the user grades instead; the evidence records the samples and results"
   - "A workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
   - "The Handoff states whether any pilot stop condition in this file's Context was hit, and if so the user decided whether to proceed before T-0008 leaves `backlog/`; it records the user's decision"
-  - "The Handoff notes how the study coach differs from the real one (for example, no user-level settings or plugins in its config directory)"
+  - "The Handoff notes how the study coach differs from the real one, including user-level settings and plugins, the project's and the coach's hooks and the `node_modules/` they need, and the sandbox's parent `CLAUDE.md`"
   - "`npm run check` exits 0 on the branch that carries this task file"
 evidence: []
 ---
@@ -24,9 +23,9 @@ evidence: []
 ## Context
 
 The user wants to know whether a Markdown LSP is worth adopting before building it (T-0002). This task builds the
-study's isolated setup, confirms the LSP works inside it, runs a pilot, calibrates the grader, and fixes the
+study's isolated setup, confirms the LSP works inside it, runs a pilot, and fixes the
 workload; T-0008 runs the study. The pilot's Handoff is the user's decision point before the expensive part. This
-file is the home for the study's design; T-0008 points here. It can run in parallel with T-0004. Epic: T-0009.
+file is the home for the study's design; T-0008 points here. T-0004 (the freshness spike) waits for the user's decision after this pilot. Epic: T-0009.
 
 gol2's own docs (11 files, about 520 lines) are too small to show a difference; the agentpatterns corpus the coach
 reviews against is large enough, and T-0002 serves agentpatterns too, so a go is a benefit T-0002 ships. A no-go
@@ -67,8 +66,8 @@ least two thirds of its runs. Otherwise the result is "not tested", not no-go: a
 
 **Pilot stop conditions.** Stop and ask the user before fixing the workload if any of these hold: LSP uptake in the
 pilot is below the uptake rule; the baseline already finds so much that the gate's gain is out of reach; the
-agentpatterns share of context isn't lower in the LSP condition; or the estimated cost in dollars or the user's
-rating time looks larger than the decision is worth.
+agentpatterns share of context isn't lower in the LSP condition; or the projected cost of the pilot and study
+together is over $50, or the user's total grading and rating time over 3 hours (the user's limits, 2026-09-25).
 
 **Per-run measures (computed by the metrics script):**
 
@@ -86,14 +85,11 @@ gives only a rough estimate, so label the derived limits as rough);
 write the smallest detectable differences into the workload file, and if the gate or guardrail can't be met or
 tripped at that sample size, raise the runs or ask the user.
 
-**The grader.** The implementing agent is the same model family as the coach and can see which condition each run
-used, so it doesn't grade blind by default. A grader agent works from the redacted, condition-hidden outputs, after
-its judgments agree with the user's on a sample the user grades. The bar, fixed now so it isn't chosen after the
-grader's results are seen (the user's decision, 2026-09-25): Cohen's kappa of at least 0.7 on a sample containing
-at least 10 true key matches, with one revision of the grader's instructions and a fresh sample allowed; after a
-second failure, the user grades. Kappa, not raw agreement: most findings are clear non-matches, so a grader that
-always says "no match" gets high raw agreement (across 21 judges, raw agreement overstated chance-corrected
-agreement by 33 to 41 points).
+**The grader.** A grader agent proposes answer-key matches and citation checks from the redacted,
+condition-hidden outputs, and the user confirms every proposed match (at most one per key item per run), so a false
+match can't reach the score unseen (the user's decision, 2026-09-25). A missed match is harmless, since the user
+rates every off-key finding anyway. This replaces a separate calibration step; the confirmation time counts toward
+the user's 3-hour limit.
 
 **Answer keys.** Extracted, confirmed by the user, and committed by T-0010, from the findings the user accepted in
 each 2026-09-25 coach review. The keys come from reviews made without the LSP, and the user acted on them, so their findings will look
@@ -170,6 +166,11 @@ prompt-cache warmth from favoring one side.
 - **Bash stays in both conditions,** as in the real coach, which reads pages with `cat`, `grep`, and `sed`. An
   isolated worktree session refuses to start a nested `claude` session that has Bash, so run the runner from a
   session that isn't worktree-isolated, or have the user run it.
+- **Hooks.** The coach's role file sets PreToolUse hooks that run `$CLAUDE_PROJECT_DIR/node_modules/.bin/tsx` and
+  fail closed, and the project's `.claude/settings.json` hooks need the same `tsx`; plain `claude -p` loads them. A
+  fresh clone has no `node_modules/`, so every Bash call could be blocked in both conditions. Either install
+  `node_modules/` in each run's environment, or leave the hooks out of both conditions and say so in the Handoff.
+  The runs also won't load the sandbox's parent `CLAUDE.md`, which the real coach loads.
 - **Pointing rumdl at agentpatterns.** Options: the `.lsp.json` `workspaceFolder` field set to the pinned
   agentpatterns checkout, running the session with it as the project folder, or `--add-dir`. `--plugin-dir <path>`
   loads a plugin for one session only, which keeps the study's plugin out of the repo. T-0002's Context has the

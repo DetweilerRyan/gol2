@@ -7,7 +7,7 @@ verified_by: null
 acceptance:
   - "`.board/README.md` lists a `dropped/` lane: a terminal lane for tasks that won't be done, moved in by the user or with the user's agreement, whose body has a `## Dropped` section saying why and linking the task, evidence, or decision that settled it"
   - "`npm run check:board` fails for a task in `dropped/` without a non-empty `## Dropped` section and passes once one is added, shown by a single evidence command that creates the task file, runs the check twice, and deletes the file"
-  - "`npm run check:board` fails for a task outside `backlog/` and `dropped/` that depends on a task in `dropped/`, shown by a single evidence command that creates the files, runs the check, and deletes them"
+  - "`npm run check:board` fails for a task in `ready/`, `active/`, `blocked/`, or `review/` that depends on a task in `dropped/`, shown by a single evidence command that creates the files, runs the check, and deletes them"
   - "`npm run check:board` does not require `verified_by` or evidence for tasks in `dropped/`, and rejects `verified_by` on them"
   - "`.board/README.md` documents two evidence conventions: for a conditional criterion that didn't apply, `command` is the check that showed it and `result` starts with `not applicable:` and says why; for a criterion met by the user's decision or judgment, `command` says where the decision is recorded (for example a PR comment or conversation) and `result` quotes it"
   - "`npm run check` exits 0"
