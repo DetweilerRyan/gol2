@@ -1,0 +1,87 @@
+I found seven problems with T-0001. The biggest is scope: the task grew from 7 to 13 acceptance criteria in two later commits, and it now holds a well-tested lint swap and an LSP plugin that hasn't been tried. I'd split them before you approve. I didn't edit any files.
+
+## Findings
+
+**1. The task grew mid-spec; split it into two or three tasks.**
+- Evidence: the first commit (1846c06) had 7 criteria, all about swapping the linter. Commits 9c81f38 and 648d64a added criteria 14–19 (plugin, LSP checks, `docs/tools/`) and changed the title.
+- The two halves carry very different risk. The lint swap is already tested and `npm run check` verifies it. The LSP half depends on a closed Claude Code bug (#72316), new sessions and workspace trust.
+- Under the board's WIP=1 rule a blocked task keeps its slot. If the LSP half blocks, which finding 2 makes likely, the finished lint swap is stuck with it.
+- Suggestion: T-0001 goes back to the original 7 criteria. A new T-0002 covers the LSP plugin (criteria 14–17) with `depends_on: [T-0001]`. The `docs/tools/` doc is either part of T-0002 or its own task (see finding 5).
+- One caveat: the "PR scope creep" page's warning about small teams doesn't apply here. The reason to split is so one half can't block the other, not review load.
+- Pages: `patterns/agent-design/wip-1-littles-law-agent-throughput.md` (blocked keeps the slot; "don't also do a second feature"), `workflows/per-task-verification-budget.md` (a task too big for a quick check gets its own thread), `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md` (one logical change per unit).
+
+**2. Worktrees have no `node_modules`, so criteria 15 and 16 can't both pass as written.**
+- Evidence: this worktree has no `node_modules/` at all. The bind mount in `/etc/sandbox-persistent.sh` only covers the main checkout's path.
+- Criterion 15 requires `${CLAUDE_PROJECT_DIR}/node_modules/rumdl/bin/rumdl`. Criterion 16 requires a working session inside a worktree. In a worktree, the first path is missing unless `CLAUDE_PROJECT_DIR` points at the main checkout, and nobody has checked which it is.
+- The Context's install check ("confirm the binary resolves in the sandbox and CI") only looks at the main checkout. The existing hooks call `$CLAUDE_PROJECT_DIR/node_modules/.bin/tsx`, so they probably hit the same gap. That's outside this task, but worth knowing.
+- This is a problem with the environment, not the spec. The spec is built on an assumption nobody checked.
+- Suggestion: add a Context bullet saying how a worktree session gets the pinned binary. Or narrow criterion 16 until that's decided.
+- Page: `patterns/anti-patterns/assumption-propagation.md` (a wrong premise at the root stays consistent until someone checks it against reality).
+
+**3. Criterion 14 locks in a plugin setup that the Context itself calls unverified.**
+- The Context says the marketplace setup came "via a research subagent; verify while implementing". Criterion 14 still requires that `.claude/settings.json` enables the plugin through `extraKnownMarketplaces` and `enabledPlugins`.
+- The reference documents a simpler route, available since Claude Code 2.1.157 (this machine runs 2.1.282). A folder at `.claude/skills/<name>/.claude-plugin/plugin.json` loads automatically as `<name>@skills-dir`, needs no marketplace, and can bundle an LSP server.
+- Its limits: project-scope LSP servers start only after you trust the workspace, and these plugins aren't found when Claude Code is launched from a subdirectory.
+- I'm also not sure the marketplace route meets "no manual plugin install". Project marketplaces may ask each user to install. That's unverified.
+- Suggestion: state the outcome ("a new session loads the plugin with no manual install step"), not the mechanism. Record the choice in the Handoff.
+- Pages: `tools/claude/local-plugin-scaffolding.md`, `patterns/anti-patterns/assumption-propagation.md` (a spec on disk doesn't catch a wrong spec).
+
+**4. No criterion checks the main reason for choosing rumdl.**
+- The Context says agents should not "see diagnostics that differ from what `npm run check` enforces". Nothing checks that the LSP actually reads `.rumdl.toml`, in the main checkout or in a worktree.
+- Suggestion: add a criterion. For example, on a planted file, the LSP reports the same rule IDs as `npm run lint:md` and reports no MD013. Name how it's checked (a raw-LSP script, or Claude Code's diagnostics after an edit).
+- The Out-of-scope note "leave autofix-on-save off" also has no check. It matters only if Claude Code ever calls the LSP to format.
+- Pages: `instructions/feature-list-files.md` (each criterion names its validation method, exercised end to end), `patterns/anti-patterns/assumption-propagation.md`.
+
+**5. Three criteria don't fit the board's evidence rule.**
+The board requires each criterion to have a `{criterion, command, result}` entry, with a verifier who isn't the implementer.
+- **Criterion 16** needs "a new Claude Code session" in two checkouts, but gives no command. Suggestion: name one (for example a headless `claude -p` run that records the LSP tool's result), and say whether headless mode passes the workspace-trust gate. Otherwise say the user runs it and supplies the evidence.
+- **Criterion 17** is met just by writing text in the Handoff. The verifier can see the text exists but can't check it's true. Suggestion: make it six evidence entries (three operations × two checkouts), each with its raw output.
+- **Criterion 18** ("explains how agents use…") is a judgment call. It's also the doc the Context assigns to the coach to write or review, but a task has only one `claimed_by` and no criterion covers that review.
+  - Since the doc depends on T-0002's Handoff results, it fits best as a follow-on task claimed by the coach.
+  - The LSP-behavior notes in Context lines 50–65 would move there, so the task and the doc don't become two copies of the same text.
+  - The doc should keep only what the repo can't show: how `references` depends on cursor position, and the Claude Code bug with its version. It shouldn't restate `.rumdl.toml`.
+- Pages: `instructions/feature-list-files.md` ("criteria that can be gamed"), `workflows/per-task-verification-budget.md` (a check written by the implementer confirms what was built, not what was asked), `context-engineering/discoverable-vs-nondiscoverable-context.md`.
+
+**6. Criterion 11 needs a command the verifier can re-run.**
+- The planted-error design is good: it tests behavior, not "tests pass", so deleting tests can't satisfy it.
+- But the file is "temporary", so the verifier can't re-run the evidence unless its command creates the file itself. Suggest saying so in the criterion.
+- Page: `instructions/feature-list-files.md` (pass-gate: evidence recorded, workflow exercised).
+
+**7. Security: low risk, but have a person review the `.claude/settings.json` change.**
+- The plugin makes every session run a 0.x npm binary. The existing hooks already run `node_modules` code in every session, so the added exposure is small.
+- The exact version pin plus the lockfile is the control you own. Local marketplaces have auto-update off by default, and project LSP servers start only after workspace trust.
+- Editing `.claude/settings.json` is an executable-config change, so you should look at that diff specifically rather than have an agent approve it.
+- Treat each rumdl upgrade as a deliberate task, as the Context already says.
+- Pages: `patterns/anti-patterns/install-once-plugin-trust.md`, `security/pre-trust-execution-surface.md`, `security/gate-agent-writes-to-executable-config.md`.
+
+## What the task already does well
+- Criterion 13 guards against oxfmt and `rumdl fmt` undoing each other.
+- rumdl is pinned to an exact version.
+- The Context says which research is unverified.
+- It has an explicit out-of-scope list.
+- Each finding is labeled with the rumdl and Claude Code version it was tested on.
+
+## Outside this review
+The task is fully specified but sits in `backlog/`, which the board defines as "captured, not yet specified". No lane means "specified, waiting for user approval". That's a question for whoever owns the board, not a problem with this task.
+
+## Pages I read
+- `verification/risk-based-task-sizing.md` (not cited: its file-risk tiers don't fit here)
+- `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md`
+- `patterns/anti-patterns/compound-prompt-constraints.md` (not applicable)
+- `tools/claude/local-plugin-scaffolding.md`
+- `patterns/anti-patterns/assumption-propagation.md`
+- `patterns/anti-patterns/spec-complexity-displacement.md` (not cited: the detailed Context is research the repo can't show, so it's justified)
+- `patterns/anti-patterns/install-once-plugin-trust.md`
+- `patterns/agent-design/wip-1-littles-law-agent-throughput.md`
+- `tool-engineering/per-surface-plugin-verification.md` (not applicable: only one client)
+- `patterns/agent-design/coding-agent-scope-expansion.md` (not applicable)
+- `workflows/per-task-verification-budget.md`
+- `security/pre-trust-execution-surface.md`
+- `security/gate-agent-writes-to-executable-config.md`
+- `context-engineering/discoverable-vs-nondiscoverable-context.md`
+- `patterns/anti-patterns/tool-call-success-as-workflow-evidence.md` (not applicable: its conditions need irreversible external effects)
+- `instructions/feature-list-files.md`
+
+Files reviewed:
+- /c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0001-rumdl-markdown-lint.md
+- /c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/README.md

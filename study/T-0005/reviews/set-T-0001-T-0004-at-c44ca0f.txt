@@ -1,0 +1,92 @@
+I found 10 issues across the four tasks. The biggest is that no criterion measures whether the Markdown LSP actually helps agents. I didn't edit any files. The earlier coach review and your recorded decisions (the relay spike, the kept prototype branch, rebuilding in Rust) are taken as given; I only mention them where a finding touches them. All page paths below are relative to `/c/Users/User/Documents/projects/agentpatterns/`, and I read each page, including its "When this backfires" section, before citing it.
+
+## Findings, most important first
+
+**1. The set checks whether the LSP can be made to work, never whether it's worth it (all four tasks).**
+- The repo has 11 Markdown files, about 520 lines in all; the longest is 116 lines.
+- No task points to an actual problem, such as agents reading too much Markdown.
+- The plan is still large: a plugin, a relay (preferably in Rust), a new pinned dependency, two ADRs and a docs page.
+- `context-engineering/semantic-context-loading.md` says LSP pays off on large codebases, names grep as the thing to beat, and says that when one grep finds the target, "the LSP round-trip rarely pays for itself."
+- `patterns/agent-design/minimum-sufficient-control-ladder.md` and `patterns/anti-patterns/cargo-cult-agent-setup.md` both say to add machinery only for a named, observed failure.
+- Your decision to pursue rumdl stands. The gap is that the go/no-go never weighs the benefit.
+- Suggestion: add one criterion to T-0004 or T-0002. Answer a fixed set of navigation questions (outline, a section, backlinks) once with the LSP and once with Grep/Read, and record tool calls and tokens for each.
+
+**2. T-0004's "go" has no stated rule, and it doesn't match what T-0002 requires.**
+- T-0002 passes only if all nine change routes stay fresh in one session.
+- T-0004 lets whoever built the relay decide "go" from the results.
+- T-0004 also lets changes you make on the host be recorded as "untested", and T-0002 has no host route at all. So T-0004 can say "go", T-0002 can then fail, or the plugin can ship stale after host edits.
+- `patterns/agent-design/sprint-contracts.md`: fix the pass bar before the work, or the evaluator rationalizes whatever was built.
+- `verification/evidence-gated-lifecycle-control.md` (When this backfires): a gate with a loose rule passes a wrong result.
+- Suggestion: define "go" in T-0004 as "T-0002's freshness criterion can be met with one mechanism", and decide now whether host edits must be fresh.
+
+**3. Most of T-0002's criteria can't fail, so "if it can't meet these criteria, don't merge it" never kicks in.**
+- Six criteria only say "raw output … is recorded", and an empty result satisfies them.
+- Only the `documentSymbol` criterion and the freshness criterion are real pass/fail tests.
+- `verification/evidence-gated-lifecycle-control.md`: the gate "faithfully admits whatever the test proves." The board README's own rule makes the same point: a test criterion should name the behavior it checks.
+- Suggestion: you decide which operations must return results for "the plugin works", and the task says the other operations are record-only.
+
+**4. The relay works around a Claude Code gap, but nothing says when to remove it (T-0002, T-0004).**
+- It exists because Claude Code rejects rumdl's `client/registerCapability`.
+- T-0002 asks for a production rebuild, preferably in Rust, with no end condition.
+- `patterns/agent-design/temporary-compensatory-mechanisms.md`: record what the workaround covers for, what would make it unnecessary, and how to remove it. Its backfire section warns against building feature flags for this; a written note is enough.
+- Suggestion: T-0002's ADR states the removal condition, e.g. "Claude Code accepts `workspace/didChangeWatchedFiles` registration". Weighing a Rust toolchain for a stopgap is your call.
+
+**5. Your review covers only the first version of executable config (T-0002).**
+- Later changes to `.lsp.json`, the relay, or the rumdl version arrive by `git pull` and run at every session start without a prompt.
+- `patterns/anti-patterns/install-once-plugin-trust.md`: trust is granted once, but the code that runs is re-read on every update.
+- `security/gate-agent-writes-to-executable-config.md` and `security/pre-trust-execution-surface.md` cover the same kind of file. Their backfire sections apply here (solo, sandboxed, in-repo), so the risk is moderate, and reviewing the diff is only worth about 50% recall.
+- The approval criterion only asks the evidence to say *where* you approved.
+- `code-review/agent-approval-authority.md`: an approval should be dismissed when new commits follow it. `patterns/anti-patterns/trusting-claimed-prior-approval.md`: a verifier shouldn't accept a stated approval it can't check.
+- Suggestion: require an approval on the final plugin commit, shown by a command such as `gh pr view --json reviews`. Whether to also add a check that flags future changes to the plugin folder or rumdl version is your call (it's tooling).
+
+**6. The same research facts are copied into several tasks and will drift.**
+- Freshness and workspace trust appear in both T-0002 and T-0004.
+- The start-line-only `documentSymbol` output, the `findReferences` cursor behavior, and the gitignore bug appear in both T-0002 and T-0003.
+- Once T-0004 runs, T-0002's freshness paragraph is out of date, but the T-0002 implementer will read it as current.
+- `patterns/anti-patterns/stale-ai-configuration-artifacts.md` (a second copy of a fact goes stale). The facts themselves belong in the tasks, per `context-engineering/discoverable-vs-nondiscoverable-context.md`; they just need one home each, with pointers elsewhere.
+
+**7. T-0002 is too big to implement, verify, or review as one unit.**
+- It has 15 criteria in about 95 lines, and the riskiest part, the production relay, is a single criterion inside it.
+- T-0004's test matrix is 9 routes × 3 operations × up to 3 conditions.
+- `patterns/anti-patterns/spec-complexity-displacement.md` (adherence drops as specs grow).
+- `instructions/instruction-compliance-ceiling.md`: 15 criteria is well under the thresholds it studied, so the pressure is on the verifier and your review more than on the implementer.
+- `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md`: plugin, relay, ADR and settings in one PR. Its backfire section notes this matters less for a solo reviewer.
+- Suggestion: split the relay out into its own task.
+- Minor: several T-0004 criteria only apply under conditions, but the board requires evidence for every criterion. The task should say how to record one that didn't apply.
+
+**8. The board has no final state for a dropped task.**
+- T-0001, T-0002 and T-0003 all say they are "dropped" on a no-go.
+- `scripts/check-board.ts` defines lanes only up to `done/`, and `done/` needs evidence for every criterion. So dropped tasks would either sit in backlog forever or be deleted, and the record would go with them.
+- `workflows/throwaway-prototype-skill.md`: the verdict is the part that must survive.
+- This belongs to the board owner or you, not me.
+
+**9. Nothing gets agents to actually use the LSP.**
+- T-0003's doc goes in `docs/tools/`, and only `docs/README.md` links to it.
+- `context-engineering/semantic-context-loading.md`: agents often skip LSP entirely.
+- `workflows/throwaway-prototype-skill.md` cites a study where agents never used an installed skill in 56% of cases, until a trigger was added to the always-loaded instructions.
+- Suggestion: when T-0003 lands, I add a one-line `CLAUDE.md` pointer. Prediction: at least one Markdown-navigation session in the next 5 uses LSP calls on `.md` files. I can check this in the next retro.
+
+**10. Some of T-0002's evidence may not be producible from a worktree.**
+- It needs sessions in the main checkout, but agents work under `.claude/worktrees/`.
+- In this session, the worktree isolation refused commands it couldn't prove stayed in the worktree.
+- `patterns/agent-design/task-feasibility-awareness.md`: check whether the environment can do the task before starting.
+- Suggestion: the task names who runs the main-checkout sessions (you, or a session that isn't worktree-isolated).
+- Related: `tools/claude/feature-flags.md` (reviewed May 2026) says the LSP tool is off unless `ENABLE_LSP_TOOL` is set. The 2.1.282 spike contradicts that, but "no manual install step" should also mean no environment variable set by hand.
+
+## What the tasks already do well
+
+- The spike runs before the build, a no-go counts as a valid result, and the prototype lives on a `prototype/` branch that is never merged and then rebuilt rather than copied. That matches `workflows/throwaway-prototype-skill.md`.
+- The research facts are dated and tied to versions.
+- Checks that something is absent are written as criteria (e.g. `rumdl fmt` not wired into anything).
+- The linter and the formatter each have exactly one job.
+- You review the executable config yourself.
+
+## Needs you
+
+- Findings 1, 2, 3 and 4: decisions about the benefit criterion, the pass bars, and the stack.
+- Finding 5: the check on future plugin changes (tooling).
+- Finding 8: a final state for dropped tasks (board).
+
+The rest are edits to the task files for whoever specifies them.
+
+Files reviewed: `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0001-rumdl-markdown-lint.md`, `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0002-rumdl-lsp-plugin.md`, `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0003-markdown-lsp-docs.md`, `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0004-spike-lsp-file-watcher.md`, `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/README.md`, `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/scripts/check-board.ts`

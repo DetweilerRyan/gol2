@@ -1,0 +1,77 @@
+I found nine issues with T-0004. Three of them should be fixed before the user approves it, because they stop the task from reaching `done/` cleanly. I edited nothing. Besides the reference pages, I read the board README, T-0001/T-0002, the git hooks, `.claude/settings.json` and `stop-check.ts`, and this worktree's transcripts from the first freshness test on 2026-09-25.
+
+**What the task already does well:** it asks one question, says a no-go is a valid result, and keeps the verdict in the Handoff. It also records the setup details that can't be learned from the repo (versions, relay design, trust behaviour, the premature `git rm` in the first run). That matches the "capture the verdict before the code dies" section of `workflows/throwaway-prototype-skill.md`.
+
+## Fix before approval
+
+**1. The unmerged branch means the board never records the result.**
+- Criterion 2 says the watcher source "is on the task's branch and is not merged to main". The board's status is the folder the task file sits in, so the moves to `review/` and `done/` happen on that same branch.
+- Merging the branch would put the prototype on main, breaking criterion 2. Not merging it means main keeps showing T-0004 in `backlog/`, so T-0002's dependency never clears.
+- The throwaway-prototype page's fix is to mark disposability by location: a separate `prototype/` branch or a `prototypes/` directory. So: put the watcher on its own `prototype/T-0004-…` branch, let the task branch carry only the task file and Handoff, and point the evidence at the prototype branch and commit. That branch has to be kept, unlike the temporary test-file branch.
+- Page: `workflows/throwaway-prototype-skill.md` ("The prototype that ships", "Capture the verdict").
+- Layer: state.
+
+**2. The requirement to build and test everything leaves no early exit.**
+- The Context says to check the virtiofs mount first because "it decides whether a watcher can work at all". But criteria 2 and 3 still require building the watcher and running the full route matrix. If the first check says no, the task can't reach `done/` honestly.
+- One nuance: that page's "When this backfires" warns that a false "can't be done" costs more than overspending. inotify failing doesn't rule out polling, so the exit condition should be "no way of detecting file changes works", not "inotify doesn't fire".
+- Fix: make criteria 2 and 3 conditional, e.g. "unless the Handoff shows no change detection works on this mount, with evidence".
+- Page: `patterns/agent-design/task-feasibility-awareness.md`.
+- Layer: task spec.
+
+**3. The deliberately broken test links make the gate block the agent over and over.**
+- In the first run, the outer session was blocked by the Stop hook ("npm run check failed") 6 times (transcript `440265dc…`). The cause was the test files' broken links, as that session itself said at cleanup.
+- The pre-commit hook did pass when the temporary files were committed. The noise comes from the Stop hook while the spike is running.
+- The deterministic-guardrails page names this exact risk: a gate that fires on legitimate exploratory work pushes people toward `--no-verify`, which CLAUDE.md forbids.
+- None of the acceptance criteria needs broken links. `findReferences` works with valid links. Fix: use valid links, or state why the diagnostics are part of the question.
+- Page: `verification/deterministic-guardrails.md` ("When this backfires": hook noise trains bypass behaviour).
+- Layer: environment.
+
+## Should fix
+
+**4. The host-side part of criterion 1 needs the user, and the task doesn't say so.**
+- An agent in the sandbox can't make a change on the host. The task should say that step needs the user, and what to do if the user isn't available (record it as untested and continue, or move the task to `blocked/`).
+- The page advises pairing any wait for a human with a documented default outcome rather than an open-ended wait.
+- Page: `loop-engineering/human-in-the-loop-checkpoints.md` ("When this backfires": indefinite suspends; under-specified stop condition).
+- Layer: task spec.
+
+**5. The waiting headless session has no turn cap.**
+- In the first run, the inner session made 18 `Read` polls of the signal file for 13 LSP calls (`e6400228…`). The new matrix needs roughly 42 or more LSP calls, so polling grows with it.
+- If the outer session fails a step (the first run's premature `git rm` is the known case), the inner session polls until something external stops it.
+- Fix: require `--max-turns` or a timeout, and have the outer session write the signal only after the step's command exits 0.
+- Page: `loop-engineering/loop-budgeting.md` ("budgets that bind force discipline"; use an iteration cap when there is no grader).
+- Layer: environment.
+
+**6. Criterion 3 is ambiguous and asks for too much raw output in the task file.**
+- "From a single Claude Code session, both without the watcher and with it" can mean one session that turns the watcher on partway (the relay would need a switch) or one session per condition. The agent would have to guess.
+- The criterion also asks for about 42 raw outputs (7 routes × 3 operations × 2 conditions) plus the traffic log. Putting all that in the frontmatter `evidence` would load thousands of tokens into every session that reads T-0004, including T-0002's implementer.
+- The board README already says "Summarize; don't paste transcripts" (that line is about the Handoff).
+- Fix: store the raw logs as files on the prototype branch. Evidence entries then give the path, the commit, and a table of route × operation × fresh-or-stale for each condition.
+- Page: `patterns/agent-design/five-failure-layers-diagnostic.md` (task-spec question: "did the agent have to guess?").
+- Layer: task spec.
+
+## Questions for the user
+
+**7. Should the spike test only `workspace/didChangeWatchedFiles`?**
+- Criterion 2 fixes that as the mechanism. The Context's crux is whether it refreshes files Claude Code has already opened (`from_disk: false`).
+- If it doesn't, the spike returns no-go, even though a relay that re-syncs open documents another way might work.
+- Only the user can say whether the question is "does rumdl's watched-files handler suffice?" or "can any relay keep rumdl fresh?". The page's point is that asking the wrong question wastes the whole prototype.
+- Page: `workflows/throwaway-prototype-skill.md` ("Pick the question shape first").
+
+**8. There is no check that the watcher doesn't break the Write/Edit path, which works today.**
+- With the watcher on, a Write or Edit produces two updates for the same file: Claude Code's `didChange` and the watcher's disk event. Whether that is harmless isn't tested.
+- Fix: add "Write and Edit, with the watcher on" to the route list.
+- The page I'm citing only partly fits: it is about demos skipping edge cases, and it says it matters mainly for chains of five or more automated steps, which this relay setup is.
+- Page: `patterns/anti-patterns/demo-to-production-gap.md` ("Single happy path" row).
+
+**9. Two lower-priority risks.**
+- **Expected-answer bias.** The Context states the stale results the no-watcher run is expected to show again. The reproducibility page warns that giving an agent the expected result biases it toward reporting that result. Requiring raw LSP output and the traffic log mostly guards against this, so I'd keep both.
+  Page: `context-engineering/reproducibility-artifacts-as-agent-context.md` ("The agent is verifying, not producing").
+- **The prototype becoming production code.** T-0002 says "Build on T-0004's watcher approach", and nothing but prose stops the spike code from being carried over. Criterion 5's maintenance-cost list covers part of this. The user might want T-0002 to say "reimplement". A Python relay would also be a new runtime dependency, which CLAUDE.md lists as "Ask first".
+  Page: `workflows/throwaway-prototype-skill.md` ("When this backfires": no enforcement gates).
+
+Files reviewed:
+- `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0004-spike-lsp-file-watcher.md`
+- `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/README.md`
+- `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.board/backlog/T-0002-rumdl-lsp-plugin.md`
+- `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.claude/hooks/stop-check.ts`
+- `/c/Users/User/Documents/projects/gol2/.claude/worktrees/board-rumdl-task/.githooks/pre-commit`
