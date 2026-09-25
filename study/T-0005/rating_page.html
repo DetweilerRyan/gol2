@@ -302,6 +302,72 @@
     color: var(--muted);
     font-variant-numeric: tabular-nums;
   }
+  .key {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .key summary {
+    cursor: pointer;
+    font: 600 1rem var(--serif);
+  }
+  .key ol {
+    margin: 8px 0 0;
+    padding-left: 1.6em;
+    display: grid;
+    gap: 4px;
+  }
+  .match {
+    display: grid;
+    gap: 8px;
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .match .prop {
+    font-size: 0.9rem;
+  }
+  .match .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .match select,
+  .match button {
+    font: 500 0.88rem var(--sans);
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+  .match button {
+    cursor: pointer;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .match .warn {
+    color: var(--rej);
+    font-size: 0.85rem;
+  }
+  .match .cc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    display: grid;
+    gap: 4px;
+  }
+  .match .cc b.ok {
+    color: var(--act);
+  }
+  .match .cc b.bad {
+    color: var(--rej);
+  }
+  .locked {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
   .nav {
     display: flex;
     justify-content: space-between;
@@ -359,6 +425,15 @@
     <span class="count" id="count">0 of 0 rated</span>
   </div>
   <p class="status" id="status" role="status">Connecting to storage…</p>
+  <p class="lede" id="s2note" hidden style="margin: 0">
+    <strong>Stage 2: confirm the key matches.</strong> Your stage 1 ratings are locked. For each
+    finding, confirm the grader's proposed Key 1 item, pick another, or choose "No match". Each key
+    item can match at most one finding per review. Citation checks are shown for reference.
+  </p>
+  <details class="key" id="keybox" hidden open>
+    <summary>Key 1: the findings you accepted in the original review</summary>
+    <ol id="keylist"></ol>
+  </details>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Reviews"></nav>
   <details class="pre" id="pre">
     <summary>Review introduction</summary>
@@ -375,7 +450,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script>
   const RUNS = /*__DATA__*/ [];
+  const STAGE2 = /*__STAGE2__*/ null; // {key: [text...], proposals: {R1: {matches: [...], citations: [...]}}}
   const ratings = {}; // key "R1-3" -> {verdict, note, ratedAt}
+  const matches = {}; // key "R1-3" -> {key_item, proposed, decidedAt}
   let db = null,
     current = 0,
     writable = true;
@@ -404,6 +481,20 @@
   }
 
   function progress() {
+    if (STAGE2) {
+      const m = Object.values(matches).filter((x) => x && "key_item" in x).length;
+      $("count").textContent = `${m} of ${total} matches decided`;
+      $("barfill").style.width = total ? `${(100 * m) / total}%` : "0";
+      document.querySelectorAll(".tab").forEach((t, i) => {
+        const r = RUNS[i];
+        const done = r.findings.filter(
+          (f) => matches[key(r.run, f.id)] && "key_item" in matches[key(r.run, f.id)],
+        ).length;
+        t.querySelector(".n").textContent = `${done}/${r.findings.length}`;
+        t.classList.toggle("done", done === r.findings.length);
+      });
+      return;
+    }
     const n = Object.values(ratings).filter((r) => r && r.verdict).length;
     $("count").textContent = `${n} of ${total} rated`;
     $("barfill").style.width = total ? `${(100 * n) / total}%` : "0";
@@ -474,25 +565,110 @@
         b.textContent = label;
         b.id = `${k}-${v}`;
         b.setAttribute("aria-pressed", String(cur.verdict === v));
-        b.disabled = !writable || !db;
+        b.disabled = !writable || !db || !!STAGE2;
         b.addEventListener("click", () => save(r.run, f.id, { verdict: v }, el));
         seg.append(b);
       }
       const ta = el.querySelector("textarea");
       ta.id = `${k}-note`;
       ta.value = cur.note || "";
-      ta.disabled = !writable || !db;
+      ta.disabled = !writable || !db || !!STAGE2;
       let t = null;
       ta.addEventListener("input", () => {
         clearTimeout(t);
         t = setTimeout(() => save(r.run, f.id, { note: ta.value }, el), 800);
       });
-      el.querySelector(".saved").textContent = cur.ratedAt ? "Saved" : "";
+      el.querySelector(".saved").textContent = STAGE2 ? "Locked" : cur.ratedAt ? "Saved" : "";
+      if (STAGE2) el.append(matchBlock(r, f));
       list.append(el);
     }
     $("prev").disabled = current === 0;
     $("next").disabled = current === RUNS.length - 1;
     progress();
+  }
+
+  function matchBlock(r, f) {
+    const k = key(r.run, f.id);
+    const p = (STAGE2.proposals[r.run]?.matches || []).find((m) => m.finding === f.id) || {};
+    const cur = matches[k];
+    const box = document.createElement("div");
+    box.className = "match";
+    const prop = document.createElement("div");
+    prop.className = "prop";
+    prop.textContent = p.key_item
+      ? `Grader proposes key ${p.key_item} (${p.confidence} confidence): ${p.reason || ""}`
+      : `Grader proposes no match${p.reason ? ": " + p.reason : "."}`;
+    const row = document.createElement("div");
+    row.className = "row";
+    const sel = document.createElement("select");
+    sel.id = `${k}-match`;
+    sel.setAttribute("aria-label", `Key match for ${r.run} finding ${f.id}`);
+    sel.innerHTML =
+      `<option value="">Choose…</option><option value="none">No match</option>` +
+      STAGE2.key.map((_, i) => `<option value="${i + 1}">Key ${i + 1}</option>`).join("");
+    if (cur && "key_item" in cur) sel.value = cur.key_item == null ? "none" : String(cur.key_item);
+    sel.disabled = !writable || !db;
+    sel.addEventListener("change", () => {
+      if (sel.value)
+        saveMatch(r.run, f.id, sel.value === "none" ? null : Number(sel.value), p.key_item ?? null);
+    });
+    const ok = document.createElement("button");
+    ok.type = "button";
+    ok.textContent = "Confirm proposal";
+    ok.disabled = !writable || !db;
+    ok.addEventListener("click", () =>
+      saveMatch(r.run, f.id, p.key_item ?? null, p.key_item ?? null),
+    );
+    row.append(ok, sel);
+    const warn = document.createElement("div");
+    warn.className = "warn";
+    if (cur && cur.key_item != null) {
+      const dup = r.findings.filter(
+        (g) => g.id !== f.id && matches[key(r.run, g.id)]?.key_item === cur.key_item,
+      );
+      if (dup.length)
+        warn.textContent = `Key ${cur.key_item} is also matched to finding ${dup.map((g) => g.id).join(", ")} in ${r.run}; keep only one.`;
+    }
+    const cc = document.createElement("div");
+    cc.className = "cc";
+    for (const c of (STAGE2.proposals[r.run]?.citations || []).filter((c) => c.finding === f.id)) {
+      const line = document.createElement("div");
+      const b = document.createElement("b");
+      b.className = c.correct ? "ok" : "bad";
+      b.textContent =
+        c.correct === true
+          ? "Supports it"
+          : c.correct === false
+            ? "Doesn't support it"
+            : "Page missing";
+      const code = document.createElement("code");
+      code.textContent = c.page;
+      line.append(b, " ", code, ` — "${c.evidence || ""}"`);
+      cc.append(line);
+    }
+    box.append(prop, row, warn);
+    if (cc.childElementCount) box.append(cc);
+    return box;
+  }
+
+  async function saveMatch(run, id, keyItem, proposed) {
+    if (!db || !writable) return;
+    const k = key(run, id);
+    const next = {
+      run,
+      finding: id,
+      key_item: keyItem,
+      proposed,
+      decidedAt: new Date().toISOString(),
+    };
+    matches[k] = next;
+    render();
+    try {
+      await db.doc(`matches/${k}`).set(next);
+      setStatus("All choices save as you make them.");
+    } catch (e) {
+      setStatus("A match didn't save. Choose it again in a moment.", true);
+    }
   }
 
   const inflight = {};
@@ -549,6 +725,15 @@
       window.scrollTo({ top: 0 });
     }
   });
+  if (STAGE2) {
+    $("keybox").hidden = false;
+    $("s2note").hidden = false;
+    for (const t of STAGE2.key) {
+      const li = document.createElement("li");
+      li.innerHTML = md(t).replace(/^<p>|<\/p>\s*$/g, "");
+      $("keylist").append(li);
+    }
+  }
   renderTabs();
   render();
 
@@ -562,6 +747,15 @@
       render();
       return;
     }
+    if (STAGE2)
+      db.collection("matches").onSnapshot(
+        (snap) => {
+          for (const d of snap.docs) if (d.exists) matches[d.id] = { ...d.data() };
+          render();
+        },
+        (e) =>
+          setStatus(`Storage stopped responding (${e.code}). Reload the page to continue.`, true),
+      );
     db.collection("ratings").onSnapshot(
       (snap) => {
         for (const d of snap.docs) if (d.exists) ratings[d.id] = { ...d.data() };
