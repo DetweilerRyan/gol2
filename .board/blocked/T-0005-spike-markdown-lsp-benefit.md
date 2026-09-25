@@ -184,7 +184,40 @@ production plugin (T-0002).
 
 ## Handoff
 
-**Blocked on the user's decision: the pilot hit a stop condition.** The LSP condition made no LSP call in any of
+**The user's decision (session 00fe2a0f, 2026-09-25): option 2**, answering the options at the end with "2": test a
+stronger instruction and rerun the pilot's LSP arm. New wording (now `lsp_instruction` in `tasks.json`; the first
+wording is kept in `lsp_instruction_history`): "Before reading an agentpatterns page, use the LSP tool's
+documentSymbol to see its sections, and workspaceSymbol to find headings across pages."
+
+**Rerun of the LSP arm** (`c5f32ec`, runs `pilot2-T-0001-lsp-1` to `-3`, run back to back, not alternated with
+baseline runs). Median (range), against the same baseline runs as the table below:
+
+| Measure                             | Baseline          | LSP, new wording |
+| ----------------------------------- | ----------------- | ---------------- |
+| Cost, USD                           | 0.78 (0.56-0.80)  | 0.73 (0.70-1.24) |
+| Turns                               | 13 (12-16)        | 24 (18-39)       |
+| LSP calls                           | 0                 | 11 (1-18)        |
+| Peak context, tokens                | 57K (43K-69K)     | 55K (53K-83K)    |
+| agentpatterns share at peak         | 0.57 (0.55-0.72)  | 0.57 (0.55-0.57) |
+| agentpatterns tool tokens           | 32K (24K-49K)     | 32K (29K-47K)    |
+| Pages opened / cited                | 16 / 10           | 13 / 11          |
+| Opened-not-cited tokens             | 5.6K (5.4K-16.5K) | 1.5K (0-6.4K)    |
+| Cited pages whose backfire was read | 0.78 (0.67-1.00)  | 1.00 (0.64-1.00) |
+
+Uptake 3 of 3 (calls: `documentSymbol` 10, 16, 1; `workspaceSymbol` 1, 2, 0), so the uptake rule is met. The
+transcript check flagged only `git worktree list` (2). Rerun spend $2.67; total so far $7.23.
+
+**Stop conditions after the rerun.** Still hit: the agentpatterns share of context isn't lower in the LSP condition
+(0.57 in both). The coach reads fewer pages it doesn't cite, but uses the outline to pick sections it then reads
+through Bash, so total agentpatterns text is about the same, with more turns. Not hit: uptake, projected cost.
+Unknown until the pilot is graded: whether the gate's gain is within reach, and the rating time.
+
+**Needs the user again.** Options: (a) proceed: grade the pilot (a grader agent proposes matches against Key 1,
+you confirm, about 20 to 30 minutes for 6 runs), then fix the workload with the new wording, accepting that the
+context mechanism wasn't shown in the pilot (the gate is effectiveness, which the pilot hasn't measured yet);
+(b) stop: record "not shown" (the LSP didn't reduce the agentpatterns text in context) and drop T-0008.
+
+**Was blocked on the user's decision: the pilot hit a stop condition.** The LSP condition made no LSP call in any of
 its 3 pilot runs, below the uptake rule (at least two thirds). The workload file is not written, and T-0008 stays in
 `backlog/`. Options are listed at the end.
 
