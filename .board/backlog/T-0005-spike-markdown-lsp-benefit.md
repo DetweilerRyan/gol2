@@ -25,7 +25,7 @@ evidence: []
 The user wants to know whether a Markdown LSP is worth adopting before building it (T-0002). This task builds the
 study's isolated setup, confirms the LSP works inside it, runs a pilot, and fixes the
 workload; T-0008 runs the study. The pilot's Handoff is the user's decision point before the expensive part. This
-file is the home for the study's design; T-0008 points here. T-0004 (the freshness spike) waits for the user's decision after this pilot. Epic: T-0009.
+file is the home for the study's design; T-0008 points here. T-0004 (the freshness spike) runs only if T-0008 recommends go. Epic: T-0009.
 
 gol2's own docs (11 files, about 520 lines) are too small to show a difference; the agentpatterns corpus the coach
 reviews against is large enough, and T-0002 serves agentpatterns too, so a go is a benefit T-0002 ships. A no-go

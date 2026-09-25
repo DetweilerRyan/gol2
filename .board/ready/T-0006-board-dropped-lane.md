@@ -16,7 +16,8 @@ evidence: []
 
 ## Context
 
-T-0001, T-0002, T-0003, and T-0007 are dropped if the spikes T-0004 or T-0008 recommend no-go, and T-0008 is dropped if the user decides not to proceed after T-0005's pilot. The board has no
+T-0001, T-0002, T-0003, and T-0007 are dropped if the spikes T-0004 or T-0008 recommend no-go, T-0004 is dropped if
+T-0008 doesn't recommend go, and T-0008 is dropped if the user decides not to proceed after T-0005's pilot. The board has no
 lane for that: `done/` needs evidence for every criterion, and deleting the task file loses the record of what was
 planned and why it stopped. A `dropped/` lane keeps the task and its verdict.
 

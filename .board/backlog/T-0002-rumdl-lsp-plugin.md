@@ -25,7 +25,8 @@ evidence: []
 Lets agents navigate Markdown, in gol2 and in the agentpatterns corpus the coach reviews against, through Claude
 Code's LSP tool instead of reading whole files: a file's heading outline, heading search, link targets, and
 backlinks. The user wants rumdl in the repo only if the plugin works.
-This task waits on two spikes: T-0004 (can results be kept fresh) and T-0008 (is it worth it, set up and piloted by T-0005). If either
+This task waits on two spikes, run in order: T-0008 (is it worth it, set up and piloted by T-0005), then T-0004
+(can results be kept fresh), which runs only after T-0008 recommends go. If either
 recommends no-go, move this task to `dropped/` (T-0006). Freshness itself is T-0007, which adds a relay on top of
 this plugin. This file is the home for the plugin-setup facts; other tasks point here. Research was done in a
 session on 2026-09-25.

@@ -25,8 +25,9 @@ evidence: []
 Runs the benefit study that T-0005 set up and piloted. The design (hypothesis, gate, guardrail, uptake rule,
 measures, rubric, answer keys, isolation) is in T-0005's Context, and the fixed rules are in the workload file on
 `prototype/T-0005-lsp-benefit`; follow the workload file, and don't change any rule after the first run. This task
-leaves `backlog/` only after the user has reviewed T-0005's pilot Handoff and decided to proceed. Its go
-recommendation, together with T-0004's, decides T-0002. If the user decides not to proceed, or T-0005 shows the LSP
+leaves `backlog/` only after the user has reviewed T-0005's pilot Handoff and decided to proceed. A go
+recommendation starts T-0004 (the freshness spike); a no-go drops T-0004 and everything after it, and T-0002
+needs both to recommend go. If the user decides not to proceed, or T-0005 shows the LSP
 can't work in the study's setup, move this task to `dropped/` (T-0006) with the user's agreement. Epic: T-0009.
 
 The user's time is part of the cost: rating the off-key findings and the pairs. T-0005's Handoff has the estimate.
