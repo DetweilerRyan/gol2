@@ -1,0 +1,67 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.7013802,
+    "tokens": {
+      "input": 34,
+      "output": 12090,
+      "cache_write": 45518,
+      "cache_read": 476501
+    },
+    "turns": 18,
+    "api_calls": 17,
+    "agentpatterns_tool_tokens": {
+      "Read": 0,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 28556,
+      "LSP": 215
+    },
+    "agentpatterns_tool_tokens_total": 28771,
+    "pages_opened": 13,
+    "pages_cited": 12,
+    "whole_page_reads": 1,
+    "section_only_pages": 12,
+    "lsp_calls": 1,
+    "tool_calls": {
+      "Bash": 16,
+      "LSP": 1
+    }
+  },
+  "context": {
+    "peak_context_tokens": 52597,
+    "agentpatterns_tokens_at_peak": 28771,
+    "agentpatterns_share_at_peak": 0.547,
+    "tokens_opened_not_cited": 1455,
+    "cited_pages": [
+      "context-engineering/discoverable-vs-nondiscoverable-context.md",
+      "instructions/agents-md-as-table-of-contents.md",
+      "patterns/agent-design/coding-agent-scope-expansion.md",
+      "patterns/agent-design/wip-1-littles-law-agent-throughput.md",
+      "patterns/anti-patterns/assumption-propagation.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "patterns/anti-patterns/stale-ai-configuration-artifacts.md",
+      "security/pre-trust-execution-surface.md",
+      "verification/deterministic-guardrails.md",
+      "workflows/agent-environment-bootstrapping.md",
+      "workflows/issue-to-pr-delegation-pipeline.md"
+    ],
+    "backfire_read": {
+      "context-engineering/discoverable-vs-nondiscoverable-context.md": false,
+      "instructions/agents-md-as-table-of-contents.md": true,
+      "patterns/agent-design/coding-agent-scope-expansion.md": null,
+      "patterns/agent-design/wip-1-littles-law-agent-throughput.md": true,
+      "patterns/anti-patterns/assumption-propagation.md": false,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "patterns/anti-patterns/stale-ai-configuration-artifacts.md": true,
+      "security/pre-trust-execution-surface.md": true,
+      "verification/deterministic-guardrails.md": false,
+      "workflows/agent-environment-bootstrapping.md": false,
+      "workflows/issue-to-pr-delegation-pipeline.md": true
+    },
+    "backfire_read_share": 0.636
+  },
+  "effectiveness": null
+}

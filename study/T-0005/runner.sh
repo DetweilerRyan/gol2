@@ -70,8 +70,9 @@ git -C "$RUN/study/gol2" gc -q --prune=now
 mkdir -p "$RUN/study/gol2/node_modules"
 
 # Agent definitions from the snapshot's own coach role file.
-node "$HERE/make_agents.mjs" "$RUN/study/gol2/.claude/agents/coach.md" "$condition" > "$RUN/opt/agents.json"
+LSP_INSTRUCTION=$(cfg "d['lsp_instruction']") node "$HERE/make_agents.mjs" "$RUN/study/gol2/.claude/agents/coach.md" "$condition" > "$RUN/opt/agents.json"
 cp "$HERE/preflight.sh" "$RUN/opt/preflight.sh"
+cp "$RUN/opt/agents.json" "$RUN/out/agents.json"
 
 # Credentials: the access token only, so a run can never rotate the host's login.
 python3 - "$HOME/.claude/.credentials.json" "$RUN/study/home/.claude/.credentials.json" <<'EOF'

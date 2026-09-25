@@ -1,0 +1,65 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.7307942,
+    "tokens": {
+      "input": 24,
+      "output": 12276,
+      "cache_write": 52089,
+      "cache_read": 342331
+    },
+    "turns": 24,
+    "api_calls": 12,
+    "agentpatterns_tool_tokens": {
+      "Read": 0,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 26662,
+      "LSP": 5035
+    },
+    "agentpatterns_tool_tokens_total": 31697,
+    "pages_opened": 10,
+    "pages_cited": 11,
+    "whole_page_reads": 0,
+    "section_only_pages": 10,
+    "lsp_calls": 11,
+    "tool_calls": {
+      "Bash": 12,
+      "LSP": 11
+    }
+  },
+  "context": {
+    "peak_context_tokens": 55422,
+    "agentpatterns_tokens_at_peak": 31697,
+    "agentpatterns_share_at_peak": 0.572,
+    "tokens_opened_not_cited": 0,
+    "cited_pages": [
+      "context-engineering/discoverable-vs-nondiscoverable-context.md",
+      "index.md",
+      "instructions/agent-config-as-managed-supply-chain.md",
+      "instructions/agents-md-as-table-of-contents.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "patterns/anti-patterns/premature-completion.md",
+      "tool-engineering/per-surface-plugin-verification.md",
+      "tools/claude/local-plugin-scaffolding.md",
+      "verification/deterministic-guardrails.md",
+      "workflows/per-task-verification-budget.md"
+    ],
+    "backfire_read": {
+      "context-engineering/discoverable-vs-nondiscoverable-context.md": true,
+      "index.md": null,
+      "instructions/agent-config-as-managed-supply-chain.md": true,
+      "instructions/agents-md-as-table-of-contents.md": true,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "patterns/anti-patterns/premature-completion.md": true,
+      "tool-engineering/per-surface-plugin-verification.md": true,
+      "tools/claude/local-plugin-scaffolding.md": true,
+      "verification/deterministic-guardrails.md": true,
+      "workflows/per-task-verification-budget.md": true
+    },
+    "backfire_read_share": 1.0
+  },
+  "effectiveness": null
+}

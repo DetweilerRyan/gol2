@@ -5,6 +5,14 @@
   "effort": "medium",
   "rumdl_version": "0.2.77",
   "rumdl_sha256": "3545e4774be53caafaf9a94e5eff3b03f3148051cdd00a802ae1d595786b8c1e",
+  "lsp_instruction": "Before reading an agentpatterns page, use the LSP tool's documentSymbol to see its sections, and workspaceSymbol to find headings across pages.",
+  "lsp_instruction_history": [
+    {
+      "text": "To find headings or sections in Markdown, use the LSP tool's documentSymbol and workspaceSymbol.",
+      "runs": "setup-lsp-1, pilot-T-0001-lsp-1 to -3",
+      "outcome": "0 of 3 pilot runs made an LSP call"
+    }
+  ],
   "tasks": {
     "T-0001": {
       "snapshot": "648d64a",

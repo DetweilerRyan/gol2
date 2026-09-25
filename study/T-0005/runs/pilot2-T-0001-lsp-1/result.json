@@ -1,0 +1,97 @@
+{
+  "duration_api_ms": 125993,
+  "stop_reason": "end_turn",
+  "session_id": "99c19d6a-9cf7-47c0-bd75-5111b5df5c3a",
+  "total_cost_usd": 0.7307942,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 52089,
+    "cache_read_input_tokens": 342331,
+    "output_tokens": 12276,
+    "output_tokens_details": {
+      "thinking_tokens": 5308
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 52089,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2885,
+        "cache_read_input_tokens": 51067,
+        "cache_creation_input_tokens": 4353,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4353
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 24,
+      "outputTokens": 12276,
+      "cacheReadInputTokens": 342331,
+      "cacheCreationInputTokens": 52089,
+      "webSearchRequests": 0,
+      "costUSD": 0.7307942,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5308,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 24,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found seven problems in T-0001, two of them serious. The biggest is that one task bundles two separate jobs, and part of it depends on a Claude Code bug that hasn't been fixed. I didn't edit any files. Where a \"When this backfires\" section changes a finding, I say so.\n\n## 1. Two tasks in one; split before approving\n\nThe task mixes (a) swapping the gate's Markdown linter with (b) a Claude Code LSP plugin, tests in fresh sessions, and a `docs/tools/` doc. Part (a) is one logical change that `npm run check` and a planted-error run can verify. Part (b) depends on anthropics/claude-code#72316, an upstream bug closed without a fix. It needs new sessions in both checkouts, and its doc can't be written until the Handoff results exist. If the LSP tests stall, the finished linter swap stalls with them.\n\nIt also breaks the board's claiming model. The Context says the coach \"writes or reviews\" the doc, but a task has one `claimed_by`, and WIP is one task per agent.\n\n- **Suggested split:**\n  - One task for the lint swap (the ADR, `package.json`, the config, planted errors, gitignored paths, \"`rumdl fmt` not wired\", and the check).\n  - One task for the plugin and its LSP Handoff, depending on the first.\n  - One task for the `docs/tools/` doc, owned by the coach, depending on the second.\n- **Patterns:**\n  - `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md` (\"one logical change per PR\"). Its backfire case is small or solo teams; here several agents share the tree.\n  - `workflows/per-task-verification-budget.md`, Layer 3: work that doesn't fit the check goes to its own thread instead of the batch.\n\n## 2. The session-based criteria can't produce reproducible evidence, and one already fails in this session\n\n`done/` needs `{criterion, command, result}` from a verifier who isn't the implementer. \"In a new Claude Code session\u2026 `documentSymbol` returns its headings with section line ranges\" names no command a verifier can re-run.\n\nI have direct evidence from this session (Claude Code 2.1.282, with a rumdl LSP attached to `.md` files). The LSP tool's `documentSymbol` printed only start lines (e.g. \"Per-Task Verification Budget\u2026 - Line 19\", \"When this backfires - Line 62\"), with no range ends. rumdl's raw LSP response may include full section ranges, but the tool's output doesn't. So the criterion as worded probably fails on the surface agents actually use.\n\nAgents can still read \"from this heading's line to the line before the next heading\". The criterion and the planned doc should say that rather than promise ranges.\n\n- **Suggestion:** specify how each surface is verified. For example, a raw-LSP script for server behaviour, plus a recorded tool output per surface.\n- **Patterns:**\n  - `tool-engineering/per-surface-plugin-verification.md`: verify each client separately, and read vendor docs as claims rather than results.\n  - `workflows/per-task-verification-budget.md` backfire: \"The implementing agent authored the test steps\u2026 you confirm what was built.\"\n\n## 3. The worktree hypothesis already has a counter-example\n\nThe Context suggests worktree sessions \"may be fine\" because `git check-ignore` doesn't flag their files. In this session, `workspaceSymbol` returned \"No symbols found\" for `/study/agentpatterns/index.md`, which `git check-ignore` also doesn't flag, while `documentSymbol` worked. That's one data point and could be indexing lag. Still, the doc criterion shouldn't assume worktrees behave differently, and the plugin task should expect that three of the five operations may be broken everywhere.\n\nThe Handoff criterion already records results without assuming them, which is right. But what agents get out of the plugin today may be just `documentSymbol` plus `hover`, and the user should weigh the plugin's setup and upkeep against that.\n\n- **Pattern:** `tool-engineering/per-surface-plugin-verification.md` again: read the changelog or issue thread as a claim, not a result.\n\n## 4. The planted-error check runs once; the property it protects isn't guarded after that\n\nLink checking is the main reason to switch linters (MD051/MD057 replace `relative-links`), but criterion 4 is a one-time manual check. Nothing stops someone later disabling MD051/MD057, or a deliberate upgrade of 0.x rumdl changing their behaviour. The gate would still pass while broken links get through.\n\nCriterion 3 pins four style values instead of the property behind them, which is that the linter never demands a style oxfmt undoes.\n\n- **Suggestions (to put to the user, since tests and lint config are the implementer's area):**\n  - A fixture-based check in the gate showing that broken links fail rumdl.\n  - A check that oxfmt-formatted Markdown passes rumdl.\n- **Pattern:** `verification/deterministic-guardrails.md` backfires: \"The guardrail drifts from the property\" and \"Coverage is thin but visible.\"\n\n## 5. CI is named in the Context but not in the acceptance criteria\n\nThe Context says to confirm the rumdl binary loads in the sandbox and in CI. The only related criterion is \"`npm run check` exits 0\", which runs locally. The binary comes from optional platform packages, and CI installs from the lockfile, so a local pass doesn't show CI works.\n\n- **Suggestion:** add \"CI's `check` workflow passes on the change.\"\n- **Pattern:** `patterns/anti-patterns/premature-completion.md`, \"Stopping criteria tied to observable state.\" Its backfire (strong models, trivial criteria) doesn't cover a platform-specific install.\n\n## 6. The new doc would have no pointer from CLAUDE.md\n\nThe acceptance criteria update `docs/README.md` but not `CLAUDE.md`. Agents load `CLAUDE.md` every session, and it currently points only at `docs/decisions/`, so no session would know the LSP guide exists.\n\nThe doc's content does pass the discoverability test. How rumdl's `references` depends on cursor position is out-of-band knowledge from rumdl's source. Only the pointer is missing.\n\nThe table-of-contents page's backfire also applies: `docs/` holds four Markdown files. Heading navigation pays off as `docs/` grows, and the user should decide whether it's worth the cost now.\n\n- **Patterns:**\n  - `instructions/agents-md-as-table-of-contents.md` (pointer map; backfire: \"The repository is small\").\n  - `context-engineering/discoverable-vs-nondiscoverable-context.md` (\"Out-of-band context\").\n\n## 7. Plugin setup: a simpler route to test, and a trust prompt to plan for\n\n- **Trust prompt:** project-scope plugins' \"LSP servers start only after you trust the workspace.\" So \"a new session needs no manual plugin install\" should still expect the workspace trust prompt. The implementer should also check whether headless sessions and subagent-spawned sessions start the server at all.\n- **Simpler route:** since 2.1.157, a folder under `.claude/skills/` that contains `.claude-plugin/plugin.json` loads in place, with no marketplace. That might avoid `extraKnownMarketplaces`/`enabledPlugins` edits to `.claude/settings.json`, which holds the gate's hooks. The page lists only skills-directory behaviour, so whether its `.lsp.json` loads there is untested and would need checking first.\n- **Pattern:** `tools/claude/local-plugin-scaffolding.md` (\"Scope: personal vs project\", \"When this backfires\").\n- **Supply-chain risk (low, no extra control needed):** that anti-pattern needs auto-update switched on, and local marketplaces default to off. Here the plugin files are in git and rumdl is pinned through `package.json` and the lockfile. Single-repo setups get versioning and review from git.\n- **Patterns:**\n  - `patterns/anti-patterns/install-once-plugin-trust.md` (\"The conditions that make it reachable\").\n  - `instructions/agent-config-as-managed-supply-chain.md` (its backfire covers single-repo, single-team setups).\n\n## Needs the user\n\n- Decide whether to split the task (finding 1), and whether the LSP half is worth it now that three of its five operations may not work (findings 3 and 6).\n- Decide whether to add a regression fixture for link checking (finding 4). That's a test/tooling change, outside the coach's scope.",
+  "ttft_ms": 2815,
+  "type": "result",
+  "duration_ms": 130218,
+  "uuid": "a1e150f8-498c-40f1-b906-0ec940c14ac7",
+  "ttft_stream_ms": 1356,
+  "time_to_request_ms": 406,
+  "first_content_frame_ms": 1356,
+  "queued_turn_count": 0,
+  "result_index": 0
+}
