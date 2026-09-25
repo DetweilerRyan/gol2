@@ -1,0 +1,56 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.56701,
+    "tokens": {
+      "input": 20,
+      "output": 8757,
+      "cache_write": 43057,
+      "cache_read": 236670
+    },
+    "turns": 11,
+    "api_calls": 10,
+    "agentpatterns_tool_tokens": {
+      "Read": 0,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 30041,
+      "LSP": 0
+    },
+    "agentpatterns_tool_tokens_total": 30041,
+    "pages_opened": 11,
+    "pages_cited": 7,
+    "whole_page_reads": 5,
+    "section_only_pages": 6,
+    "lsp_calls": 0,
+    "tool_calls": {
+      "Bash": 10
+    }
+  },
+  "context": {
+    "peak_context_tokens": 48584,
+    "agentpatterns_tokens_at_peak": 30041,
+    "agentpatterns_share_at_peak": 0.618,
+    "tokens_opened_not_cited": 9379,
+    "cited_pages": [
+      "context-engineering/discoverable-vs-nondiscoverable-context.md",
+      "patterns/anti-patterns/artifact-only-verification.md",
+      "patterns/anti-patterns/completion-summary-as-oversight-surface.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "security/pre-trust-execution-surface.md",
+      "workflows/per-task-verification-budget.md"
+    ],
+    "backfire_read": {
+      "context-engineering/discoverable-vs-nondiscoverable-context.md": true,
+      "patterns/anti-patterns/artifact-only-verification.md": true,
+      "patterns/anti-patterns/completion-summary-as-oversight-surface.md": true,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "security/pre-trust-execution-surface.md": false,
+      "workflows/per-task-verification-budget.md": true
+    },
+    "backfire_read_share": 0.857
+  },
+  "effectiveness": null
+}

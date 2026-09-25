@@ -1,0 +1,61 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.7653258000000001,
+    "tokens": {
+      "input": 24,
+      "output": 9909,
+      "cache_write": 61493,
+      "cache_read": 375529
+    },
+    "turns": 13,
+    "api_calls": 12,
+    "agentpatterns_tool_tokens": {
+      "Read": 12766,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 34341,
+      "LSP": 0
+    },
+    "agentpatterns_tool_tokens_total": 47107,
+    "pages_opened": 13,
+    "pages_cited": 9,
+    "whole_page_reads": 8,
+    "section_only_pages": 5,
+    "lsp_calls": 0,
+    "tool_calls": {
+      "Bash": 11,
+      "Read": 1
+    }
+  },
+  "context": {
+    "peak_context_tokens": 68559,
+    "agentpatterns_tokens_at_peak": 47107,
+    "agentpatterns_share_at_peak": 0.687,
+    "tokens_opened_not_cited": 11448,
+    "cited_pages": [
+      "context-engineering/discoverable-vs-nondiscoverable-context.md",
+      "context-engineering/semantic-context-loading.md",
+      "patterns/agent-design/goal-contract-completion-evaluator.md",
+      "patterns/agent-design/task-feasibility-awareness.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "verification/evidence-gated-lifecycle-control.md",
+      "verification/risk-based-task-sizing.md",
+      "workflows/per-task-verification-budget.md",
+      "workflows/research-plan-implement.md"
+    ],
+    "backfire_read": {
+      "context-engineering/discoverable-vs-nondiscoverable-context.md": false,
+      "context-engineering/semantic-context-loading.md": null,
+      "patterns/agent-design/goal-contract-completion-evaluator.md": true,
+      "patterns/agent-design/task-feasibility-awareness.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "verification/evidence-gated-lifecycle-control.md": true,
+      "verification/risk-based-task-sizing.md": true,
+      "workflows/per-task-verification-budget.md": true,
+      "workflows/research-plan-implement.md": false
+    },
+    "backfire_read_share": 0.75
+  },
+  "effectiveness": null
+}

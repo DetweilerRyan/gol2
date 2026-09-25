@@ -1,0 +1,57 @@
+== gol2 clone (/study/gol2)
+$ git rev-parse HEAD
+648d64a26916241145ee961ac581d5eb2df87a12
+$ git for-each-ref
+648d64a26916241145ee961ac581d5eb2df87a12 commit	refs/heads/main
+$ git remote
+$ git reflog --all | wc -l
+0
+$ git stash list | wc -l
+0
+== agentpatterns (/study/agentpatterns)
+$ git rev-parse HEAD
+86da49a1a025f18843818dfa6025d16be70076bf
+$ git for-each-ref
+86da49a1a025f18843818dfa6025d16be70076bf commit	refs/heads/main
+$ git remote
+$ realpath /study/gol2/../agentpatterns
+/study/agentpatterns
+== home (/study/home)
+$ find $HOME -maxdepth 3
+/study/home
+/study/home/.claude
+/study/home/.claude/.credentials.json
+== filesystem roots
+$ ls /
+bin
+dev
+etc
+lib
+lib64
+opt
+proc
+sbin
+study
+tmp
+usr
+$ ls /study
+agentpatterns
+gol2
+home
+== environment
+CLAUDE_CONFIG_DIR=/study/home/.claude
+== checks
+PASS clone HEAD is the snapshot
+PASS clone has exactly one ref, refs/heads/main
+PASS clone has no remote
+PASS clone has no reflog entries
+PASS clone has no stash
+PASS clone working tree is clean
+PASS agentpatterns HEAD is the pinned commit
+PASS agentpatterns has no remote
+PASS ../agentpatterns resolves to the pinned checkout
+PASS original gol2 and agentpatterns checkouts are absent
+PASS the host home directory is absent
+PASS config dir belongs to the run
+PASS no earlier transcripts in the run's config dir
+PASS no memory in the run's config dir

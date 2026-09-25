@@ -1,0 +1,62 @@
+{
+  "run": "task=T-0001 condition=baseline snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.5614964,
+    "tokens": {
+      "input": 24,
+      "output": 10049,
+      "cache_write": 38646,
+      "cache_read": 256262
+    },
+    "turns": 12,
+    "api_calls": 12,
+    "agentpatterns_tool_tokens": {
+      "Read": 0,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 23940,
+      "LSP": 0
+    },
+    "agentpatterns_tool_tokens_total": 23940,
+    "pages_opened": 16,
+    "pages_cited": 10,
+    "whole_page_reads": 0,
+    "section_only_pages": 16,
+    "lsp_calls": 0,
+    "tool_calls": {
+      "Bash": 11
+    }
+  },
+  "context": {
+    "peak_context_tokens": 43292,
+    "agentpatterns_tokens_at_peak": 23940,
+    "agentpatterns_share_at_peak": 0.553,
+    "tokens_opened_not_cited": 5554,
+    "cited_pages": [
+      "code-review/agent-driven-pr-slicing.md",
+      "context-engineering/discoverable-vs-nondiscoverable-context.md",
+      "context-engineering/semantic-context-loading.md",
+      "instructions/agents-md-as-table-of-contents.md",
+      "patterns/agent-design/five-failure-layers-diagnostic.md",
+      "patterns/agent-design/sprint-contracts.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "patterns/anti-patterns/trust-without-verify.md",
+      "verification/incremental-verification.md"
+    ],
+    "backfire_read": {
+      "code-review/agent-driven-pr-slicing.md": null,
+      "context-engineering/discoverable-vs-nondiscoverable-context.md": true,
+      "context-engineering/semantic-context-loading.md": null,
+      "instructions/agents-md-as-table-of-contents.md": true,
+      "patterns/agent-design/five-failure-layers-diagnostic.md": true,
+      "patterns/agent-design/sprint-contracts.md": null,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "patterns/anti-patterns/trust-without-verify.md": true,
+      "verification/incremental-verification.md": true
+    },
+    "backfire_read_share": 1.0
+  },
+  "effectiveness": null
+}

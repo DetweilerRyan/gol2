@@ -1,0 +1,65 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.9261541999999999,
+    "tokens": {
+      "input": 30,
+      "output": 12312,
+      "cache_write": 71505,
+      "cache_read": 538771
+    },
+    "turns": 16,
+    "api_calls": 15,
+    "agentpatterns_tool_tokens": {
+      "Read": 12308,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 39540,
+      "LSP": 0
+    },
+    "agentpatterns_tool_tokens_total": 51848,
+    "pages_opened": 17,
+    "pages_cited": 11,
+    "whole_page_reads": 0,
+    "section_only_pages": 17,
+    "lsp_calls": 0,
+    "tool_calls": {
+      "Bash": 14,
+      "Read": 1
+    }
+  },
+  "context": {
+    "peak_context_tokens": 77032,
+    "agentpatterns_tokens_at_peak": 51848,
+    "agentpatterns_share_at_peak": 0.673,
+    "tokens_opened_not_cited": 11997,
+    "cited_pages": [
+      "instructions/agents-md-as-table-of-contents.md",
+      "instructions/documentation-read-counts.md",
+      "instructions/restraint-rules-need-external-enforcement.md",
+      "patterns/agent-design/five-failure-layers-diagnostic.md",
+      "patterns/agent-design/temporary-compensatory-mechanisms.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "patterns/anti-patterns/premature-completion.md",
+      "patterns/multi-agent/oracle-task-decomposition.md",
+      "tool-engineering/per-surface-plugin-verification.md",
+      "verification/bug-discriminating-validation-evidence.md"
+    ],
+    "backfire_read": {
+      "instructions/agents-md-as-table-of-contents.md": true,
+      "instructions/documentation-read-counts.md": false,
+      "instructions/restraint-rules-need-external-enforcement.md": true,
+      "patterns/agent-design/five-failure-layers-diagnostic.md": false,
+      "patterns/agent-design/temporary-compensatory-mechanisms.md": true,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "patterns/anti-patterns/premature-completion.md": true,
+      "patterns/multi-agent/oracle-task-decomposition.md": true,
+      "tool-engineering/per-surface-plugin-verification.md": true,
+      "verification/bug-discriminating-validation-evidence.md": true
+    },
+    "backfire_read_share": 0.818
+  },
+  "effectiveness": null
+}
