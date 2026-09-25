@@ -2,7 +2,7 @@
 id: T-0010
 title: Extract, confirm, and commit the benefit study's answer keys before their transcripts expire
 depends_on: []
-claimed_by: null
+claimed_by: claude-session-440265dc
 verified_by: null
 acceptance:
   - "The Handoff names the transcript file holding each of the three coach reviews used as answer keys: T-0001 at `648d64a`, T-0004 at `f5f6bff`, and the set T-0001 to T-0004 at `c44ca0f`"
