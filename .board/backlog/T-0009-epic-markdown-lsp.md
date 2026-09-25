@@ -76,8 +76,8 @@ flowchart LR
 - **After T-0004:** T-0002 starts only if the freshness spike also recommends go. Otherwise T-0002, T-0007, T-0001,
   and T-0003 move to `dropped/`.
 - **If T-0008 ends not tested, or effectiveness is not measurable:** the user chooses to rerun with changes (as a
-  new task), accept a lighter bar, or drop; if the user doesn't choose, the default is to drop, recorded as "not
-  shown", not "doesn't help".
+  new task), accept a lighter bar, or drop. Until the user chooses, the dependent tasks stay in `backlog/`; nothing
+  is dropped without the user's agreement. A drop here is recorded as "not shown", not "doesn't help".
 - **Merging T-0002 and T-0007:** the user reviews and merges each PR; agents never merge them, since both add
   executable config and agents act on GitHub as the user's account.
 - **Every move to `dropped/`** needs the user's agreement (T-0006).

@@ -5,16 +5,16 @@ field to drift out of sync. Move tasks with `git mv` (plain `mv` before a file's
 
 ## Lanes
 
-| Lane       | Meaning                                               | Who moves it in                        |
-| ---------- | ----------------------------------------------------- | -------------------------------------- |
-| `backlog/` | Captured, not yet specified                           | anyone                                 |
-| `ready/`   | Acceptance criteria written; dependencies in `done/`  | whoever specifies it                   |
-| `active/`  | Claimed and being worked on                           | the agent claiming it                  |
-| `blocked/` | Can't proceed; the body says why and what unblocks it | the claiming agent                     |
-| `review/`  | Work finished; waiting for verification               | the claiming agent                     |
-| `done/`    | Every acceptance criterion verified, with evidence    | the verifier, never the implementer    |
-| `dropped/` | Won't be done; the `## Dropped` section says why      | the user, or with the user's agreement |
-| `retros/`  | Retrospectives by the coach agent (`YYYY-MM-DD.md`)   | coach                                  |
+| Lane       | Meaning                                               | Who moves it in                                 |
+| ---------- | ----------------------------------------------------- | ----------------------------------------------- |
+| `backlog/` | Captured, not yet specified                           | anyone                                          |
+| `ready/`   | Acceptance criteria written; dependencies in `done/`  | whoever specifies it                            |
+| `active/`  | Claimed and being worked on                           | the agent claiming it                           |
+| `blocked/` | Can't proceed; the body says why and what unblocks it | the claiming agent                              |
+| `review/`  | Work finished; waiting for verification               | the claiming agent                              |
+| `done/`    | Every acceptance criterion verified, with evidence    | the verifier, never the implementer             |
+| `dropped/` | Won't be done; the `## Dropped` section says why      | the user, or an agent with the user's agreement |
+| `retros/`  | Retrospectives by the coach agent (`YYYY-MM-DD.md`)   | coach                                           |
 
 ## Rules
 
@@ -29,7 +29,7 @@ field to drift out of sync. Move tasks with `git mv` (plain `mv` before a file's
   what needs attention, what's unresolved. Summarize; don't paste transcripts.
 - **Dependencies:** `depends_on` lists task ids. A task isn't `ready/` until all of them are in `done/`.
 - **Dropped:** `dropped/` is terminal, like `done/`, for tasks that won't be done. Only the user moves a task there,
-  or an agent with the user's agreement. The body gets a `## Dropped` section saying why and linking the task,
+  or an agent with the user's agreement. A task in `done/` is never moved to `dropped/`. The body gets a `## Dropped` section saying why and linking the task,
   evidence, or decision that settled it (for example a spike's verdict or a PR comment). A dropped task keeps its
   criteria and any evidence gathered so far but needs no more; it never has `verified_by`. `claimed_by` stays as it
   was: set if work had started, `null` if not. A task that depends on a dropped task can't proceed: it stays in
@@ -66,8 +66,9 @@ criterion exactly. Two kinds of criterion don't fit a plain command:
 
 - **Conditional criterion that didn't apply** (for example "if the spike says go, ..."): `command` is the check that
   showed the condition didn't hold, and `result` starts with `not applicable:` and says why.
-- **Criterion met by the user's decision or judgment:** `command` says where the decision is recorded (a PR
-  comment, an issue, or the conversation), and `result` quotes it.
+- **Criterion met by the user's decision or judgment:** `command` says where the decision is recorded, and
+  `result` quotes it. Prefer a durable record a verifier can open, such as a PR comment or an issue. If the decision
+  was only in a conversation, `command` names the session and date, and `result` quotes the user exactly.
 
 `verified_by` is set only in `done/`. A test-only criterion should name the behavior it checks,
 not just "tests pass", so deleting tests can't satisfy it.
