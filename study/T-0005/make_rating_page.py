@@ -8,6 +8,7 @@ to the artifact's db at ratings/<run>-<finding id> with a timestamp, and read ba
 import glob
 import json
 import os
+import re
 import sys
 
 grading_dir, out = sys.argv[1:]
@@ -22,5 +23,5 @@ for f in sorted(glob.glob(os.path.join(grading_dir, "R*.findings.json"))):
     })
 data = json.dumps(runs).replace("</", "<\\/")
 html = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rating_page.html")).read()
-open(out, "w").write(html.replace("/*__DATA__*/[]", data))
+open(out, "w").write(re.sub(r"/\*__DATA__\*/\s*\[\]", lambda _: data, html, count=1))
 print(f"{sum(len(r['findings']) for r in runs)} findings in {len(runs)} runs -> {out}")
