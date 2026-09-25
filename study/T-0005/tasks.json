@@ -1,0 +1,25 @@
+{
+  "agentpatterns_commit": "86da49a1a025f18843818dfa6025d16be70076bf",
+  "claude_code_version": "2.1.282",
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "rumdl_version": "0.2.77",
+  "rumdl_sha256": "3545e4774be53caafaf9a94e5eff3b03f3148051cdd00a802ae1d595786b8c1e",
+  "tasks": {
+    "T-0001": {
+      "snapshot": "648d64a",
+      "key": "Key 1",
+      "prompt": "Review the board task at /study/gol2/.board/backlog/T-0001-rumdl-markdown-lint.md from the perspective of the agentic patterns and anti-patterns in the agentpatterns.ai reference (cloned at /study/agentpatterns). The board rules are in .board/README.md. The user will approve the task before it moves to ready/.\n\nReport findings only; don't edit files. For each finding, cite the pattern or anti-pattern page you read."
+    },
+    "T-0004": {
+      "snapshot": "f5f6bff",
+      "key": "Key 2",
+      "prompt": "Review the board task at /study/gol2/.board/backlog/T-0004-spike-lsp-file-watcher.md from the perspective of the agentic patterns and anti-patterns in the agentpatterns.ai reference (cloned at /study/agentpatterns). The board rules are in .board/README.md. The user will approve the task before it moves to ready/.\n\nReport findings only; don't edit files. For each finding, cite the pattern or anti-pattern page you read."
+    },
+    "set": {
+      "snapshot": "c44ca0f",
+      "key": "Key 3",
+      "prompt": "Review the board tasks in /study/gol2/.board/backlog/ (T-0001 through T-0004, individually and as a set) from the perspective of the agentic patterns and anti-patterns in the agentpatterns.ai reference (cloned at /study/agentpatterns). The board rules are in .board/README.md. The user will approve the tasks before they move to ready/.\n\nReport findings only; don't edit files. For each finding, cite the pattern or anti-pattern page you read."
+    }
+  }
+}

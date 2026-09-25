@@ -1,0 +1,97 @@
+{
+  "duration_api_ms": 9118,
+  "stop_reason": "end_turn",
+  "session_id": "28b6ad36-bdb5-4337-8d45-9f3c39458936",
+  "total_cost_usd": 0.09253140000000001,
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 8723,
+    "cache_read_input_tokens": 7257,
+    "output_tokens": 1064,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8723,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 629,
+        "cache_read_input_tokens": 7257,
+        "cache_creation_input_tokens": 1466,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1466
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 4,
+      "outputTokens": 1064,
+      "cacheReadInputTokens": 7257,
+      "cacheCreationInputTokens": 8723,
+      "webSearchRequests": 0,
+      "costUSD": 0.09253140000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I ran all three steps. Here is the raw output from each.\n\n**(1) LSP documentSymbol**\n```\nDocument symbols:\nThe Instruction Compliance Ceiling (String) - Line 18\n  The constraint (String) - Line 27\n  Why it works (String) - Line 33\n  Failure modes (String) - Line 39\n  Primacy bias (String) - Line 54\n  Model variation (String) - Line 60\n  Architectural response (String) - Line 70\n  In practice: the mega-prompt (String) - Line 82\n  When this backfires (String) - Line 96\n  Example (String) - Line 110\n  FAQ (String) - Line 116\n  Key Takeaways (String) - Line 130\n  Related (String) - Line 138\n```\n\n**(2) LSP workspaceSymbol (\"Instruction Compliance Ceiling\")**\n```\nFound 1 symbol in workspace:\n\n../agentpatterns/instructions/instruction-compliance-ceiling.md:\n  The Instruction Compliance Ceiling (String) - Line 18\n```\n\n**(3) Bash: sed -n 1,12p**\n```\n---\ntitle: \"The Instruction Compliance Ceiling: How Rule Count Limits AI\"\nterm: \"Instruction Compliance Ceiling\"\ndescription: \"Instruction compliance degrades as rule count grows \u2014 adding more rules past a threshold produces omission errors, not better behavior.\"\naliases:\n  - The Mega-Prompt Anti-Pattern\n  - Instruction Overload\n  - Compliance Degradation\ntags:\n  - instructions\n  - context-engineering\n  - tool-agnostic\n```\n\nThe markdown linter (rumdl) also sent back diagnostics for this file on its own. It reported one MD025 error (\"multiple top-level headings\", line 18) and several MD013 line-length warnings. I didn't act on them because the file isn't part of this harness check.",
+  "ttft_ms": 2440,
+  "type": "result",
+  "duration_ms": 10277,
+  "uuid": "0481131a-2f8e-4502-aee4-c8b96a560e71",
+  "ttft_stream_ms": 1438,
+  "time_to_request_ms": 416,
+  "first_content_frame_ms": 1438,
+  "queued_turn_count": 0,
+  "result_index": 0
+}
