@@ -2,7 +2,7 @@
 id: T-0005
 title: "Spike setup and pilot: Markdown LSP benefit study for the coach's agentpatterns reviews"
 depends_on: [T-0006, T-0010]
-claimed_by: null
+claimed_by: claude-job-00fe2a0f
 verified_by: null
 acceptance:
   - "A runner script and a metrics script are committed on branch `prototype/T-0005-lsp-benefit` (pushed, kept, never merged): the runner builds an isolated environment, runs one coach review, and redacts its transcript; the metrics script computes every per-run measure in this file's Context from a run's JSON output and transcript, so grading can be redone without new runs"
