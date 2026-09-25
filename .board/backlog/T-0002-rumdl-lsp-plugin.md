@@ -5,7 +5,8 @@ depends_on: [T-0004, T-0005]
 claimed_by: null
 verified_by: null
 acceptance:
-  - "A new ADR in `docs/decisions/` records adopting rumdl as the Markdown LSP server for agents, loaded through an in-repo Claude Code plugin, and cites the go recommendations of T-0004 and T-0005"
+  - "A new ADR in `docs/decisions/` records adopting rumdl as the Markdown LSP server for agents, serving both gol2's Markdown and the agentpatterns corpus, loaded through an in-repo Claude Code plugin, and cites the go recommendations of T-0004 and T-0005"
+  - "In a worktree session, the LSP tool returns correct results on agentpatterns files for each of `documentSymbol` (a page's headings with their start lines), `workspaceSymbol` (a heading that exists in agentpatterns), `goToDefinition` (a relative link in an agentpatterns page), and `findReferences` (from a body line of an agentpatterns page that others link to); the evidence has the raw output and Claude Code version"
   - "`package.json` pins `rumdl` exactly in devDependencies"
   - "A new Claude Code session started in the main checkout loads a rumdl LSP plugin committed in the repo, with no manual install step and no hand-set environment variable such as `ENABLE_LSP_TOOL`, shown by `claude plugin list` or `/plugin` output; the Handoff names the loading mechanism chosen and why"
   - "The running LSP server is the rumdl version pinned in `package.json`, both in a session in the main checkout and in a session in a worktree under `.claude/worktrees/`, shown by the server's version or command line from each session"
@@ -21,8 +22,9 @@ evidence: []
 
 ## Context
 
-Lets agents navigate Markdown through Claude Code's LSP tool instead of reading whole files: a file's heading
-outline, heading search, link targets, and backlinks. The user wants rumdl in the repo only if the plugin works.
+Lets agents navigate Markdown, in gol2 and in the agentpatterns corpus the coach reviews against, through Claude
+Code's LSP tool instead of reading whole files: a file's heading outline, heading search, link targets, and
+backlinks. The user wants rumdl in the repo only if the plugin works.
 This task waits on two spikes: T-0004 (can results be kept fresh) and T-0005 (is it worth it). If either
 recommends no-go, move this task to `dropped/` (T-0006). Freshness itself is T-0007, which adds a relay on top of
 this plugin. This file is the home for the plugin-setup facts; other tasks point here. Research was done in a
@@ -37,6 +39,14 @@ session on 2026-09-25.
   environment variable set by hand. It used a downloaded binary, not the npm package, and the main checkout wasn't
   tested. (A May 2026 agentpatterns page, `tools/claude/feature-flags.md`, says the LSP tool needs
   `ENABLE_LSP_TOOL`; the spike contradicts that for 2.1.282.)
+- **Serving agentpatterns too.** The coach reviews against the agentpatterns corpus, cloned at `../agentpatterns`
+  relative to the repo (`/c/Users/User/Documents/projects/agentpatterns` here), and T-0005 measures the benefit
+  there, so the plugin serves it as well as gol2's Markdown. Options: a second LSP workspace folder, the
+  `.lsp.json` `workspaceFolder` field, or a second server entry; whichever is chosen, don't hard-code this
+  machine's absolute path if a path relative to the project folder works. The corpus has 1,587 pages, so check
+  that indexing it doesn't slow session start noticeably and record the time in the Handoff. rumdl will also
+  publish lint diagnostics for agentpatterns files it opens; that's expected, since agentpatterns isn't linted
+  by gol2's gate.
 - **Who runs the main-checkout sessions.** Agents work in worktrees, and an isolated worktree session refuses
   commands it can't prove stay in its worktree, so it can't run sessions in the main checkout. The user runs
   them, or a session started in the main checkout (not worktree-isolated) does; the evidence records their
