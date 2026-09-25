@@ -22,6 +22,27 @@ export async function readInput(): Promise<HookInput> {
   return parsed as HookInput;
 }
 
+/**
+ * Regex for `body` run as a command: at the start of a shell command, optionally after env assignments, wrappers
+ * like sudo, or a path. Can't see through variable substitution like `$G push`.
+ */
+export const shellCommand = (body: string, flags = ""): RegExp =>
+  new RegExp(
+    String.raw`(?:^|[;&|(${"`"}\n]|\$\()\s*(?:(?:sudo|env|command|exec|nohup|time|xargs)\s+|\w+=\S*\s+)*(?:\S*\/)?` +
+      body,
+    flags,
+  );
+
+/**
+ * Regex for `git <subcommand>` run as a command, with any global options before the subcommand. Won't match
+ * `git commit -m "push"`, `git stash push`, or `echo git push`.
+ */
+export const gitCommand = (subcommand: string, flags = ""): RegExp =>
+  shellCommand(
+    String.raw`git(?:\s+(?:-[cC]\s+\S+|--\S+|-\S+))*\s+` + subcommand + String.raw`\b`,
+    flags,
+  );
+
 /** Block the tool call or stop, with a reason Claude sees. */
 export function block(reason: string): never {
   console.error(reason);

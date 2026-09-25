@@ -8,7 +8,7 @@ in parallel. Keep this file a map (under ~100 lines); detail lives in the files 
 - Decisions and their reasons: [`docs/decisions/`](docs/decisions/). Read the relevant ADR before changing
   architecture; propose a new ADR instead of silently deviating.
 - Task management: [`.board/`](.board/README.md). Work from a task file when one exists.
-- Agent roles: `.claude/agents/`. The `coach` agent maintains this file, agent roles, and `docs/`.
+- Agent roles: `.claude/agents/`. `tech` builds or routes technical work, owns product docs; `coach` owns agent docs.
 
 ## Checks
 
