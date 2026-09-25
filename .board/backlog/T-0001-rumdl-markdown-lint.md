@@ -1,6 +1,6 @@
 ---
 id: T-0001
-title: Replace markdownlint-cli2 with rumdl for Markdown linting
+title: Replace markdownlint-cli2 with rumdl for Markdown linting and document its LSP for agents
 depends_on: []
 claimed_by: null
 verified_by: null
@@ -11,6 +11,8 @@ acceptance:
   - "A temporary Markdown file containing a link to a missing file, a missing same-file anchor, and a missing cross-file anchor makes `npm run lint:md` exit non-zero and report all three"
   - "A Markdown file with a lint error in a gitignored path such as `.claude/worktrees/` does not fail `npm run lint:md`"
   - "`rumdl fmt` is not wired into any script, hook, or CI step"
+  - "A doc in `docs/tools/` explains how agents use rumdl's LSP to navigate Markdown: list a file's headings with their section line ranges and read only the section needed, search headings across files, follow links, and find backlinks from a body line rather than a heading"
+  - "`docs/README.md` lists `tools/` and says what it holds"
   - "`npm run check` exits 0"
 evidence: []
 ---
@@ -40,6 +42,21 @@ the gate and rumdl for the LSP would mean two configs, and agents would see diag
   in CI.
 - **Churn.** rumdl is 0.x and releases every few days. Pin the exact version and upgrade deliberately.
 - **Time.** On the 7 current files, rumdl takes ~0.07 s and markdownlint-cli2 ~0.6 s, so speed isn't a factor.
+
+- **LSP behavior for the `docs/tools/` doc** (rumdl 0.2.77, tested over raw LSP against this repo):
+  - `textDocument/documentSymbol` returns the heading tree. Each heading's range spans its whole section and ends on
+    the section's last line, so an agent can read just that line range instead of the whole file.
+  - `workspace/symbol` searches headings across all Markdown files (query "Decision" found the heading in each ADR).
+  - `textDocument/definition` on a link target resolves to the linked file, or to the heading for `file.md#anchor`.
+  - `textDocument/references` depends on the cursor (`handle_references` in rumdl's `src/lsp/navigation.rs`). On a
+    heading, it returns links to that heading's anchor only. On a link target, it returns links to the same
+    target. On any other line, it returns every link to the current file. On the link text `[...]`, it
+    returns nothing. So to find what links to a file, ask from a body line, not the `#` title on line 1.
+  - A research subagent reported (not verified) that Claude Code's LSP tool currently returns empty results for
+    workspace symbol, go-to-definition, and find-references, because it fails to map file URIs back to paths
+    (anthropics/claude-code#72316). Check this before documenting those operations as usable by agents.
+- **Ownership.** The coach maintains `docs/`, so the coach writes or reviews the `docs/tools/` doc. Per
+  `docs/README.md`, the doc should cover only what agents can't learn by reading the repo.
 
 Out of scope: the Claude Code LSP plugin for rumdl (a separate task), and rumdl's autofix-on-save (leave it off).
 
