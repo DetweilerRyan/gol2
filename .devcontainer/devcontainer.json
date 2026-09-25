@@ -1,0 +1,27 @@
+{
+  // Dev container for gol2. Works both ways:
+  //  - On the host: VS Code "Dev Containers: Reopen in Container".
+  //  - Inside a Docker sandbox: `.devcontainer/up.sh`, then connect from host VS Code with Remote-SSH
+  //    (see .devcontainer/README.md).
+  "name": "gol2",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    // SSH server on port 2222 so host VS Code can reach the container via Remote-SSH.
+    "ghcr.io/devcontainers/features/sshd:1": {}
+  },
+  // Publish sshd on the Docker host (the sandbox) so `sbx ports` can forward it to the real host.
+  "runArgs": ["-p", "2222:2222"],
+  // node_modules lives in a volume: the sandbox's virtiofs mount silently drops symlinks (node_modules/.bin).
+  "mounts": [
+    "source=gol2-node_modules-${devcontainerId},target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ],
+  "remoteUser": "node",
+  "postCreateCommand": "sudo chown node:node node_modules && npm ci",
+  "postStartCommand": ".devcontainer/authorize-keys.sh",
+  "forwardPorts": [5173],
+  "customizations": {
+    "vscode": {
+      "extensions": ["oxc.oxc-vscode", "vitest.explorer", "DavidAnson.vscode-markdownlint"]
+    }
+  }
+}
