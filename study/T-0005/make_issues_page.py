@@ -1,6 +1,6 @@
 """Build the blind issue-rating page: findings grouped into distinct issues, each rated once.
 
-Usage: python3 make_issues_page.py GRADING_DIR OUT_HTML [--stage2]
+Usage: python3 make_issues_page.py GRADING_DIR OUT_HTML [--stage2] [--disputes]
 Reads GRADING_DIR/issues.json (the grouping, made blind to condition and checked by a second agent) and the
 R*.findings.json files it refers to. Ratings are saved to the artifact's db at issue_ratings/<issue>; with
 --stage2 (only after every issue is rated) the page adds Key 1 and GRADING_DIR/issue_proposals.json, locks the
@@ -37,5 +37,10 @@ if "--stage2" in flags:
            if re.match(r"^\|\s*\d+\s*\|", ln)]
     proposals = json.load(open(os.path.join(grading_dir, "issue_proposals.json")))
     html = re.sub(r"/\*__STAGE2__\*/\s*null", lambda _: js({"key": key, "proposals": proposals}), html, count=1)
+if "--disputes" in flags:
+    # Issues the skeptic panel (verify.tally.json) didn't agree on unanimously; the user settles them.
+    tally = json.load(open(os.path.join(grading_dir, "verify.tally.json")))
+    disputes = {k: {"verdicts": v["verdicts"], "majority": v["majority"]} for k, v in tally.items() if v["status"] == "disputed"}
+    html = re.sub(r"/\*__DISPUTES__\*/\s*null", lambda _: js(disputes), html, count=1)
 open(out, "w").write(html)
 print(f"{len(data)} issues from {sum(len(i['members']) for i in data)} findings -> {out}")

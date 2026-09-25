@@ -59,6 +59,13 @@
     <strong>Stage 2: match issues to the key.</strong> Your stage 1 ratings are locked. For each
     issue, confirm the grader's proposed Key 1 item, pick another, or choose "No match".
   </p>
+  <p class="lede" id="dnote" hidden style="margin: 0">
+    <strong>Settle the disputes.</strong> Three agents, each blind to which review came from which
+    condition, tried to refute every issue against the task as it was at 648d64a and the pinned
+    reference. They agreed on 8 issues; the issues with a "Settle this dispute" box are the ones
+    they didn't. Read their reasons and decide whether the problem is real for this task. Their
+    majority is shown for reference only.
+  </p>
   <details class="key" id="keybox" hidden open>
     <summary>Key 1: the findings you accepted in the original review</summary>
     <ol id="keylist"></ol>
@@ -76,6 +83,8 @@
 <script>
   const ISSUES = /*__ISSUES__*/ []; // [{id, title, statement, variants, members: [{id, title, text}]}]
   const STAGE2 = /*__STAGE2__*/ null; // {key: [text], proposals: {I1: {key_item, confidence, reason}}}
+  const DISPUTES = /*__DISPUTES__*/ null; // {I5: {verdicts: {A: {verdict, reason}}, majority}}
+  const verdicts = {};
   const ratings = {},
     matches = {};
   let db = null,
@@ -103,7 +112,11 @@
     const n = STAGE2
       ? ISSUES.filter((i) => matches[i.id] && "key_item" in matches[i.id]).length
       : ISSUES.filter((i) => ratings[i.id]?.verdict).length;
-    $("count").textContent = `${n} of ${ISSUES.length} ${STAGE2 ? "matched" : "rated"}`;
+    const nd = DISPUTES ? Object.keys(DISPUTES).length : 0;
+    const dd = DISPUTES ? Object.keys(DISPUTES).filter((k) => verdicts[k]?.verdict).length : 0;
+    $("count").textContent =
+      `${n} of ${ISSUES.length} ${STAGE2 ? "matched" : "rated"}` +
+      (nd ? ` · ${dd} of ${nd} disputes settled` : "");
     $("barfill").style.width = `${(100 * n) / (ISSUES.length || 1)}%`;
   }
 
@@ -161,10 +174,69 @@
         t = setTimeout(() => saveRating(it.id, { note: ta.value }), 800);
       });
       el.querySelector(".saved").textContent = STAGE2 ? "Locked" : cur.ratedAt ? "Saved" : "";
+      if (DISPUTES && DISPUTES[it.id]) el.append(disputeBlock(it));
       if (STAGE2) el.append(matchBlock(it));
       list.append(el);
     }
     progress();
+  }
+
+  const VNAME = { real: "Real", not_real: "Not real", unclear: "Unclear" };
+  const LENS = { A: "Repo facts", B: "Consequences", C: "Rules and reference" };
+  function disputeBlock(it) {
+    const d = DISPUTES[it.id];
+    const cur = verdicts[it.id];
+    const box = document.createElement("div");
+    box.className = "match dispute";
+    const head = document.createElement("div");
+    head.className = "prop";
+    head.innerHTML = "<strong>Settle this dispute.</strong> ";
+    head.append(
+      d.majority ? `Panel majority: ${VNAME[d.majority]}.` : "The panel has no majority.",
+    );
+    const cc = document.createElement("div");
+    cc.className = "cc";
+    for (const [s, v] of Object.entries(d.verdicts)) {
+      const line = document.createElement("div");
+      const b = document.createElement("b");
+      b.className = v.verdict === "real" ? "ok" : v.verdict === "not_real" ? "bad" : "";
+      b.textContent = `${LENS[s] || s}: ${VNAME[v.verdict] || v.verdict}.`;
+      line.append(b, " ", v.reason || "");
+      cc.append(line);
+    }
+    const row = document.createElement("div");
+    row.className = "row";
+    for (const [val, label] of [
+      ["real", "It's real"],
+      ["not_real", "It's not real"],
+    ]) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.id = `${it.id}-verdict-${val}`;
+      b.textContent = label;
+      b.setAttribute("aria-pressed", String(cur?.verdict === val));
+      if (cur?.verdict === val) {
+        b.style.background = "var(--accent)";
+        b.style.color = "var(--bg)";
+      }
+      b.disabled = !writable || !db;
+      b.addEventListener("click", () => saveVerdict(it.id, val, d.majority));
+      row.append(b);
+    }
+    box.append(head, cc, row);
+    return box;
+  }
+
+  async function saveVerdict(id, verdict, majority) {
+    if (!db || !writable) return;
+    verdicts[id] = { issue: id, verdict, majority, decidedAt: new Date().toISOString() };
+    render();
+    try {
+      await db.doc(`issue_verdicts/${id}`).set(verdicts[id]);
+      setStatus("All choices save as you make them.");
+    } catch {
+      setStatus("A verdict didn't save. Choose it again in a moment.", true);
+    }
   }
 
   function matchBlock(it) {
@@ -245,6 +317,7 @@
       $("keylist").append(li);
     }
   }
+  if (DISPUTES) $("dnote").hidden = false;
   $("nf").textContent = ISSUES.reduce((n, i) => n + i.members.length, 0);
   $("ni").textContent = ISSUES.length;
   render();
@@ -271,5 +344,6 @@
       );
     sub("issue_ratings", ratings);
     if (STAGE2) sub("issue_matches", matches);
+    if (DISPUTES) sub("issue_verdicts", verdicts);
   })();
 </script>
