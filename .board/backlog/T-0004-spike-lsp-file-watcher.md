@@ -10,23 +10,30 @@ acceptance:
   - "If inotify doesn't fire for sandbox changes, the Handoff states whether polling the disk (for example comparing modification times) detects them, with the command and output"
   - "Unless the Handoff shows with evidence that no method detects Markdown changes on the mount, a prototype relay runs between Claude Code and rumdl, and its source is on a separate branch `prototype/T-0004-lsp-relay` that is pushed, kept, and never merged; the evidence gives the branch and commit"
   - "Unless no method detects changes, the relay is tested first sending rumdl only `workspace/didChangeWatchedFiles`, and, if any route stays stale that way, also re-sending the current text of files Claude Code already opened (for example as `textDocument/didChange`); the Handoff reports each mechanism separately"
-  - "Unless no method detects changes, one Claude Code session per condition (no relay, then each mechanism tested) runs `documentSymbol`, `workspaceSymbol`, and `findReferences` after each change route: Write tool, Edit tool, shell edit to a queried file, shell edit to an unqueried file, file created from the shell, `git mv`, `git rm`, `git checkout` of different content, and a switch to a branch whose Markdown differs; the raw LSP tool output and relay traffic log of each session are committed as files on the prototype branch"
+  - "Unless no method detects changes, one Claude Code session per condition (no relay, then each mechanism tested) runs `documentSymbol`, `workspaceSymbol`, `goToDefinition`, and `findReferences` after each change route: Write tool, Edit tool, shell edit to a queried file, shell edit to an unqueried file, file created from the shell, `git mv`, `git rm`, `git checkout` of different content, and a switch to a branch whose Markdown differs; the raw LSP tool output and relay traffic log of each session are committed as files on the prototype branch"
   - "The evidence gives, for each condition, a table of change route × operation × fresh or stale, pointing to the raw log files by path and commit, and records the Claude Code and rumdl versions used"
-  - "The Handoff recommends go or no-go for T-0002, citing the per-route results, names the mechanism T-0002 should reimplement if go, and lists what it would cost to maintain (for example language, dependencies, and failure modes)"
+  - "The Handoff recommends go only if one mechanism kept every change route above fresh for all four operations in a single session, and no-go otherwise; host-side edits don't decide it but are listed as a known limitation if stale"
+  - "The Handoff names the mechanism T-0007 should reimplement if go, and lists what it would cost to maintain (for example dependencies and failure modes)"
   - "`npm run check` exits 0 on the task's branch"
 evidence: []
 ---
 
 ## Context
 
-The user wants rumdl only if its LSP plugin works (T-0002), and a test on 2026-09-25 found that it goes stale.
-This spike answers one question before any of it lands: can any relay between Claude Code and rumdl keep rumdl's
-LSP results fresh? A no-go is a valid result.
+The user wants rumdl only if its LSP plugin works (T-0002), and a test on 2026-09-25 found that its results go
+stale. This spike answers one question before any of it lands: can any relay between Claude Code and rumdl keep
+rumdl's LSP results fresh? A no-go is a valid result; the go rule is the acceptance criterion above, which matches
+T-0007's freshness criterion. This file is the home for the freshness findings and the test harness; other tasks
+point here.
 
 **Branches.** The task file, its Handoff, and its evidence move through the lanes on the task's own branch, which
 merges to main like any task. The prototype relay and the raw logs go only on `prototype/T-0004-lsp-relay`, which
-is pushed and kept for reference but never merged. T-0002 reimplements the chosen mechanism rather than copying
-the prototype, preferably in Rust; the prototype can be in any language.
+is pushed and kept for reference but never merged. T-0007 reimplements the chosen mechanism in TypeScript/Node
+rather than copying the prototype; the prototype can be in any language.
+
+**Criteria that don't apply.** The board needs an evidence entry for every criterion. When a conditional criterion
+doesn't apply (for example, no method detects changes), its entry's `command` is the check that showed that and
+its `result` starts with "not applicable:" and says why.
 
 What the 2026-09-25 test found (Claude Code 2.1.282, rumdl 0.2.77, a gitignored worktree):
 
@@ -53,10 +60,9 @@ What the 2026-09-25 test found (Claude Code 2.1.282, rumdl 0.2.77, a gitignored 
 
 How the 2026-09-25 test was run, to rebuild it:
 
-- **Plugin.** `.claude/skills/rumdl-lsp/.claude-plugin/plugin.json` (`name`, `version`, `description`) and
-  `.claude/skills/rumdl-lsp/.lsp.json` with an entry whose `command`/`args` start the relay (the test used
-  `python3` and a script path), and `extensionToLanguage` `{ ".md": "markdown" }`. It loads only in a trusted
-  workspace: this repo's checkout or its worktrees, not a scratch folder.
+- **Plugin.** The skills-directory plugin described in T-0002's Context (spike result), with the `.lsp.json`
+  `command`/`args` starting the relay instead of rumdl (the test used `python3` and a script path). Workspace trust
+  limits where it loads; see T-0002.
 - **Relay.** A short Python script that starts `rumdl server`, copies LSP messages between stdin/stdout and rumdl,
   and logs each message's direction, method, and key params (URIs, `didChange` text) to a file. The mechanisms
   under test live in the same relay.
@@ -74,7 +80,7 @@ How the 2026-09-25 test was run, to rebuild it:
   in the first run it blocked the outer session six times. Test link changes by retargeting links to other
   existing files instead.
 
-Out of scope: building the production plugin (T-0002) and changing rumdl or Claude Code.
+Out of scope: building the production plugin (T-0002) or relay (T-0007), and changing rumdl or Claude Code.
 
 ## Handoff
 

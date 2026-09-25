@@ -1,7 +1,7 @@
 ---
 id: T-0001
 title: Replace markdownlint-cli2 with rumdl for Markdown linting
-depends_on: [T-0002]
+depends_on: [T-0007]
 claimed_by: null
 verified_by: null
 acceptance:
@@ -20,8 +20,8 @@ evidence: []
 
 Why: T-0002 adds rumdl as the LSP server agents use to navigate `docs/`. Keeping markdownlint for the gate and
 rumdl for the LSP would mean two configs, and agents would see diagnostics that differ from what `npm run check`
-enforces. This task runs only after T-0002 is done; if the plugin didn't work, rumdl isn't adopted and this task
-is dropped. Research was done in a session on 2026-09-25; the findings the implementer needs:
+enforces. This task runs only after the plugin (T-0002) and its freshness relay (T-0007) are done; if either
+spike (T-0004, T-0005) recommends no-go, rumdl isn't adopted and this task moves to `dropped/` (T-0006). Research was done in a session on 2026-09-25; the findings the implementer needs:
 
 - **Parity.** rumdl 0.2.77 implements all 53 markdownlint rules. With MD013 off, both tools report 0 issues on the
   repo's Markdown. On planted errors both caught a missing file (rumdl MD057), a missing same-file anchor (MD051),
