@@ -184,6 +184,26 @@ production plugin (T-0002).
 
 ## Handoff
 
+**Pilot grading (session 00fe2a0f, 2026-09-25).** Grading covers the 3 baseline runs and the 3 refined-LSP runs,
+labelled R1 to R6 in shuffled order. Blind agents split each answer into findings and removed traces of tool use
+(52 findings). Residual risk: LSP runs reported their own session's rumdl diagnostics and `workspaceSymbol`
+results; those were reworded neutrally, but a few claims remain that a reviewer without the LSP would rarely make.
+The user found 52 findings too many to judge ("they blend together"), so a blind agent grouped them into 19
+distinct issues, a second agent checked the grouping (2 statements revised, 2 more non-findings excluded), and
+the user rated each issue once; 6 findings propose no action and are excluded. Scoring counts distinct issues per
+run, so a run can't score twice by repeating itself; how well a finding is argued is left to the pair ratings.
+The user accepted 17 of 19 issues in 25 minutes and said: "i would act on almost all of the findings but that's
+because i am not very familiar with the subject matter and the findings are generally persenting in ways that
+sound confidant." Accepted issues per run: baseline 6, 6, 10; LSP 9, 8, 5 — nearly the same as issues raised, so
+user acceptance measures how many plausible issues a review raises, not whether they're right.
+
+**The user's third decision (same session): "option 1"** of three offered: replace user acceptance as the main
+effectiveness score with evidence-checked issues. Three condition-blind skeptic agents (repo facts,
+consequences, rules and reference) each try to refute every issue against the snapshot, the pinned agentpatterns,
+and the pinned rumdl binary, without gol2's later history; an issue is verified when at least 2 of 3 find it
+real, and the user settles every issue the panel doesn't agree on unanimously. The main score becomes verified
+issues per run; key recall stays secondary.
+
 **The user's second decision (session 00fe2a0f, 2026-09-25)**, answering options (a) and (b) below: "let's
 refine the instructions to include telling coach to prefer reading sections via lsp and not through bash". The LSP
 tool returns headings and start lines, not section text, so the refined wording has the coach locate sections with
