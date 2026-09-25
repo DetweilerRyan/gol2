@@ -1,0 +1,62 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.8024798000000001,
+    "tokens": {
+      "input": 34,
+      "output": 15214,
+      "cache_write": 50198,
+      "cache_read": 482399
+    },
+    "turns": 33,
+    "api_calls": 17,
+    "agentpatterns_tool_tokens": {
+      "Read": 17666,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 7118,
+      "LSP": 5570
+    },
+    "agentpatterns_tool_tokens_total": 30354,
+    "pages_opened": 9,
+    "pages_cited": 9,
+    "whole_page_reads": 0,
+    "section_only_pages": 9,
+    "lsp_calls": 12,
+    "tool_calls": {
+      "Read": 12,
+      "Bash": 8,
+      "LSP": 12
+    }
+  },
+  "context": {
+    "peak_context_tokens": 57485,
+    "agentpatterns_tokens_at_peak": 30354,
+    "agentpatterns_share_at_peak": 0.528,
+    "tokens_opened_not_cited": 0,
+    "cited_pages": [
+      "instructions/agents-md-as-table-of-contents.md",
+      "patterns/agent-design/five-failure-layers-diagnostic.md",
+      "patterns/anti-patterns/artifact-only-verification.md",
+      "patterns/anti-patterns/assumption-propagation.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "patterns/anti-patterns/spec-complexity-displacement.md",
+      "patterns/anti-patterns/stale-ai-configuration-artifacts.md",
+      "verification/risk-based-task-sizing.md"
+    ],
+    "backfire_read": {
+      "instructions/agents-md-as-table-of-contents.md": true,
+      "patterns/agent-design/five-failure-layers-diagnostic.md": true,
+      "patterns/anti-patterns/artifact-only-verification.md": true,
+      "patterns/anti-patterns/assumption-propagation.md": true,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "patterns/anti-patterns/spec-complexity-displacement.md": null,
+      "patterns/anti-patterns/stale-ai-configuration-artifacts.md": true,
+      "verification/risk-based-task-sizing.md": true
+    },
+    "backfire_read_share": 1.0
+  },
+  "effectiveness": null
+}

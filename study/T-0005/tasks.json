@@ -5,12 +5,17 @@
   "effort": "medium",
   "rumdl_version": "0.2.77",
   "rumdl_sha256": "3545e4774be53caafaf9a94e5eff3b03f3148051cdd00a802ae1d595786b8c1e",
-  "lsp_instruction": "Before reading an agentpatterns page, use the LSP tool's documentSymbol to see its sections, and workspaceSymbol to find headings across pages.",
+  "lsp_instruction": "Before reading an agentpatterns page, use the LSP tool's documentSymbol to see its sections, and workspaceSymbol to find headings across pages. Then read only the sections you need with the Read tool's offset and limit, not through Bash (cat, sed, grep).",
   "lsp_instruction_history": [
     {
       "text": "To find headings or sections in Markdown, use the LSP tool's documentSymbol and workspaceSymbol.",
       "runs": "setup-lsp-1, pilot-T-0001-lsp-1 to -3",
       "outcome": "0 of 3 pilot runs made an LSP call"
+    },
+    {
+      "text": "Before reading an agentpatterns page, use the LSP tool's documentSymbol to see its sections, and workspaceSymbol to find headings across pages.",
+      "runs": "pilot2-T-0001-lsp-1 to -3",
+      "outcome": "3 of 3 runs made LSP calls (11, 18, 1); agentpatterns share at peak unchanged at 0.57"
     }
   ],
   "tasks": {

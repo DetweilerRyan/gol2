@@ -1,0 +1,97 @@
+{
+  "duration_api_ms": 147337,
+  "stop_reason": "end_turn",
+  "session_id": "f1f05caa-87d8-4f51-9147-1c0bb915a2d2",
+  "total_cost_usd": 0.8024798000000001,
+  "usage": {
+    "input_tokens": 34,
+    "cache_creation_input_tokens": 50198,
+    "cache_read_input_tokens": 482399,
+    "output_tokens": 15214,
+    "output_tokens_details": {
+      "thinking_tokens": 7590
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 50198,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2978,
+        "cache_read_input_tokens": 54937,
+        "cache_creation_input_tokens": 2546,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2546
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 34,
+      "outputTokens": 15214,
+      "cacheReadInputTokens": 482399,
+      "cacheCreationInputTokens": 50198,
+      "webSearchRequests": 0,
+      "costUSD": 0.8024798000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 7590,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 33,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I reviewed T-0001 against the board rules and nine agentpatterns pages. I edited nothing. Five findings should be fixed before the task moves to `ready/` (1\u20135), four are smaller (6\u20139), and two places were checked and are fine (10\u201311).\n\n## Fix before `ready/`\n\n**1. The task bundles three deliverables with different owners and different risk.**\n- **What:** It covers the lint swap (criteria 1\u20136, 13), the Claude Code plugin (7\u201310), and the `docs/tools/` doc (11\u201312), which the Context says the coach writes.\n- **Why it matters:** The board allows one `claimed_by`, and `verified_by` must be someone else. If the coach writes the doc and then verifies, it checks part of its own work. With one active task per agent, if the plugin hits the known LSP bug or the worktree gap in #3, the lint swap is stuck in `blocked/` with it, although it's useful by itself.\n- **Suggestion:** Split into three tasks:\n  - T-0001: the lint swap.\n  - T-0002: the plugin, `depends_on: [T-0001]`.\n  - T-0003: the doc, owned by the coach, `depends_on: [T-0002]`.\n- **Pages:**\n  - `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md` (\"one logical change\"). Its \"When this backfires\" says splitting helps a solo reviewer little; the reason here is the board rules, not review load.\n  - `verification/risk-based-task-sizing.md`: the lint swap is low-risk with deterministic checks. The plugin runs in every session in the repo, so it deserves its own review gate.\n\n**2. The plugin criteria could pass without the committed plugin being used.**\n- **What:** A rumdl LSP plugin is already installed for the user at `~/.claude/plugins/data/rumdl-lsp-inline`. It served rumdl diagnostics in this session.\n- **Why it matters:** A session could pass criteria 14 and 16 through that user-level plugin, not the committed one. Criterion 15 (\"starts the pinned version from `node_modules/`\") has no named way to check it. The results would look right without showing the committed plugin works.\n- **Suggestion:** Name the evidence commands, for example:\n  - `claude plugin list` showing `<plugin>@<marketplace>` as the source;\n  - `claude --debug` output showing the server started from `node_modules/rumdl/bin/rumdl`;\n  - or run the check with the user-level plugin disabled.\n  \n  Also say whether the user-level plugin should be removed afterwards, so two rumdl servers don't both handle `.md` files.\n- **Page:** `patterns/anti-patterns/artifact-only-verification.md` (\"a green output check is not evidence the procedure ran\"). Its \"When this backfires\" doesn't apply: the output alone can't tell you which plugin produced it.\n\n**3. Worktree sessions probably have no `node_modules/`.**\n- **What:** `node_modules/` is gitignored and exists only as the main checkout's bind mount. No worktrees exist yet.\n- **Why it matters:** In a session under `.claude/worktrees/<x>/`, `${CLAUDE_PROJECT_DIR}/node_modules/rumdl/bin/rumdl` probably won't exist. The existing hooks' `node_modules/.bin/tsx` has the same problem. Running `npm install` there would lose `.bin` symlinks on virtiofs. Criterion 16 will hit this late, after the rest is built.\n- **Suggestion:** Say this in Context and decide the approach up front: point at the main checkout's `node_modules`, install per worktree, or accept main-checkout-only and change criterion 16.\n- **Page:** `patterns/agent-design/five-failure-layers-diagnostic.md`, execution-environment layer (\"Did the agent waste context on broken dev setup, missing deps\u2026\").\n\n**4. The plugin setup rests on second-hand research.**\n- **What:** The \"Plugin setup\" bullets come from a research subagent and are marked \"verify while implementing.\" Everything after them depends on them: marketplace shape, `${CLAUDE_PROJECT_DIR}` expanding in `args`, `command` needing to be on `PATH`.\n- **Why it matters:** If one of these is wrong, the plugin, settings and doc all build on the mistake.\n- **Suggestion:** Make the first step a small check with a stop point: a stub plugin that `claude plugin list` shows as loaded and that `--debug` shows starting `rumdl server`. The implementer should stop and write a Handoff if it fails.\n- **Page:** `patterns/anti-patterns/assumption-propagation.md`, Level 3 (a check between understanding and building). Its \"When this backfires\" says the ladder isn't needed when the spec is precise; this part is explicitly unverified, so it applies.\n\n**5. Nothing checks CI, but Context asks for it.**\n- **What:** The Install bullet says to confirm that the platform binary (`@rumdl/cli-linux-x64`) resolves in CI. No criterion covers it, and agents can't push (a hook blocks `git push`).\n- **Suggestion:** Either add a criterion owned by the user (\"CI `check` job passes on the change\") or delete the sentence.\n- **Page:** `verification/risk-based-task-sizing.md` (\"Empty runtime verification is never acceptable\"). The CI install path is a runtime path nobody checks.\n\n## Smaller findings\n\n**6. Agents may never find the new doc.**\n- **What:** Criterion 12 adds `tools/` to `docs/README.md`, but the root `CLAUDE.md` map only points to `docs/decisions/`.\n- **Suggestion:** Add a criterion (coach-owned) for a one-line pointer in `CLAUDE.md` under \"Where things are\".\n- **Page:** `instructions/agents-md-as-table-of-contents.md`. Its \"When this backfires\" notes agents don't always follow pointers, so keep it to one line.\n\n**7. The doc will go stale.**\n- **What:** Criterion 18 writes \"operation X doesn't work on Claude Code version Y\" into a lasting doc, and the linked bug was closed without a fix.\n- **Suggestion:** Have the doc say when to re-test (on a Claude Code upgrade) and when to delete the caveat (when every operation works).\n- **Page:** `patterns/anti-patterns/stale-ai-configuration-artifacts.md`. Its \"When this backfires\" says the solo-repo case softens this but doesn't remove it: agents, not the author, read the doc.\n\n**8. The bug description in Context is broader than the evidence.**\n- **What:** Line 60 reads as if those operations always return nothing. The Context's own maintainer quote limits it to cases where the queried file is gitignored. This session backs that up: `workspaceSymbol` returned results on `/study/agentpatterns`, which is outside any ignored path.\n- **Suggestion:** Reword line 60 so an implementer doesn't read a successful result as a mistake in their setup.\n- **Page:** `patterns/anti-patterns/assumption-propagation.md`.\n\n**9. Criterion 10 checks the config file's shape, not the behaviour it's for.**\n- **What:** The goal is that \"the linter never demands a style the formatter will undo.\" A `.rumdl.toml` with the right keys could still disagree with oxfmt on some construct.\n- **Suggestion:** Add a check of the behaviour: a file with setext headings, `*`/`+` bullets and mixed emphasis, run through `oxfmt` then `rumdl check`, reports 0 issues.\n- **Page:** `patterns/anti-patterns/spec-complexity-displacement.md` (\"What replaces verbose specs\": tests as acceptance criteria rather than prose).\n\n## Checked and fine\n\n**10. Plugin supply-chain risk mostly doesn't apply.**\n- **What:** The page describes an attack where a plugin update changes its hooks under the same name.\n- **Why it doesn't apply:** It needs auto-update and an unpinned plugin. Here the plugin is committed in the repo, and its binary is pinned exactly in `package.json` and the lockfile.\n- **What to keep:** The exact pin and criterion 15 (no global install) are what protect you, so any rumdl upgrade should be its own reviewed change. The ADR could also record the choice to turn on, by default, a plugin that runs a binary in every session.\n- **Page:** `patterns/anti-patterns/install-once-plugin-trust.md` (\"The conditions that make it reachable\").\n\n**11. Criteria 4, 5 and 13 are well formed.** They name behaviour that fails when broken, not just \"tests pass,\" as the board rules ask.",
+  "ttft_ms": 2317,
+  "type": "result",
+  "duration_ms": 151101,
+  "uuid": "255de755-710e-4b7d-a694-34d3203d7fb3",
+  "ttft_stream_ms": 1166,
+  "time_to_request_ms": 419,
+  "first_content_frame_ms": 1166,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

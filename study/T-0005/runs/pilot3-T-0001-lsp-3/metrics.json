@@ -1,0 +1,56 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.6766784,
+    "tokens": {
+      "input": 24,
+      "output": 11780,
+      "cache_write": 47132,
+      "cache_read": 319632
+    },
+    "turns": 22,
+    "api_calls": 12,
+    "agentpatterns_tool_tokens": {
+      "Read": 13839,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 12920,
+      "LSP": 765
+    },
+    "agentpatterns_tool_tokens_total": 27524,
+    "pages_opened": 8,
+    "pages_cited": 6,
+    "whole_page_reads": 0,
+    "section_only_pages": 8,
+    "lsp_calls": 4,
+    "tool_calls": {
+      "Bash": 10,
+      "LSP": 4,
+      "Read": 7
+    }
+  },
+  "context": {
+    "peak_context_tokens": 52709,
+    "agentpatterns_tokens_at_peak": 27524,
+    "agentpatterns_share_at_peak": 0.522,
+    "tokens_opened_not_cited": 635,
+    "cited_pages": [
+      "patterns/agent-design/persona-as-code.md",
+      "patterns/anti-patterns/distractor-interference.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "security/pre-trust-execution-surface.md",
+      "verification/bug-discriminating-validation-evidence.md",
+      "workflows/per-task-verification-budget.md"
+    ],
+    "backfire_read": {
+      "patterns/agent-design/persona-as-code.md": true,
+      "patterns/anti-patterns/distractor-interference.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "security/pre-trust-execution-surface.md": true,
+      "verification/bug-discriminating-validation-evidence.md": true,
+      "workflows/per-task-verification-budget.md": true
+    },
+    "backfire_read_share": 1.0
+  },
+  "effectiveness": null
+}

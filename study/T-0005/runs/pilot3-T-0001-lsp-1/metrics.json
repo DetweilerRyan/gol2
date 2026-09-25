@@ -1,0 +1,64 @@
+{
+  "run": "task=T-0001 condition=lsp snapshot=648d64a26916241145ee961ac581d5eb2df87a12 agentpatterns=86da49a1a025f18843818dfa6025d16be70076bf prompt_override=",
+  "efficiency": {
+    "cost_usd": 0.8127784,
+    "tokens": {
+      "input": 30,
+      "output": 15798,
+      "cache_write": 52300,
+      "cache_read": 391492
+    },
+    "turns": 40,
+    "api_calls": 15,
+    "agentpatterns_tool_tokens": {
+      "Read": 18890,
+      "Grep": 0,
+      "Glob": 0,
+      "Bash": 4437,
+      "LSP": 4617
+    },
+    "agentpatterns_tool_tokens_total": 27944,
+    "pages_opened": 11,
+    "pages_cited": 10,
+    "whole_page_reads": 0,
+    "section_only_pages": 11,
+    "lsp_calls": 14,
+    "tool_calls": {
+      "Read": 18,
+      "Bash": 7,
+      "LSP": 14
+    }
+  },
+  "context": {
+    "peak_context_tokens": 55633,
+    "agentpatterns_tokens_at_peak": 27944,
+    "agentpatterns_share_at_peak": 0.502,
+    "tokens_opened_not_cited": 1221,
+    "cited_pages": [
+      "context-engineering/discoverable-vs-nondiscoverable-context.md",
+      "instructions/agent-config-as-managed-supply-chain.md",
+      "instructions/agents-md-as-table-of-contents.md",
+      "patterns/anti-patterns/assumption-propagation.md",
+      "patterns/anti-patterns/distractor-interference.md",
+      "patterns/anti-patterns/install-once-plugin-trust.md",
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+      "verification/deterministic-guardrails.md",
+      "verification/risk-based-task-sizing.md",
+      "workflows/worktree-isolation.md"
+    ],
+    "backfire_read": {
+      "context-engineering/discoverable-vs-nondiscoverable-context.md": true,
+      "instructions/agent-config-as-managed-supply-chain.md": true,
+      "instructions/agents-md-as-table-of-contents.md": true,
+      "patterns/anti-patterns/assumption-propagation.md": true,
+      "patterns/anti-patterns/distractor-interference.md": true,
+      "patterns/anti-patterns/install-once-plugin-trust.md": true,
+      "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md": true,
+      "verification/deterministic-guardrails.md": true,
+      "verification/risk-based-task-sizing.md": true,
+      "workflows/worktree-isolation.md": true
+    },
+    "backfire_read_share": 1.0
+  },
+  "effectiveness": null
+}
