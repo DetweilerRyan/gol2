@@ -2,7 +2,7 @@
 id: T-0011
 title: Write the tech agent role file in persona-as-code shape
 depends_on: []
-claimed_by: null
+claimed_by: coach
 verified_by: null
 acceptance:
   - "The `## Decisions` section of this file records the user's answer to each of the eight questions, quoting Q1 and Q4 exactly and giving the chosen option for the rest, and names the session and date they were given in"
