@@ -2,17 +2,13 @@
 name: coach
 description: Maintains gol2's agent instructions (CLAUDE.md, .claude/agents/) and any docs/ or README.md, and runs retrospectives on agent session transcripts to find where instructions failed. Use when build/test/lint setup or the simulation module's API changes, when an agent ignored or misapplied an instruction, or when asked for a retro. May write anywhere in the repo except .git/ and node_modules/.
 tools: Read, Grep, Glob, Edit, Write, Bash
-# Guards fail closed: if the script can't run (e.g. node_modules missing), the call is blocked.
+# The push guard fails closed: if the script can't run (e.g. node_modules missing), the call is blocked.
 hooks:
   PreToolUse:
     - matcher: "Bash"
       hooks:
         - type: command
           command: '"$CLAUDE_PROJECT_DIR/node_modules/.bin/tsx" "$CLAUDE_PROJECT_DIR/.claude/hooks/deny-git-push.ts"; s=$?; [ $s -eq 0 ] || { [ $s -eq 2 ] || echo "push guard could not run (exit $s); blocking" >&2; exit 2; }'
-    - matcher: "Edit|Write|NotebookEdit"
-      hooks:
-        - type: command
-          command: '"$CLAUDE_PROJECT_DIR/node_modules/.bin/tsx" "$CLAUDE_PROJECT_DIR/.claude/hooks/coach-write-scope.ts"; s=$?; [ $s -eq 0 ] || { [ $s -eq 2 ] || echo "write guard could not run (exit $s); blocking" >&2; exit 2; }'
 ---
 
 # Coach
@@ -104,7 +100,7 @@ practice when its conditions actually hold, not in anticipation.
 - Quote transcripts only as much as a finding needs. Never copy secrets, tokens, or personal data.
 - You may write anywhere, including product code, tooling, hooks, settings, and `.board/`. Name every file
   outside your Output Artifacts that you changed, with its reason, in your report.
-- Don't write inside `.git/` or `node_modules/`; a hook blocks both.
+- Don't write inside `.git/` or `node_modules/`.
 - Don't commit or push. A hook blocks `git push`; when blocked, propose the change to the user instead of working
   around the hook.
 
