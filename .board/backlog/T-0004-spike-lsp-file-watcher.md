@@ -1,15 +1,18 @@
 ---
 id: T-0004
-title: "Spike: can a file watcher alongside rumdl keep its LSP results fresh in Claude Code?"
+title: "Spike: can a relay alongside rumdl keep its LSP results fresh in Claude Code?"
 depends_on: []
 claimed_by: null
 verified_by: null
 acceptance:
-  - "The Handoff states whether inotify events fire on the repo's virtiofs mount for Markdown changes made inside the sandbox and for changes made on the host, with the command used and its output for each"
-  - "A prototype watcher runs between Claude Code and rumdl and sends rumdl `workspace/didChangeWatchedFiles` for Markdown files created, changed, or deleted on disk; its source is on the task's branch and is not merged to main"
-  - "For each change route (shell edit to a file already queried, shell edit to a file not yet queried, file created from the shell, `git mv`, `git rm`, `git checkout` of different content, and switching to a branch whose Markdown differs), the evidence records raw LSP tool output of `documentSymbol`, `workspaceSymbol`, and `findReferences` after the change, from a single Claude Code session, both without the watcher and with it"
-  - "The evidence records the Claude Code and rumdl versions used and the traffic log showing the notifications the watcher sent"
-  - "The Handoff recommends go or no-go for T-0002, citing the per-route results, and lists what the watcher would cost to maintain (for example its language, dependencies, and failure modes)"
+  - "The Handoff states whether inotify events fire on the repo's virtiofs mount for Markdown changes made inside the sandbox, with the command used and its output"
+  - "The Handoff states whether inotify events fire on the mount for Markdown changes the user makes on the host, with the command and output; if the user isn't available when the step is reached, the Handoff records host-side changes as untested and the task continues"
+  - "If inotify doesn't fire for sandbox changes, the Handoff states whether polling the disk (for example comparing modification times) detects them, with the command and output"
+  - "Unless the Handoff shows with evidence that no method detects Markdown changes on the mount, a prototype relay runs between Claude Code and rumdl, and its source is on a separate branch `prototype/T-0004-lsp-relay` that is pushed, kept, and never merged; the evidence gives the branch and commit"
+  - "Unless no method detects changes, the relay is tested first sending rumdl only `workspace/didChangeWatchedFiles`, and, if any route stays stale that way, also re-sending the current text of files Claude Code already opened (for example as `textDocument/didChange`); the Handoff reports each mechanism separately"
+  - "Unless no method detects changes, one Claude Code session per condition (no relay, then each mechanism tested) runs `documentSymbol`, `workspaceSymbol`, and `findReferences` after each change route: Write tool, Edit tool, shell edit to a queried file, shell edit to an unqueried file, file created from the shell, `git mv`, `git rm`, `git checkout` of different content, and a switch to a branch whose Markdown differs; the raw LSP tool output and relay traffic log of each session are committed as files on the prototype branch"
+  - "The evidence gives, for each condition, a table of change route × operation × fresh or stale, pointing to the raw log files by path and commit, and records the Claude Code and rumdl versions used"
+  - "The Handoff recommends go or no-go for T-0002, citing the per-route results, names the mechanism T-0002 should reimplement if go, and lists what it would cost to maintain (for example language, dependencies, and failure modes)"
   - "`npm run check` exits 0 on the task's branch"
 evidence: []
 ---
@@ -17,8 +20,13 @@ evidence: []
 ## Context
 
 The user wants rumdl only if its LSP plugin works (T-0002), and a test on 2026-09-25 found that it goes stale.
-This spike answers one question before any of it lands: does a watcher that sends rumdl file-change notifications
-fix that? A no-go is a valid result.
+This spike answers one question before any of it lands: can any relay between Claude Code and rumdl keep rumdl's
+LSP results fresh? A no-go is a valid result.
+
+**Branches.** The task file, its Handoff, and its evidence move through the lanes on the task's own branch, which
+merges to main like any task. The prototype relay and the raw logs go only on `prototype/T-0004-lsp-relay`, which
+is pushed and kept for reference but never merged. T-0002 reimplements the chosen mechanism rather than copying
+the prototype, preferably in Rust; the prototype can be in any language.
 
 What the 2026-09-25 test found (Claude Code 2.1.282, rumdl 0.2.77, a gitignored worktree):
 
@@ -35,10 +43,13 @@ What the 2026-09-25 test found (Claude Code 2.1.282, rumdl 0.2.77, a gitignored 
 - **What might work.** rumdl's `did_change_watched_files` handler updates the workspace index for Markdown files
   that are created, changed, or deleted; a source comment mentions files "deleted and recreated underneath the
   editor (a branch" switch). Whether it also refreshes a file Claude Code has already opened with `didOpen`
-  (stored as editor-owned, `from_disk: false`) is unknown and is the crux for queries on a single file.
+  (stored as editor-owned, `from_disk: false`) is unknown. If it doesn't, a relay can re-send that file's text
+  itself, which is why the criteria test a second mechanism before calling no-go.
 - **Mount risk.** The repo is on a virtiofs mount (see `CLAUDE.md`). inotify may not report changes made on the
-  host, and may behave differently for the sandbox's own writes. Check this first; it decides whether a watcher
-  can work at all.
+  host, and may behave differently for the sandbox's own writes. Check this first. If inotify fails, try polling
+  before concluding that no method detects changes; that conclusion is the only one that skips the relay.
+- **Host step.** An agent in the sandbox can't change files on the host, so ask the user to make the host-side
+  change while the agent watches. If the user doesn't respond, record host-side changes as untested and continue.
 
 How the 2026-09-25 test was run, to rebuild it:
 
@@ -47,16 +58,21 @@ How the 2026-09-25 test was run, to rebuild it:
   `python3` and a script path), and `extensionToLanguage` `{ ".md": "markdown" }`. It loads only in a trusted
   workspace: this repo's checkout or its worktrees, not a scratch folder.
 - **Relay.** A short Python script that starts `rumdl server`, copies LSP messages between stdin/stdout and rumdl,
-  and logs each message's direction, method, and key params (URIs, `didChange` text) to a file. A watcher can live
-  in the same relay and inject `workspace/didChangeWatchedFiles` notifications to rumdl.
-- **Session.** One headless `claude -p` session with only the `LSP` and `Read` tools, so it can't run git itself
-  (an isolated worktree session refuses to start a nested session with Bash). The prompt runs baseline queries,
-  then waits by re-reading a signal file until it holds `G1`, `G2`, ..., and queries again. The outer session
-  watches the relay log for the previous step's last query, makes that step's change with plain shell or git
-  commands, then writes the next signal. Make each step's change finish before writing its signal; in the first
-  run, a `git rm` failed on a staged rename after the signal went out, so that step queried too early.
+  and logs each message's direction, method, and key params (URIs, `didChange` text) to a file. The mechanisms
+  under test live in the same relay.
+- **Session.** One headless `claude -p` session per condition, with only the `LSP` and `Read` tools, so it can't
+  run git itself (an isolated worktree session refuses to start a nested session with Bash). The prompt runs
+  baseline queries, then waits by re-reading a signal file until it holds `G1`, `G2`, ..., and queries again. The
+  outer session watches the relay log for the previous step's last query, makes that step's change, and writes
+  the next signal only after the change command exits 0; in the first run, a `git rm` failed on a staged rename
+  after the signal went out, so that step queried too early. Bound each session with `timeout` and
+  `--max-budget-usd` (this version of `claude` has no `--max-turns`); the first run needed 18 signal reads for 13
+  LSP calls, and this matrix is several times larger. For the Write and Edit routes, the waiting session makes
+  the change itself with those tools, so allow them in that session.
 - **Test files.** Committed to a temporary branch so git routes have something to act on, then deleted with the
-  branch. Deliberately broken links in them fail `npm run check` until cleanup.
+  branch. Keep every link valid: a deliberately broken link fails `npm run check`, which the Stop hook runs, and
+  in the first run it blocked the outer session six times. Test link changes by retargeting links to other
+  existing files instead.
 
 Out of scope: building the production plugin (T-0002) and changing rumdl or Claude Code.
 
