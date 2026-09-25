@@ -1,7 +1,7 @@
 ---
 id: T-0002
 title: Run rumdl's LSP for agents through an in-repo Claude Code plugin
-depends_on: []
+depends_on: [T-0004]
 claimed_by: null
 verified_by: null
 acceptance:
@@ -16,6 +16,7 @@ acceptance:
   - "Raw LSP tool output of `goToDefinition` on a Markdown link in a worktree session is recorded with the Claude Code version"
   - "Raw LSP tool output of `findReferences` from a body line of a linked Markdown file in a main-checkout session is recorded with the Claude Code version"
   - "Raw LSP tool output of `findReferences` from a body line of a linked Markdown file in a worktree session is recorded with the Claude Code version"
+  - "In a single Claude Code session, after each change route that T-0004 tested (shell edit to a queried file, shell edit to an unqueried file, file created from the shell, `git mv`, `git rm`, `git checkout` of different content, and a branch switch), raw LSP tool output of `documentSymbol`, `workspaceSymbol`, and `findReferences` reflects the change"
   - "The plugin's LSP config does not enable rumdl's autofix-on-save, and editing a Markdown file with a fixable violation in a session leaves the violation in place"
   - "The user has reviewed and approved the diff of the plugin's files and of any `.claude/settings.json` change, and the evidence says where (PR review or comment)"
   - "`npm run check` exits 0"
@@ -25,10 +26,16 @@ evidence: []
 ## Context
 
 Lets agents navigate Markdown through Claude Code's LSP tool instead of reading whole files: a file's heading
-outline, heading search, link targets, and backlinks. This task goes first because the user wants rumdl in the
-repo only if the plugin works: if it can't meet these criteria, don't merge it, and T-0001 (switching the linter to
-rumdl) doesn't happen either. T-0003 documents usage once this task's evidence shows which operations work.
-Research was done in a session on 2026-09-25.
+outline, heading search, link targets, and backlinks. The user wants rumdl in the repo only if the plugin works:
+if it can't meet these criteria, don't merge it, and T-0001 (switching the linter to rumdl) doesn't happen either.
+It waits on T-0004, a spike on keeping LSP results fresh; if T-0004 recommends no-go, this task is dropped. T-0003
+documents usage once this task's evidence shows which operations work. Research was done in a session on
+2026-09-25.
+
+- **Freshness (2026-09-25 test, details in T-0004).** Changes made with Claude Code's Write and Edit tools reach
+  rumdl immediately. Changes made by shell or git commands never do: Claude Code rejects rumdl's request to watch
+  `**/*.md` (`Unhandled method client/registerCapability`) and sends each file only once, so results stay stale
+  for the rest of the session. Build on T-0004's watcher approach if it recommends go.
 
 - **Spike result (2026-09-25, Claude Code 2.1.282).** A plugin folder `.claude/skills/rumdl-lsp/` holding
   `.claude-plugin/plugin.json` (`name`, `version`, `description`) and an `.lsp.json` with
@@ -79,7 +86,7 @@ Research was done in a session on 2026-09-25.
   approving it. `.claude/settings.json` already holds the project's hooks; add to it without disturbing them.
 
 Out of scope: switching the linter (T-0001), working around the Claude Code LSP tool bug beyond recording which
-operations work, and the `docs/tools/` doc (T-0003).
+operations work, and the `docs/tools/` doc (T-0003). The freshness watcher is in scope only as T-0004 recommends.
 
 ## Handoff
 
