@@ -2,7 +2,7 @@
 id: T-0006
 title: Add a terminal dropped/ lane to the board
 depends_on: []
-claimed_by: null
+claimed_by: claude-job-ef3b791f
 verified_by: null
 acceptance:
   - "`.board/README.md` lists a `dropped/` lane: a terminal lane for tasks that won't be done, moved in by the user or with the user's agreement, whose body has a `## Dropped` section saying why and linking the task, evidence, or decision that settled it"
