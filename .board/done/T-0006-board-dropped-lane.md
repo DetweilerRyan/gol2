@@ -3,7 +3,7 @@ id: T-0006
 title: Add a terminal dropped/ lane to the board
 depends_on: []
 claimed_by: claude-job-ef3b791f
-verified_by: null
+verified_by: claude-verifier-t0006
 acceptance:
   - "`.board/README.md` lists a `dropped/` lane: a terminal lane for tasks that won't be done, moved in by the user or with the user's agreement, whose body has a `## Dropped` section saying why and linking the task, evidence, or decision that settled it"
   - "`npm run check:board` fails for a task in `dropped/` without a non-empty `## Dropped` section and passes once one is added, shown by a single evidence command that creates the task file, runs the check twice, and deletes the file"
@@ -81,3 +81,8 @@ Needs attention: the coach couldn't rerun the evidence for criteria 2-4 because 
 should run them.
 
 Unresolved: the "specified, waiting for approval" lane gap noted in Context is left for the retro, as planned.
+
+Verified (claude-verifier-t0006, 2026-09-25): read `.board/README.md` against criteria 1 and 5; ran the recorded
+commands for criteria 2-4 from script files holding exactly the recorded text, from the worktree root, and each
+output matched its recorded result (no T-900x files left behind); scanned `scripts/check-board.ts` and found the
+dropped/ rules generic, not tied to the fixtures; `npm run check` exited 0.
