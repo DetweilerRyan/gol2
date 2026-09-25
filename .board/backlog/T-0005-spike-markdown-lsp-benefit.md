@@ -1,20 +1,20 @@
 ---
 id: T-0005
 title: "Spike setup and pilot: Markdown LSP benefit study for the coach's agentpatterns reviews"
-depends_on: []
+depends_on: [T-0006, T-0010]
 claimed_by: null
 verified_by: null
 acceptance:
   - "A runner script and a metrics script are committed on branch `prototype/T-0005-lsp-benefit` (pushed, kept, never merged): the runner builds an isolated environment, runs one coach review, and redacts its transcript; the metrics script computes every per-run measure in this file's Context from a run's JSON output and transcript, so grading can be redone without new runs"
   - "Each run the runner builds happens in an environment where the original gol2 checkout, the shared agentpatterns checkout, and `~/.claude/projects/` don't exist (for example a separate home directory or user, or a container), holding only a fresh clone of its snapshot commit (no other branches or tags, no remote, no reflog), a separate checkout of agentpatterns at commit `86da49a` at the `../agentpatterns` path relative to that clone, and a Claude config directory of its own; the runner's output for each run shows `git rev-parse HEAD`, `git for-each-ref`, and `git remote` for the clone, the agentpatterns commit, and a listing of the home directory"
-  - "Inside a run the runner built, the coach's LSP tool is listed and `documentSymbol` and `workspaceSymbol` calls on agentpatterns files return results, shown by the raw output; if that can't be made to work, the Handoff shows why with evidence, the remaining criteria are recorded as not applicable, and T-0008 moves to `dropped/`"
+  - "Inside a run the runner built, the coach's LSP tool is listed and `documentSymbol` and `workspaceSymbol` calls on agentpatterns files return results, shown by the raw output; if that can't be made to work, the Handoff shows why with evidence, the remaining criteria are recorded as not applicable, and, with the user's agreement, T-0008 moves to `dropped/`"
   - "A diff of the two conditions' agent definitions, and of the tool lists each pilot run started with, shows they differ only in the LSP tool and the one-line LSP instruction; the diff is in the evidence"
   - "A check over every run's transcript finds no command reaching other refs or remotes and no read outside the run's environment; its output is in the evidence"
   - "Before anything is pushed, a scan of the files to be committed for the user's email address, token and key patterns, and the sandbox name finds nothing, and its command and output are in the evidence; credentials a run needs are set up before its session starts"
-  - "Each answer key contains only findings the user accepted from the review it comes from, and the user confirmed each key; the keys are committed (redacted) on the prototype branch"
-  - "A pilot of at least two runs per condition on one review task records in the Handoff: cost and its spread per condition, accepted findings and key recall of the baseline, LSP uptake, peak context and the agentpatterns share of it per condition, and an estimate of the user's rating time for the study; pilot runs are excluded from the study data"
-  - "A grader agent's answer-key matches and citation judgments, made on redacted, condition-hidden pilot outputs, agree with the user's on a sample the user graded, measured by balanced accuracy or Cohen's kappa with at least 5 true matches in the sample, and meet the calibration rule in the workload file; the evidence records the sample and the result"
-  - "A workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the calibration rule, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
+  - "The study uses the answer keys T-0010 committed and the user confirmed, unchanged; the evidence gives their commit"
+  - "A pilot of at least three runs per condition on one review task records in the Handoff: cost and its spread per condition, accepted findings and key recall of the baseline, LSP uptake, peak context and the agentpatterns share of it per condition, and an estimate of the user's rating time for the study; pilot runs are excluded from the study data"
+  - "A grader agent's answer-key matches and citation judgments, made on redacted, condition-hidden pilot outputs, reach Cohen's kappa of at least 0.7 against the user's grading of a sample containing at least 10 true key matches; if they don't, the grader's instructions are revised once and checked on a fresh sample, and if they still don't, the user grades instead; the evidence records the samples and results"
+  - "A workload file on the prototype branch fixes the review tasks (at least 3 snapshots with their answer keys), the agentpatterns commit, the prompt, the exact LSP instruction text, the two conditions, the number of runs, how runs are paired for rating, the rubric, how findings are matched to the key, the uptake rule, the effectiveness gate, the efficiency guardrail, and the smallest differences in accepted findings and in cost the study can detect, derived from the pilot; the evidence gives its commit"
   - "The Handoff states whether any pilot stop condition in this file's Context was hit, and if so the user decided whether to proceed before T-0008 leaves `backlog/`; it records the user's decision"
   - "The Handoff notes how the study coach differs from the real one (for example, no user-level settings or plugins in its config directory)"
   - "`npm run check` exits 0 on the branch that carries this task file"
@@ -81,18 +81,22 @@ rating time looks larger than the decision is worth.
   section reads, and the number of LSP calls.
 
 **What the study can detect.** The keys have 7 to 10 findings, and a review may add a few accepted off-key ones, so
-one finding is a large step. Cost varies a lot from run to run with the number of turns. The pilot estimates both;
+one finding is a large step. Cost varies a lot from run to run with the number of turns. The pilot estimates both, from at least three runs per condition (a spread across two runs bounds nothing, and three
+gives only a rough estimate, so label the derived limits as rough);
 write the smallest detectable differences into the workload file, and if the gate or guardrail can't be met or
 tripped at that sample size, raise the runs or ask the user.
 
 **The grader.** The implementing agent is the same model family as the coach and can see which condition each run
 used, so it doesn't grade blind by default. A grader agent works from the redacted, condition-hidden outputs, after
-its judgments agree with the user's on a sample the user grades (the user's decision). Use balanced accuracy or
-Cohen's kappa, not raw agreement: most findings are clear non-matches, so a grader that always says "no match" gets
-high raw agreement (across 21 judges, raw agreement overstated chance-corrected agreement by 33 to 41 points).
+its judgments agree with the user's on a sample the user grades. The bar, fixed now so it isn't chosen after the
+grader's results are seen (the user's decision, 2026-09-25): Cohen's kappa of at least 0.7 on a sample containing
+at least 10 true key matches, with one revision of the grader's instructions and a fresh sample allowed; after a
+second failure, the user grades. Kappa, not raw agreement: most findings are clear non-matches, so a grader that
+always says "no match" gets high raw agreement (across 21 judges, raw agreement overstated chance-corrected
+agreement by 33 to 41 points).
 
-**Answer keys.** Built only from the findings the user accepted from each 2026-09-25 coach review, and confirmed by
-the user. The keys come from reviews made without the LSP, and the user acted on them, so their findings will look
+**Answer keys.** Extracted, confirmed by the user, and committed by T-0010, from the findings the user accepted in
+each 2026-09-25 coach review. The keys come from reviews made without the LSP, and the user acted on them, so their findings will look
 familiar; that's why off-key findings are rated before the user sees the key. The reviews cited agentpatterns at
 `86da49a` ("Release v1.8.67", 2026-09-24), which is why the study pins that commit. Review tasks, snapshots from
 before each review so there's something to find:
@@ -100,11 +104,13 @@ before each review so there's something to find:
 - T-0001 at commit `648d64a` (the first review: 7 findings, led by splitting the task).
 - T-0004 at `f5f6bff` (9 findings).
 - The set T-0001 to T-0004 at `c44ca0f` (10 findings).
-- T-0005 at `ff794b4` (10 findings).
 
-The coach's outputs aren't in the repo. They're in the subagent transcripts under
-`~/.claude/projects/-c-Users-User-Documents-projects-gol2--claude-worktrees-board-rumdl-task/440265dc-29df-4a06-99dc-0fa759d9950d/subagents/`.
-The user's accept or reject decisions for each finding are in that session's main transcript alongside them.
+All three are about rumdl and the LSP, so the LSP condition may use the tool more because the topic invites it;
+the Handoff notes this. A fourth review, of T-0005 at `ff794b4`, is excluded because that version describes the
+study itself (the user's decision). When outputs are prepared for blind rating, remove only traces of tool use (LSP
+calls, symbol listings, line-anchor citations), not mentions of the LSP as the topic under review.
+
+Where the reviews came from and how the keys were built: T-0010's Context.
 
 **Isolation.** Resetting a working tree doesn't hide the answers: from any snapshot, `git log --all` reaches the
 later commits that applied each review, the prototype branch holds the keys, earlier transcripts sit under

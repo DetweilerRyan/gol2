@@ -11,7 +11,8 @@ acceptance:
   - "The doc lists each known limitation recorded in T-0007's Handoff (for example, changes made on the host), or says there are none"
   - "The doc contains no copy of `.rumdl.toml` settings or the plugin's config; it links to those files instead"
   - "`docs/README.md` lists `tools/` and says what it holds"
-  - "`CLAUDE.md` has a one-line pointer telling agents to navigate Markdown with the LSP tool, linking to the doc, and stays under its ~100-line limit"
+  - "`CLAUDE.md` has a one-line pointer telling agents to navigate Markdown with the LSP tool, using the exact LSP instruction text fixed in T-0005's workload file and linking to the doc, and stays under its ~100-line limit"
+  - "Only if T-0008 recommended go: with the user's approval, recorded in the evidence, `.claude/agents/coach.md` lists the LSP tool and contains the exact LSP instruction text fixed in T-0005's workload file, so the coach runs the configuration that was tested"
   - "`npm run check` exits 0"
 evidence: []
 ---
@@ -24,8 +25,10 @@ limits, not how rumdl is configured. Write it from the evidence and Handoffs of 
 recommend no-go, move this task to `dropped/` (T-0006).
 
 The `CLAUDE.md` pointer is there because agents often skip an installed tool unless their always-loaded
-instructions name it. The coach's prediction to check at the next retro: at least one session among the next five
-that navigates Markdown uses the LSP tool on `.md` files.
+instructions name it. The pointer and the coach's role file reuse the instruction
+wording the study tested, not new wording. The coach's prediction to check at the next retro, matching the study's
+uptake rule: in at least two thirds of the next coach reviews against agentpatterns (at least three), the coach
+makes an LSP call.
 
 This file is the home for how rumdl's LSP operations behave; other tasks point here. From testing rumdl 0.2.77 over
 raw LSP and through Claude Code 2.1.282 on 2026-09-25:

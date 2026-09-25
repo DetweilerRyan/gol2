@@ -9,6 +9,7 @@ acceptance:
   - "`npm run check:board` fails for a task in `dropped/` without a non-empty `## Dropped` section and passes once one is added, shown by a single evidence command that creates the task file, runs the check twice, and deletes the file"
   - "`npm run check:board` fails for a task outside `backlog/` and `dropped/` that depends on a task in `dropped/`, shown by a single evidence command that creates the files, runs the check, and deletes them"
   - "`npm run check:board` does not require `verified_by` or evidence for tasks in `dropped/`, and rejects `verified_by` on them"
+  - "`.board/README.md` documents two evidence conventions: for a conditional criterion that didn't apply, `command` is the check that showed it and `result` starts with `not applicable:` and says why; for a criterion met by the user's decision or judgment, `command` says where the decision is recorded (for example a PR comment or conversation) and `result` quotes it"
   - "`npm run check` exits 0"
 evidence: []
 ---
@@ -23,6 +24,9 @@ planned and why it stopped. A `dropped/` lane keeps the task and its verdict.
 in `.board/`, so the new lane must be added to its `LANES` list. A task that depends on a dropped task can't
 proceed, so it should stay in `backlog/` or be dropped too. `claimed_by` may or may not be set on a dropped task,
 depending on whether work had started.
+
+The evidence conventions come from the rumdl tasks (T-0004, T-0005, T-0008), which have conditional criteria and
+criteria met by the user's decisions; the board's `{ criterion, command, result }` format assumes a command.
 
 A separate gap the 2026-09-25 reviews found, not part of this task: the board has no lane for "fully specified,
 waiting for the user's approval"; `backlog/` means "captured, not yet specified". That's for the retro on that

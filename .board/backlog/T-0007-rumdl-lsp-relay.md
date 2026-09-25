@@ -11,7 +11,7 @@ acceptance:
   - "In a single Claude Code session in a worktree, after each change route T-0004 tested (Write tool, Edit tool, shell edit to a queried file, shell edit to an unqueried file, file created from the shell, `git mv`, `git rm`, `git checkout` of different content, and a switch to a branch whose Markdown differs), `documentSymbol`, `workspaceSymbol`, `goToDefinition`, and `findReferences` reflect the change; the raw LSP tool output is committed to the task's evidence as files, summarized in a route × operation table"
   - "The Handoff records whether changes the user makes on the host are reflected, with the command and output; if they aren't, or the user wasn't available, it lists that as a known limitation for T-0003's doc"
   - "The four T-0002 operation criteria still pass in a main-checkout session and a worktree session with the relay in place; the evidence has the raw output"
-  - "The user approved the task's final commit, shown by `gh pr view <number> --json reviews,commits` listing an approving review from the user whose commit is the PR's last commit"
+  - "The user merged the task's PR after reviewing it; agents opened it but didn't merge it, shown by `gh pr view <number> --json state,mergedAt` and the user's confirmation, recorded after the merge"
   - "`npm run check` exits 0"
 evidence: []
 ---
@@ -30,6 +30,9 @@ rather than copying the prototype on `prototype/T-0004-lsp-relay`. If T-0004 rec
 - **Temporary by design.** The relay exists only because of the Claude Code gap. The removal condition goes in the
   ADR, not in feature flags.
 - **Who runs the main-checkout sessions.** See T-0002's Context.
+- **Merging.** The relay is executable config that runs in every session. Agents act on GitHub as the user's
+  account, so a PR review can't show that the user approved; the user reviews and merges the PR, and agents never
+  merge it.
 - **Host edits.** Host-side changes don't decide go (T-0004's rule); if they stay stale, T-0003's doc says so.
 
 Out of scope: the plugin itself (T-0002), changing rumdl or Claude Code.

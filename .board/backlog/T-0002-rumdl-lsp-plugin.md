@@ -15,7 +15,7 @@ acceptance:
   - "In a main-checkout session and in a worktree session, the LSP tool's `goToDefinition` on a relative link in `CLAUDE.md` returns the linked file; the evidence has the raw output and Claude Code version"
   - "In a main-checkout session and in a worktree session, the LSP tool's `findReferences` from a body line of `.board/README.md` returns the link to it in `CLAUDE.md`; the evidence has the raw output and Claude Code version"
   - "The plugin's LSP config does not enable rumdl's autofix-on-save, and editing a Markdown file with a fixable violation in a session leaves the violation in place"
-  - "The user approved the task's final commit, shown by `gh pr view <number> --json reviews,commits` listing an approving review from the user whose commit is the PR's last commit"
+  - "The user merged the task's PR after reviewing it; agents opened it but didn't merge it, shown by `gh pr view <number> --json state,mergedAt` and the user's confirmation, recorded after the merge"
   - "`npm run check` exits 0"
 evidence: []
 ---
@@ -43,7 +43,10 @@ session on 2026-09-25.
   relative to the repo (`/c/Users/User/Documents/projects/agentpatterns` here), and T-0008 measures the benefit
   there, so the plugin serves it as well as gol2's Markdown. Options: a second LSP workspace folder, the
   `.lsp.json` `workspaceFolder` field, or a second server entry; whichever is chosen, don't hard-code this
-  machine's absolute path if a path relative to the project folder works. The corpus has 1,587 pages, so check
+  machine's absolute path. A path relative to the project folder doesn't work from a worktree: from
+  `.claude/worktrees/<name>/`, `../agentpatterns` points at `.claude/worktrees/agentpatterns`, which doesn't exist.
+  Resolve it from the main checkout instead, the way `node_modules/` is found (see below). The coach's role file
+  has the same flaw in its reference line; that's for the coach, not this task. The corpus has 1,587 pages, so check
   that indexing it doesn't slow session start noticeably and record the time in the Handoff. rumdl will also
   publish lint diagnostics for agentpatterns files it opens; that's expected, since agentpatterns isn't linted
   by gol2's gate.
@@ -86,8 +89,9 @@ session on 2026-09-25.
   warnings on most docs. Matching the gate's diagnostics is T-0001's job.
 - **Security and churn.** The plugin makes every session run a 0.x npm binary that releases every few days. The
   exact version pin plus the lockfile is the control; treat each rumdl upgrade as its own task. The plugin's files
-  and any `.claude/settings.json` change are executable config, so the user approves the final commit rather than
-  an agent. `.claude/settings.json` already holds the project's hooks; add to it without disturbing them.
+  and any `.claude/settings.json` change are executable config, so the user reviews and merges the PR rather than
+  an agent: agents act on GitHub as the user's account, so a PR review can't show who approved, and agents never
+  merge. `.claude/settings.json` already holds the project's hooks; add to it without disturbing them.
 
 Out of scope: freshness after shell and git changes (T-0007), switching the linter (T-0001), working around the
 Claude Code LSP tool bug, and the `docs/tools/` doc (T-0003).
