@@ -13,6 +13,7 @@ acceptance:
   - "The user rates each pair of review outputs (one per condition, condition hidden) against the rubric, and the evidence records the ratings and how the condition was hidden"
   - "Every agentpatterns page cited in each review is checked to exist and to have been opened in that run, by a command whose output is in the evidence"
   - "The Handoff states whether the hypothesis held, applying the go rule fixed in the workload file, with the numbers, and recommends go or no-go for T-0002"
+  - 'The Handoff describes the corpus''s structure (pages, lines per page, headings per page, links between pages) with the command that measured it, and, if the result is no-go, states whether that structure rather than the LSP could explain it, citing per-run data such as how often the coach read whole pages versus single sections; a no-go explained by structure is recorded as "not shown on this corpus", not as "the LSP doesn''t help"'
   - "`npm run check` exits 0 on the task's branch"
 evidence: []
 ---
@@ -25,6 +26,15 @@ large enough. The hypothesis to test: when the coach performs a review using the
 agentpatterns, it uses fewer tokens, and it's more effective, because irrelevant text stays out of its context.
 A no-go is a valid result. This task can run in parallel with T-0004; freshness doesn't matter here because the
 corpus doesn't change during the study.
+
+**False-negative risk: the corpus's structure.** agentpatterns may not be structured so that an LSP is materially
+effective, and the study could then report no-go even if an LSP helps on larger or differently structured docs.
+Measured on 2026-09-25: 1,587 pages and 190,065 lines; lines per page median 112 (mean 120, range 24 to 1,825);
+headings per page median 10 (8 of them level 2); links to other pages median 9 per page, with 2 pages having none.
+A median section is about a dozen lines, but a whole median page is only about 112, so reading an outline plus
+one section may save little over reading the page. The coach also often knows a page's path already, which grep
+or a direct read finds cheaply. The LSP's edge is more likely in heading search across pages and in long pages.
+If the result is no-go, say whether this explains it before recommending anything beyond this corpus.
 
 **Go rule (proposed; fix it in the workload file before the first run).** Go if the LSP condition's median total
 tokens per review is at least 20% lower and the user rates its output equal or better in at least half of the
