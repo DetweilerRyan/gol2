@@ -184,5 +184,90 @@ production plugin (T-0002).
 
 ## Handoff
 
-Not started. The user approved the task on 2026-09-25 ("approve task 05"), with the proposed gate, guardrail,
-uptake rule, and rubric unchanged; it moved from `backlog/` to `ready/` with T-0006 and T-0010 in `done/`.
+**Blocked on the user's decision: the pilot hit a stop condition.** The LSP condition made no LSP call in any of
+its 3 pilot runs, below the uptake rule (at least two thirds). The workload file is not written, and T-0008 stays in
+`backlog/`. Options are listed at the end.
+
+Everything below is on `prototype/T-0005-lsp-benefit` (`45e9ccc` runner and setup runs, `dd1f423` pilot), under
+`study/T-0005/`.
+
+**Done.**
+
+- `runner.sh` builds each run in a bubblewrap sandbox holding only `/study/gol2` (a fresh clone of the snapshot:
+  one branch `main`, no tags, no remote, no reflog), `/study/agentpatterns` (a depth-1 checkout of `86da49a`, so
+  `../agentpatterns` resolves), and `/study/home` with its own `CLAUDE_CONFIG_DIR`. `/c` (both host checkouts) and
+  `/home` (so `~/.claude/projects/`) aren't mounted. `preflight.sh` runs inside the sandbox, prints `git rev-parse
+HEAD`, `git for-each-ref`, `git remote`, the agentpatterns commit, and a home listing, and the runner refuses the
+  run unless all 14 checks pass (shown working: a quoting bug failed one check and the run was refused).
+- Credentials: the runner copies only the host's OAuth access token into the run's config directory before the
+  session starts (no refresh token, so a run can never rotate the host login), refuses to start if the token
+  expires within 2 hours, deletes it after the run, and redacts it from every output.
+- `make_agents.mjs` builds both conditions from the snapshot's own `coach.md` (identical at all three snapshots and
+  on `main`) and passes them with `--agents`/`--agent coach`. The only differences are the `LSP` tool and the
+  instruction "To find headings or sections in Markdown, use the LSP tool's documentSymbol and workspaceSymbol.",
+  placed after "Read a page, including its "When this backfires" section, before citing it." Session tool lists:
+  baseline `Read, Edit, Write, Bash`; LSP `Read, Edit, Write, Bash, LSP` plus the `rumdl-lsp` plugin, loaded with
+  `--plugin-dir` (no workspace-trust setup needed). `.lsp.json`'s `workspaceFolder` set to `/study/agentpatterns`
+  makes `workspaceSymbol` search the corpus.
+- Setup runs `runs/setup-lsp-1` and `runs/setup-baseline-1`: inside a runner-built run, `documentSymbol` and
+  `workspaceSymbol` on agentpatterns returned results, a Bash `sed` of a page worked, and `--include-hook-events`
+  shows the hooks that ran in both conditions: `UserPromptSubmit` (project), `PreToolUse:Bash` (the coach's push
+  guard), and `Stop` (project).
+- `metrics.py` computes the per-run measures from `out/`; effectiveness comes from a grades file (not yet
+  exercised with real grades). Tokens per tool result are measured from context growth between API calls. Pages
+  are recognized by content, so Bash, Read, and LSP reads count alike.
+- `check_transcript.py` over the 6 pilot runs: 6 flags, all harmless: four `git worktree list` (the sandbox has
+  one worktree) and two regex false positives (`/d` and `/backfires/` inside `sed` patterns).
+- Redaction: every run's outputs were scanned before commit (0 hits; 69 files in the last commit).
+
+**Pilot** (T-0001 review at `648d64a`, 3 runs per condition, alternating, Opus 5.5 at medium effort, Claude Code
+2.1.282, 2026-09-25). Median (range):
+
+| Measure                             | Baseline          | LSP condition      |
+| ----------------------------------- | ----------------- | ------------------ |
+| Cost, USD                           | 0.78 (0.56-0.80)  | 0.77 (0.57-0.93)   |
+| Turns                               | 13 (12-16)        | 13 (11-16)         |
+| LSP calls                           | 0                 | 0 (0-0)            |
+| Peak context, tokens                | 57K (43K-69K)     | 69K (49K-77K)      |
+| agentpatterns share at peak         | 0.57 (0.55-0.72)  | 0.67 (0.62-0.69)   |
+| agentpatterns tool tokens           | 32K (24K-49K)     | 47K (30K-52K)      |
+| Pages opened / cited                | 16 / 10           | 13 / 9             |
+| Opened-not-cited tokens             | 5.6K (5.4K-16.5K) | 11.4K (9.4K-12.0K) |
+| Cited pages whose backfire was read | 0.78 (0.67-1.00)  | 0.82 (0.75-0.86)   |
+
+Every run succeeded in about 2 minutes. Pilot spend $4.40 (plus $0.16 of setup runs).
+
+**Stop conditions.** Hit: LSP uptake 0 of 3, and (as a consequence) the agentpatterns share of context isn't lower
+in the LSP condition. Not hit: projected cost (18 study runs at about $0.8 to $1.2 each, about $15 to $22, plus
+$4.56 so far, is well under $50). Not yet known: the baseline's accepted findings and key recall, and the user's
+rating time. The pilot runs aren't graded; grading needs the user, so it waits for the decision below. Rough
+estimate of rating time: about 9 findings per run, 18 study runs, so about 160 findings to rate or confirm, around 1.5
+to 2.5 hours, near the 3-hour limit.
+
+**Found.**
+
+- The coach navigates agentpatterns with `grep -n '^## '` and `sed -n` ranges through Bash, which already gets an
+  outline and single sections; whole-page reads were 0 to 8 per run. That is the job the LSP instruction offers,
+  so the coach has little reason to switch.
+- In one LSP run the coach grepped the clone's `coach.md` for "LSP" and found nothing (the variant lives in
+  `--agents`, not the file); a real adoption would change the file too.
+- `workspaceSymbol` for a common heading returns everything: "When this backfires" matched 1,242 headings (132 KB),
+  which Claude Code saved to a file instead of the context.
+- All three review tasks are about rumdl and the LSP, so the topic may invite the tool; in the pilot it didn't.
+
+**How the study coach differs from the real one.** It runs as the session's main agent (`--agent coach`), not as a
+subagent of a main session; the prompt is the original reviews' prompt with paths changed to `/study/...` and the
+branch sentence dropped. It has no user-level settings, memory, or plugins (only the built-in `agents-md` and
+`telemetry`), and no parent `CLAUDE.md` (the sandbox's `../CLAUDE.md`). The project's and the coach's hooks run,
+with the host's `node_modules/` mounted read-only. `Grep` and `Glob`, listed in the role file, aren't offered by this
+Claude Code build in either condition; the original reviews used only Bash and Read. Permission mode is
+`bypassPermissions` inside the sandbox.
+
+**Needs the user: how to proceed** (the Context says to stop and ask before fixing the workload):
+
+1. Record "not tested" and stop: T-0008 moves to `dropped/` with this pilot as the reason, recorded as "not shown",
+   not "doesn't help".
+2. Test a stronger instruction: for example, name the case where it applies ("Before reading an agentpatterns page,
+   use documentSymbol to see its sections") and rerun the pilot's LSP arm (about $2.50). This changes what is
+   tested: a directive, not an optional capability.
+3. Rerun the pilot on another review task (T-0004 or the set) to check whether uptake depends on the task.
