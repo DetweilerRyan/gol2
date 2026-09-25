@@ -1,0 +1,28 @@
+{
+  "run": "R2",
+  "matches": [
+    {"finding": 1, "key_item": 2, "confidence": "high", "reason": "Same problem: worktrees have no node_modules/, so the ${CLAUDE_PROJECT_DIR}/node_modules rumdl path and the worktree-session criterion can't both pass."},
+    {"finding": 2, "key_item": 1, "confidence": "high", "reason": "Same recommendation to split the lint swap, LSP plugin, and docs into separate tasks. Its rationale is WIP/ownership rather than growth from 7 to 13 criteria, but the problem is the same."},
+    {"finding": 3, "key_item": 5, "confidence": "high", "reason": "Same evidence-rule problem: the worktree-session criterion has no re-runnable command and 'record in Handoff' can't fail. It omits the docs-criterion-as-judgment point, but the core matches."},
+    {"finding": 4, "key_item": null, "confidence": "medium", "reason": "About criterion 4's planted-error check, but the problem raised is the lack of a lasting regression guard, not that the verifier needs a self-contained command to rerun it (key 6). Only partial overlap. It also doesn't address LSP diagnostics matching the gate (key 4)."},
+    {"finding": 5, "key_item": null, "confidence": "medium", "reason": "Version-pinning of rumdl 0.2.77. It mentions the untested ${CLAUDE_PROJECT_DIR} expansion only as a side point. It doesn't say that a criterion locks in the unverified marketplace-plugin mechanism (key 3)."},
+    {"finding": 6, "key_item": null, "confidence": "high", "reason": "CI coverage of the binary. No key item covers this."},
+    {"finding": 7, "key_item": null, "confidence": "high", "reason": "Discoverability of the new doc from CLAUDE.md. No key item covers this."},
+    {"finding": 8, "key_item": null, "confidence": "high", "reason": "Doc staleness and recording the rumdl version. No key item covers this."},
+    {"finding": 9, "key_item": null, "confidence": "high", "reason": "A checked-and-fine note (plugin trust), so it is not a finding. Its aside on the marketplace trust prompt touches key 3 only tangentially."},
+    {"finding": 10, "key_item": 7, "confidence": "medium", "reason": "Decision item 3 asks the user to approve the .claude/settings.json change as part of approving the task, which is the same point as key 7. Items 1 (is the LSP needed now) and 2 (split, which duplicates finding 2/key 1) don't match anything else."}
+  ],
+  "citations": [
+    {"finding": 1, "page": "workflows/worktree-isolation.md", "exists": true, "correct": true, "evidence": "Every worktree still installs its own dependencies, builds its own artifacts, and starts its own services.", "has_backfires": true},
+    {"finding": 2, "page": "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md", "exists": true, "correct": true, "evidence": "Atomic PR discipline keeps one logical change per PR, under 400 lines.", "has_backfires": true},
+    {"finding": 2, "page": "patterns/anti-patterns/assumption-propagation.md", "exists": true, "correct": true, "evidence": "Kiro turned a small bug fix into sixteen acceptance criteria", "has_backfires": true},
+    {"finding": 3, "page": "verification/risk-based-task-sizing.md", "exists": true, "correct": true, "evidence": "The evidence bundle shown to the developer is a SELECT, not a self-reported summary... if the INSERT did not happen, the check did not happen.", "has_backfires": true},
+    {"finding": 4, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "Wrap agent output in hard, deterministic checks — linting, schema validation, CI gates — that enforce correctness regardless of what the agent produces.", "has_backfires": true},
+    {"finding": 5, "page": "patterns/anti-patterns/assumption-propagation.md", "exists": true, "correct": true, "evidence": "The agent misunderstands a requirement early and builds on the faulty premise, reinforcing the wrong assumption until the error is too expensive to unwind.", "has_backfires": true},
+    {"finding": 6, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "CI checks run after a commit is pushed, providing a second layer independent of the local environment.", "has_backfires": true},
+    {"finding": 7, "page": "instructions/agents-md-as-table-of-contents.md", "exists": true, "correct": true, "evidence": "Keep AGENTS.md to ~100 lines as a pointer map into a versioned docs/ directory", "has_backfires": true},
+    {"finding": 8, "page": "patterns/anti-patterns/stale-ai-configuration-artifacts.md", "exists": true, "correct": true, "evidence": "AI configuration files drift out of sync with the code they describe; the agent loads stale guidance as authoritative context", "has_backfires": true},
+    {"finding": 9, "page": "patterns/anti-patterns/install-once-plugin-trust.md", "exists": true, "correct": true, "evidence": "Vetting a plugin at install says nothing about version 1.1. The harness re-reads that plugin's lifecycle-hook config on every update", "has_backfires": true},
+    {"finding": 10, "page": "patterns/anti-patterns/cargo-cult-agent-setup.md", "exists": true, "correct": true, "evidence": "Add instructions when you've identified a recurring problem they would solve.", "has_backfires": true}
+  ]
+}

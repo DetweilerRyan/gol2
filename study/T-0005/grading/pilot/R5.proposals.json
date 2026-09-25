@@ -1,0 +1,28 @@
+{
+  "run": "R5",
+  "matches": [
+    {"finding": 1, "key_item": 1, "confidence": "high", "reason": "Both say the task bundles the linter swap with the LSP plugin (and docs) and should be split."},
+    {"finding": 2, "key_item": 5, "confidence": "high", "reason": "Same problem: the new-session/worktree check has no command and the 'records whether' criterion can't fail. Key 5's third part (docs criterion belongs to the coach) is covered separately by finding 3."},
+    {"finding": 3, "key_item": null, "confidence": "medium", "reason": "Docs/ADR owned by the coach overlaps key 5's third sub-point and key 1's '(and the docs)', but key 5 is better matched by finding 2 and key 1 by finding 1."},
+    {"finding": 4, "key_item": null, "confidence": "medium", "reason": "About criterion 3 hard-coding rule values. Its suggested temp-file check resembles key 6, but key 6 is about the planted-error criterion lacking a rerunnable command, which is a different problem."},
+    {"finding": 5, "key_item": null, "confidence": "high", "reason": "CI verification of the rumdl binary is not in the key. Key 2 is about worktrees lacking node_modules, not CI."},
+    {"finding": 6, "key_item": null, "confidence": "medium", "reason": "Touches .claude/settings.json like key 7, but raises gate-hook integrity rather than a security review of an executable-config change by the user."},
+    {"finding": 7, "key_item": null, "confidence": "high", "reason": "Staleness of version-specific doc claims is not in the key."},
+    {"finding": 8, "key_item": null, "confidence": "high", "reason": "Checked-and-fine notes, not a finding."}
+  ],
+  "citations": [
+    {"finding": 1, "page": "verification/incremental-verification.md", "exists": true, "correct": true, "evidence": "After each meaningful unit of work, you verify before proceeding.", "has_backfires": true},
+    {"finding": 1, "page": "patterns/anti-patterns/assumption-propagation.md", "exists": true, "correct": true, "evidence": "Kiro turned a small bug fix into sixteen acceptance criteria", "has_backfires": true},
+    {"finding": 2, "page": "patterns/anti-patterns/premature-completion.md", "exists": true, "correct": true, "evidence": "Stopping criteria tied to observable state. Transcript-based verifiers that pattern-match \"all tests passing\" in agent output give no extra signal", "has_backfires": true},
+    {"finding": 2, "page": "verification/incremental-verification.md", "exists": true, "correct": true, "evidence": "A checkpoint that reads the agent's self-report is not a checkpoint.", "has_backfires": true},
+    {"finding": 3, "page": "patterns/agent-design/persona-as-code.md", "exists": true, "correct": true, "evidence": "Without explicit rules, that overlap is a merge conflict with no principled resolution... The receiving agent reads the file, not the chat history.", "has_backfires": true},
+    {"finding": 4, "page": "patterns/anti-patterns/spec-complexity-displacement.md", "exists": true, "correct": true, "evidence": "Delegate the precision work to artifacts that enforce rather than describe", "has_backfires": false},
+    {"finding": 4, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "The guardrail drifts from the property. A rule written years ago can encode a stale invariant", "has_backfires": true},
+    {"finding": 5, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "CI checks run after a commit is pushed, providing a second layer independent of the local environment.", "has_backfires": true},
+    {"finding": 6, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "a guardrail — deterministic, always runs, cannot be reasoned around.", "has_backfires": true},
+    {"finding": 7, "page": "patterns/anti-patterns/stale-ai-configuration-artifacts.md", "exists": true, "correct": true, "evidence": "Pre-stabilization prototypes: when the codebase reshapes weekly, the config will be wrong before any check completes. Defer authoring until structure settles.", "has_backfires": true},
+    {"finding": 8, "page": "patterns/anti-patterns/install-once-plugin-trust.md", "exists": true, "correct": true, "evidence": "\"third-party and local development marketplaces have auto-update disabled by default,\"", "has_backfires": true},
+    {"finding": 8, "page": "security/pre-trust-execution-surface.md", "exists": true, "correct": true, "evidence": "Resident first-party repos: developers who reopen a long-lived repo many times a day pay post-trust init latency every session.", "has_backfires": true},
+    {"finding": 8, "page": "context-engineering/discoverable-vs-nondiscoverable-context.md", "exists": true, "correct": true, "evidence": "Can the agent find this itself with its own tools — file reads, grep, glob searches? If yes, the information does not belong in the instruction file.", "has_backfires": true}
+  ]
+}

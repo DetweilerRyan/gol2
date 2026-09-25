@@ -1,0 +1,154 @@
+{
+  "issues": [
+    {
+      "id": "I1",
+      "title": "Split the task into separate tasks",
+      "statement": "The task bundles the linter swap with the LSP plugin work (and the docs/tools/ doc), which carry different risk and need different verification. Under the board's one-active-task rule, if the plugin half stalls on the Claude Code bug or setup gaps, the linter swap, which could ship alone, is stuck in blocked/ with it. The suggested fix is to split the work into tasks linked by depends_on, with the linter swap first.",
+      "members": ["R1-1", "R2-2", "R3-1", "R4-1", "R5-1", "R6-1"],
+      "variants": "Most propose three tasks (swap, plugin, doc); R4-1 proposes two (swap; plugin plus doc), and R5-1 proposes two with the doc handled as a separate ownership question. R4-1 adds that the scope grew after the task was first written; R6-1 stresses that the session checks can only be run by a person."
+    },
+    {
+      "id": "I2",
+      "title": "Worktrees likely have no node_modules for the plugin",
+      "statement": "The plugin starts rumdl from ${CLAUDE_PROJECT_DIR}/node_modules/, but node_modules/ is gitignored and bind-mounted only in the main checkout, so a new worktree will likely have none, and npm install there would lose .bin symlinks on virtiofs. The worktree criterion would then fail for this reason, possibly misattributed to the known Claude Code bug; the existing hooks may have the same problem. The fix is to state in the task how a worktree gets node_modules, or to drop or relabel the worktree case as a known gap or exploratory check.",
+      "members": ["R1-3", "R2-1", "R3-2", "R4-3", "R6-2"],
+      "variants": "Options offered differ slightly: point at the main checkout's node_modules, install per worktree, drop the worktree case, record it as a known limit, or make it an explicit investigation item."
+    },
+    {
+      "id": "I3",
+      "title": "Session-based criteria name no re-runnable command",
+      "statement": "The criteria that say \"in a new Claude Code session...\" (and the Handoff-recording criterion) give no command and expected result, so they cannot produce the {criterion, command, result} evidence the board requires or be re-run by a separate verifier. The fix is to name a command (for example a headless claude -p run with --debug from each directory) and what output counts as a pass, or to assign these checks to the user as manual evidence.",
+      "members": ["R2-3", "R3-3", "R4-4", "R5-2", "R6-3"],
+      "variants": "R2-3 and R5-2 add that criterion 10 cannot fail and should be labelled a reporting duty; R3-3 suggests splitting the claim into a scripted raw-LSP check plus an observational note; R6-3 adds that the implementer designing its own checks is a risk."
+    },
+    {
+      "id": "I4",
+      "title": "Agents can't find the new doc from CLAUDE.md",
+      "statement": "The new docs/tools/ doc is only listed in docs/README.md, while CLAUDE.md's \"Where things are\" section points only to docs/decisions/ and .board/, so agents may never reach it. The fix is a one-line pointer in CLAUDE.md, either as a criterion or as a coach follow-up.",
+      "members": ["R1-6", "R2-7", "R3-5", "R4-6"],
+      "variants": "They differ on whether the pointer is an acceptance criterion or a coach follow-up after the doc exists; R4-6 would remove another line to make room and also raises who writes the doc."
+    },
+    {
+      "id": "I5",
+      "title": "No exact rumdl version is named",
+      "statement": "Criterion 2 says to pin rumdl exactly but names no version, while the parity and LSP research was done on 0.2.77 and rumdl releases every few days. An implementer pinning the latest release would rely on untested findings. The fix is to pin 0.2.77 in the criterion or require the checks to be re-run on whatever version is pinned.",
+      "members": ["R2-5", "R3-7", "R4-5"],
+      "variants": "R2-5 also notes the untested claim that ${CLAUDE_PROJECT_DIR} expands in .lsp.json args."
+    },
+    {
+      "id": "I6",
+      "title": "CI resolution of the rumdl binary is not checked",
+      "statement": "The Context asks to confirm that rumdl's platform binary resolves in CI, but no criterion covers it; criterion 13 only proves the local run. The fix is a criterion that the CI check job passes (or that a clean npm ci resolves the binary), or deleting the sentence.",
+      "members": ["R1-5", "R2-6", "R5-5"],
+      "variants": "R1-5 notes agents can't push, so the criterion would be user-owned; R2-6 and R5-5 call the risk small since the sandbox matches ubuntu-latest, and offer a lockfile or clean-directory check as alternatives."
+    },
+    {
+      "id": "I7",
+      "title": "The doc's version-specific bug notes will go stale",
+      "statement": "The doc will record which LSP operations fail on a given Claude Code version, and those claims will go out of date as Claude Code or rumdl change. The fix is to have the doc say when to re-test and when to remove the caveat (for example on a Claude Code upgrade, when the bug is fixed, or when rumdl is upgraded).",
+      "members": ["R1-7", "R2-8", "R5-7"],
+      "variants": "R2-8 also asks the doc to record the rumdl version."
+    },
+    {
+      "id": "I8",
+      "title": "Check that oxfmt output passes rumdl, not just config values",
+      "statement": "The criterion on .rumdl.toml checks the configured style values rather than the goal that the linter never demands what the formatter undoes; wrong values or a later oxfmt change would go unnoticed. The fix is a behavioral check: a file with mixed heading, list and emphasis styles, run through oxfmt, then rumdl check, reports zero issues.",
+      "members": ["R1-9", "R5-4"],
+      "variants": "R5-4 would keep or drop the value list; R1-9 adds the check alongside it."
+    },
+    {
+      "id": "I9",
+      "title": "Link checking isn't protected after the one-time test",
+      "statement": "The planted broken-link test runs once as evidence; since the repo has no broken links, a later config edit or rumdl upgrade that disables MD051/MD057 would leave the gate green and link checking silently gone. The fix is a lasting fixture or test that expects rumdl to fail on broken links, or explicitly accepting the one-time check.",
+      "members": ["R2-4", "R3-4"],
+      "variants": "R2-4 also proposes a lasting oxfmt-then-lint check; R3-4 offers accepting the one-time check as an alternative."
+    },
+    {
+      "id": "I10",
+      "title": "Question whether the LSP part is needed now",
+      "statement": "The repo has little Markdown and no demonstrated navigation problem, and the known bug may leave several LSP operations returning nothing, so the LSP plugin may be ahead of need. The main reason given for switching linters depends on the LSP being used, so the user should decide whether LSP navigation is wanted now and, if not, whether the rumdl swap is still worth doing.",
+      "members": ["R4-2", "R2-10"],
+      "variants": "R2-10 frames it as a decision item alongside the split and settings approval; R4-2 gives the repo size figures in detail."
+    },
+    {
+      "id": "I11",
+      "title": "Unclear ownership of the doc (and ADR) between implementer and coach",
+      "statement": "The criteria ask whoever claims the task to write the docs/tools/ doc (and ADR), while the Context says the coach writes or reviews the doc, and the board allows one claimed_by with a different verifier. The fix is to give the doc to a separate coach-owned task that works from the plugin task's Handoff.",
+      "members": ["R5-3", "R6-4"],
+      "variants": "R6-4 also notes the ADR should record the user's approval; R5-3 treats ADRs as the coach's job too."
+    },
+    {
+      "id": "I12",
+      "title": "rumdl LSP diagnostics outside the repo add noise",
+      "statement": "Outside a repo with .rumdl.toml, rumdl falls back to defaults, so a project-wide rumdl LSP plugin would attach MD013/MD025 diagnostics to Markdown pages such as ../agentpatterns that agents (especially the coach) read often. The task says nothing about whether diagnostics are wanted or how they behave outside the project. The fix is to state the intended behavior (accept the noise or restrict to repo files) and test it on an outside file.",
+      "members": ["R3-6", "R6-5"],
+      "variants": "R6-5 also says the Context mixes material for different deliverables and asks how the project plugin coexists with a user-level rumdl plugin."
+    },
+    {
+      "id": "I13",
+      "title": "ADR should also cover enabling the plugin",
+      "statement": "The ADR criterion covers only the linter swap, while enabling a project-wide plugin in .claude/settings.json that starts a process in every session is an architectural choice recorded nowhere. The fix is to have the ADR (or approval) also record the plugin decision and that the user made it.",
+      "members": ["R3-8", "R1-10"],
+      "variants": "R1-10 is mainly a note that plugin supply-chain risk doesn't apply, with the ADR suggestion and advice to keep the exact pin and review rumdl upgrades separately."
+    },
+    {
+      "id": "I14",
+      "title": "Context overstates the Claude Code LSP bug",
+      "statement": "The Context reads as if the affected LSP operations always return nothing, while its own evidence limits the bug to files that are gitignored. The fix is to reword the description (optionally noting that workspaceSymbol works on non-ignored files) so an implementer doesn't treat a successful result as a setup mistake.",
+      "members": ["R1-8", "R3-9"],
+      "variants": "R3-9 is a side observation offered as supporting evidence for the Context rather than a requested rewording."
+    },
+    {
+      "id": "I15",
+      "title": "A user-level rumdl plugin could satisfy the plugin criteria",
+      "statement": "A rumdl LSP plugin is already installed at user level, so a session could pass the plugin criteria through it rather than the committed plugin. The fix is to name evidence that identifies the source (claude plugin list, --debug showing the server started from node_modules, or disabling the user plugin) and to say whether the user-level plugin should be removed afterwards.",
+      "members": ["R1-2"],
+      "variants": ""
+    },
+    {
+      "id": "I16",
+      "title": "Verify the second-hand plugin setup first",
+      "statement": "The plugin setup details come from a research subagent and are marked \"verify while implementing\", yet the plugin, settings and doc all build on them. The fix is to make the first step a small stub-plugin check (loaded per claude plugin list, server started per --debug) with a stop-and-Handoff point if it fails.",
+      "members": ["R1-4"],
+      "variants": ""
+    },
+    {
+      "id": "I17",
+      "title": "Protect existing hooks when editing settings.json",
+      "statement": "The task edits .claude/settings.json, which holds the Stop/SubagentStop hooks that run the gate; a malformed or overwritten file would silently disable them, and only a Context note guards against this. The fix is a criterion that the existing hook entries are unchanged, for example by diffing .hooks before and after.",
+      "members": ["R5-6"],
+      "variants": ""
+    },
+    {
+      "id": "I18",
+      "title": "Limit the committed plugin to the language server",
+      "statement": "Because enabledPlugins runs whatever the plugin declares in every session, the plugin could later gain hooks or other components unnoticed. The fix is a criterion that the plugin contains only its manifest and .lsp.json.",
+      "members": ["R4-7"],
+      "variants": ""
+    },
+    {
+      "id": "I19",
+      "title": "Project marketplace trust prompt may break \"no manual install\"",
+      "statement": "Claude Code may still ask the user to trust a project-defined marketplace, in which case the criterion requiring no manual plugin install cannot be fully met. The suggestion is to check this while implementing.",
+      "members": ["R2-9"],
+      "variants": ""
+    }
+  ],
+  "also_raises": {
+    "R1-1": ["I11"],
+    "R2-2": ["I11"],
+    "R3-1": ["I11"],
+    "R4-6": ["I11"],
+    "R1-2": ["I3"],
+    "R2-4": ["I8"],
+    "R2-5": ["I16"],
+    "R2-10": ["I1", "I13"],
+    "R6-5": ["I1", "I15"]
+  },
+  "excluded": [
+    {"id": "R1-11", "reason": "Praise: criteria 4, 5 and 13 are well formed; no action."},
+    {"id": "R4-8", "reason": "Decision summary restating R4's own findings 1, 2 and 6."},
+    {"id": "R5-8", "reason": "Checked-and-not-raised notes (plugin supply chain, pre-trust execution, context length); no action."},
+    {"id": "R6-6", "reason": "Corroborating data point for the Context's bug description; proposes no action."}
+  ]
+}

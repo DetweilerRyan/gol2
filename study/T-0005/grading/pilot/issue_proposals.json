@@ -1,0 +1,97 @@
+{
+  "I1": {
+    "key_item": 1,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 6 findings (key 1: 6)."
+  },
+  "I2": {
+    "key_item": 2,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 5 findings (key 2: 5)."
+  },
+  "I3": {
+    "key_item": 5,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 5 findings (key 5: 5)."
+  },
+  "I4": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 4 findings (no match: 4)."
+  },
+  "I5": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 3 findings (no match: 3)."
+  },
+  "I6": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 3 findings (no match: 3)."
+  },
+  "I7": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 3 findings (no match: 3)."
+  },
+  "I8": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 2 findings (no match: 2)."
+  },
+  "I9": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 2 findings (no match: 2)."
+  },
+  "I10": {
+    "key_item": 7,
+    "confidence": "medium",
+    "reason": "Per-finding grader votes across its 2 findings (no match: 1, key 7: 1)."
+  },
+  "I11": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 2 findings (no match: 2)."
+  },
+  "I12": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 2 findings (no match: 2)."
+  },
+  "I13": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (no match: 1)."
+  },
+  "I14": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (no match: 1)."
+  },
+  "I15": {
+    "key_item": 5,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (key 5: 1)."
+  },
+  "I16": {
+    "key_item": 3,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (key 3: 1)."
+  },
+  "I17": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (no match: 1)."
+  },
+  "I18": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (no match: 1)."
+  },
+  "I19": {
+    "key_item": null,
+    "confidence": "high",
+    "reason": "Per-finding grader votes across its 1 findings (no match: 1)."
+  }
+}

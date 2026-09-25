@@ -1,0 +1,19 @@
+{
+  "run": "R6",
+  "matches": [
+    {"finding": 1, "key_item": 1, "confidence": "high", "reason": "Both say the task bundles the lint swap, the LSP plugin and the docs, and should be split. The key's 7-to-13 growth framing is absent, but the core problem and fix are the same."},
+    {"finding": 2, "key_item": 2, "confidence": "high", "reason": "Same problem: worktrees have no node_modules, so the pinned-binary path via CLAUDE_PROJECT_DIR and the worktree-session criterion can't both pass."},
+    {"finding": 3, "key_item": 5, "confidence": "high", "reason": "Same problem: the session-based and 'Handoff records' criteria don't fit the command/result evidence rule. It doesn't mention the docs-judgment part of key 5; finding 4 touches that, but only as a side point."},
+    {"finding": 4, "key_item": null, "confidence": "medium", "reason": "Unclear whether the coach or the claimant writes the ADR and docs. This overlaps key 5's side point ('docs criterion ... belongs to the coach'), but key 5 is already matched by finding 3, and the ownership angle is only part of key 5, not its main problem."},
+    {"finding": 5, "key_item": null, "confidence": "medium", "reason": "About Context size and LSP diagnostic noise on files outside the repo. Key 4 is about the missing check that LSP diagnostics match the gate's; this finding raises a different diagnostics problem, not that one."},
+    {"finding": 6, "key_item": null, "confidence": "high", "reason": "Corroborating data point for the research, not a problem with the task."}
+  ],
+  "citations": [
+    {"finding": 1, "page": "workflows/per-task-verification-budget.md", "exists": true, "correct": true, "evidence": "A task that cannot be checked inside a minute is not one of these tasks, and it leaves the batch for its own thread.", "has_backfires": true},
+    {"finding": 1, "page": "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md", "exists": true, "correct": true, "evidence": "Atomic PR discipline keeps one logical change per PR, under 400 lines.", "has_backfires": true},
+    {"finding": 2, "page": "workflows/per-task-verification-budget.md", "exists": true, "correct": false, "evidence": "what this layer contributes to the budget is that a task's state is never contaminated by a sibling", "has_backfires": true},
+    {"finding": 3, "page": "workflows/per-task-verification-budget.md", "exists": true, "correct": true, "evidence": "The implementing agent authored the test steps. It chose what your minute checks, so you confirm what was built rather than what was asked.", "has_backfires": true},
+    {"finding": 4, "page": "patterns/agent-design/persona-as-code.md", "exists": true, "correct": true, "evidence": "If the line between two personas is unclear ... explicit exclusions do not resolve the conflict. They just relocate it to a boundary dispute.", "has_backfires": true},
+    {"finding": 5, "page": "patterns/anti-patterns/distractor-interference.md", "exists": true, "correct": true, "evidence": "Load task-scoped context. Load only the instructions that apply to the current task.", "has_backfires": true}
+  ]
+}

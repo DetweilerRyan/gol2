@@ -1,0 +1,58 @@
+{
+  "run": "R6",
+  "preamble": "I've finished reading. Here is the review.\n\n# Review of T-0001 (rumdl lint swap and LSP plugin)\n\nThe board check passes (`npm run -s check:board`: Board OK). Most criteria are concrete and could fail, and the Context section records the research well. I found five problems, and one of them is a gap the task can't pass without fixing.\n\n## What's already good (no change needed)\n\n- **The planted-errors criterion (#4).** It fails on broken input: rumdl has to catch the missing file, the missing same-file anchor, and the missing cross-file anchor. A passing gate on the existing, clean repo files would prove nothing about link checking. The gitignored-path criterion works the same way.\n  - One gap: nothing checks that the pinned MD003/MD004/MD049/MD050 styles actually match what oxfmt writes. `npm run check` only covers files that are already formatted. A test could write a file in the other styles, run oxfmt, then check that rumdl reports zero issues.\n  - Cites `verification/bug-discriminating-validation-evidence.md` (\"Why it works\"; the \"When this backfires\" section warns that evidence quality isn't the same as correctness).\n- **Pre-trust execution (not a finding).** Enabling a plugin in the project settings runs code at session start. However, `.claude/settings.json` already runs `tsx` from `node_modules/` through hooks, and this is your own long-lived repo, which the page's backfire section excludes. So the plugin doesn't add a new kind of risk.\n  - Cites `security/pre-trust-execution-surface.md` (\"When this backfires\", item 1).\n\nI didn't edit any files.",
+  "findings": [
+    {
+      "id": 1,
+      "title": "The task bundles three deliverables, and some of them only a person can check",
+      "text": "**1. The task bundles three deliverables, and some of them only a person can check.** The 13 criteria cover three things:\n- replacing the Markdown linter and writing its ADR;\n- the Claude Code plugin and its checks in a new session;\n- the `docs/tools/` doc, which needs the plugin's Handoff results before it can be written.\n\nOnly the first is fully covered by machine checks. The session checks can't be run by the implementing agent from inside its own session. The page says a task that can't be checked within the budget \"leaves the batch for its own thread\", and to prefer a machine check wherever one exists.\n- **Suggestion:** split it into three tasks linked with `depends_on`: linter swap and ADR → plugin → doc. The linter swap is then a small task the gate can verify on its own.\n- Cites `workflows/per-task-verification-budget.md` (Layer 3; \"When this backfires\": a cheap machine check wins where one exists). Also `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md` (\"one logical change per PR\"). Its backfire section notes that splitting gains little for solo teams, but CLAUDE.md expects many parallel agents.",
+      "citations": [
+        "workflows/per-task-verification-budget.md",
+        "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The worktree criterion probably can't pass, and the Context doesn't mention why",
+      "text": "**2. The worktree criterion probably can't pass, and the Context doesn't mention why.** The plugin runs `${CLAUDE_PROJECT_DIR}/node_modules/rumdl/bin/rumdl`. In a session inside a worktree, that variable points at the worktree. `node_modules/` is gitignored, and in the main checkout it's a bind mount (per CLAUDE.md), so a worktree won't have one. The virtiofs mount also rules out a symlink.\n- I couldn't test this because `.claude/worktrees/` doesn't exist yet, so it's an inference.\n- The existing hooks in `.claude/settings.json` resolve `tsx` the same way, so worktree sessions may already be broken for hooks too.\n- **Suggestion:** say in the spec how worktrees get `node_modules`, or make the worktree check a separate, explicitly exploratory criterion.\n- This is an environment-layer gap. Cites `workflows/per-task-verification-budget.md` (Layer 1: one worktree per task only helps if the task can actually run there).",
+      "citations": [
+        "workflows/per-task-verification-budget.md"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "The evidence format doesn't fit the session-based criteria",
+      "text": "**3. The evidence format doesn't fit the session-based criteria.** Every `evidence` entry needs a `command` and a `result`. The criteria that say \"In a new Claude Code session…\" and \"The task's Handoff records…\" have no command an agent can run and a verifier can re-run.\n- The same agent also designs these checks, and the page lists that as a backfire: \"you confirm what was built rather than what was asked.\"\n- **Suggestion:** either name the user as the person who runs them, or give a headless command (for example `claude -p` with a fixed prompt that calls `documentSymbol`) and state what output counts as a pass.\n- Cites `workflows/per-task-verification-budget.md` (\"When this backfires\", second bullet).",
+      "citations": [
+        "workflows/per-task-verification-budget.md"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Who writes the docs is unclear",
+      "text": "**4. Who writes the docs is unclear.** CLAUDE.md and `docs/README.md` say the coach maintains `docs/`, and `coach.md` says the coach records ADRs for decisions the user makes. But this task's criteria ask whoever claims it to write both the ADR and the `docs/tools/` doc. The Context then says the coach \"writes or reviews\" that doc.\n- With one `claimed_by` per task and WIP = 1, \"or\" leaves it undecided whether the coach claims part of the work or reviews it.\n- Splitting the task (finding 1) fixes this: the coach claims the doc task, and the ADR records the user's approval of this task.\n- Cites `patterns/agent-design/persona-as-code.md` (\"Role boundaries and conflict resolution\"; backfire 1: an unclear boundary turns into a boundary dispute).",
+      "citations": [
+        "patterns/agent-design/persona-as-code.md"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "The Context mixes material for different deliverables, and the plugin will add diagnostics to every agent's context",
+      "text": "**5. The Context mixes material for different deliverables, and the plugin will add diagnostics to every agent's context.**\n- **Context size:** about half of the Context (the LSP behaviour, the tool bug, the plugin setup) only matters to the plugin and doc work. The linter swap doesn't need it. Splitting the task gives each part only the context it needs.\n- **Diagnostics:** rumdl falls back to its defaults outside a repo that has a `.rumdl.toml`, so an LSP-backed rumdl plugin reports MD013/MD025 diagnostics (about 10 lines per page) on `../agentpatterns` pages when they are opened.\n- A project-wide plugin would do this for every agent reading Markdown outside the repo. The coach does this all the time.\n- **Suggestion:** add a criterion or Context note on diagnostics. Either decide the noise is acceptable, or restrict diagnostics to files inside the repo. Also say how the project plugin should coexist with an existing user-level rumdl plugin.\n- Cites `patterns/anti-patterns/distractor-interference.md` (\"Load task-scoped context\"). Its backfire section warns against over-pruning context a cross-domain task really needs, so keep what the doc author will use.",
+      "citations": [
+        "patterns/anti-patterns/distractor-interference.md"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "A small data point for the research",
+      "text": "## A small data point for the research\n\n`workspaceSymbol` returning \"No symbols found\" while `documentSymbol` works, on Claude Code 2.1.282, matches the tool bug described in the Context. It's only corroboration, though: I didn't check whether `../agentpatterns` counts as ignored or whether the server had finished indexing.",
+      "citations": []
+    }
+  ],
+  "removed": [
+    "Finding 5: \"**Diagnostics, seen in this session:** a rumdl LSP (`rumdl-lsp-inline` under `~/.claude/plugins/data/`) is already running here. Every `Read` and `documentSymbol` call on an `../agentpatterns` page added about 10 lines of MD013/MD025 diagnostics. That's because rumdl falls back to its defaults outside a repo that has a `.rumdl.toml`.\" -- reworded neutrally; it revealed the reviewer's session had an LSP plugin and that it used Read/documentSymbol on pages.",
+    "Finding 5: \"A project-wide plugin would do the same for every agent...\" -> \"would do this\" -- small reword because \"the same\" referred to the removed session observation.",
+    "Finding 6 (\"A small data point for the research\"): \"In this session, `workspaceSymbol` returned \\\"No symbols found\\\" while `documentSymbol` worked, on Claude Code 2.1.282. That matches the tool bug described in the Context.\" -- reworded to \"`workspaceSymbol` returning ... while `documentSymbol` works, on Claude Code 2.1.282, matches the tool bug described in the Context.\" because the finding was an observation of the reviewer's own workspaceSymbol/documentSymbol calls in its session. The rest of the finding is unchanged."
+  ]
+}

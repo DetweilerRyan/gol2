@@ -1,4 +1,4 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["study/T-0005/runs/**"]
+  "ignorePatterns": ["study/T-0005/runs/**", "study/T-0005/grading/**"]
 }

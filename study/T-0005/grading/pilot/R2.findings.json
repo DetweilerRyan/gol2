@@ -1,0 +1,88 @@
+{
+  "run": "R2",
+  "preamble": "I reviewed T-0001 against the board rules, the repo, and the reference pages. I edited nothing. `npm run check:board` passes. Findings are in priority order, and each one cites a page I read, including its \"When this backfires\" section.\n\n## What the task already does well\n\n- **Context holds only what the repo can't show.** That includes the research results, the Claude Code bug, the reasons for the pinned styles, and the conflict between `rumdl fmt` and oxfmt (`context-engineering/discoverable-vs-nondiscoverable-context.md`).\n- **Second-hand claims are marked.** The plugin setup comes from a subagent and is marked \"verify while implementing\".\n- **Several criteria test behaviour, not files.** Criteria 4 and 5 plant errors and check the result. Criterion 6 rules out `rumdl fmt`. Out-of-scope items are stated.",
+  "findings": [
+    {
+      "id": 1,
+      "title": "The worktree LSP criterion probably can't pass, and the failure would look like the known bug.",
+      "text": "**1. The worktree LSP criterion probably can't pass, and the failure would look like the known bug.** (Layer: environment)\n- Criterion 8 starts rumdl from `${CLAUDE_PROJECT_DIR}/node_modules/`.\n- In a worktree under `.claude/worktrees/`, that points at the worktree itself. `node_modules/` is gitignored and is a bind mount only for the main checkout, so a new worktree has none.\n- Running `npm install` inside a worktree would lose the `.bin` symlinks on virtiofs.\n- So criterion 9's worktree case would likely fail because rumdl isn't there, not because of Claude Code issue #72316. The Handoff could then blame the bug by mistake.\n- The existing hooks already use `$CLAUDE_PROJECT_DIR/node_modules/.bin/tsx`, so worktree sessions may hit this today.\n- Suggested fix: say in the spec how a worktree finds rumdl, or drop the worktree case from criterion 9 and record it as a known gap.\n- Page: `workflows/worktree-isolation.md` (\"Every worktree still installs its own dependencies\"; its backfire section covers the per-worktree setup cost).",
+      "citations": [
+        "workflows/worktree-isolation.md"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "One task holds three changes with different risks and owners.",
+      "text": "**2. One task holds three changes with different risks and owners.** (Layer: task spec)\n- The three changes are:\n  - the lint swap: predictable, needs an ADR\n  - the LSP plugin: uncertain, depends on a Claude Code bug\n  - the `docs/tools/` doc: the coach's job\n- Under the board rules, if the LSP part gets stuck, the lint swap waits in `blocked/` with it, holding the agent's WIP slot.\n- Also, one `claimed_by` can't honestly name who did the work if the coach writes the doc.\n- Suggestion: three tasks linked by `depends_on` (swap, then plugin, then doc).\n- The backfire section notes that splitting adds overhead for a solo reviewer. Here the reason to split is the board's WIP and ownership rules, not review load.\n- Pages: `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md` (\"one logical change per PR\"); `patterns/anti-patterns/assumption-propagation.md` (backfire: \"Kiro turned a small bug fix into sixteen acceptance criteria\").",
+      "citations": [
+        "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+        "patterns/anti-patterns/assumption-propagation.md"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Criteria 9 and 10 name no command that a separate verifier can re-run.",
+      "text": "**3. Criteria 9 and 10 name no command that a separate verifier can re-run.** (Layer: verification)\n- Evidence must be `{criterion, command, result}`, and the verifier must be a different agent.\n- \"In a new Claude Code session\" doesn't say how to start one, how to call the LSP tool, or what output counts as a pass.\n- Without that, the evidence is a self-reported summary.\n- Suggestion: name the command (for example, a headless `claude -p` run with `--debug`) and the expected output.\n- Criterion 10 is really a reporting duty: any outcome satisfies it. That's fine, but it can't catch a failure.\n- Page: `verification/risk-based-task-sizing.md` (verification ledger: \"if the INSERT did not happen, the check did not happen\").",
+      "citations": [
+        "verification/risk-based-task-sizing.md"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "The broken-link check is tested once, then nothing keeps it working.",
+      "text": "**4. The broken-link check is tested once, then nothing keeps it working.** (Layer: verification)\n- Criterion 4 plants errors and checks them a single time. The repo has no broken links, so the gate would stay green if a later rumdl upgrade or config edit turned off MD051 or MD057.\n- The Context itself warns that rumdl is 0.x and changes every few days.\n- Criterion 3 checks what the config says, not how rumdl and oxfmt behave together.\n- Suggestion: add a lasting check, such as a committed fixture or test that expects rumdl to fail, plus a check that oxfmt output passes `lint:md`. Those are tooling changes, so they would go in the task, not come from me.\n- Page: `verification/deterministic-guardrails.md` (checks \"that enforce correctness regardless of what the agent produces\").",
+      "citations": [
+        "verification/deterministic-guardrails.md"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "The research was done on rumdl 0.2.77, but the task doesn't require that version.",
+      "text": "**5. The research was done on rumdl 0.2.77, but the task doesn't require that version.** (Layer: context)\n- Criterion 2 says \"pins exactly\" but names no version. An implementer who pins the latest release would build the doc on untested assumptions, such as how `references` depends on the cursor position.\n- The claim that `${CLAUDE_PROJECT_DIR}` gets expanded in `.lsp.json` `args` is untested, and criterion 8 depends on it.\n- Suggestion: pin 0.2.77, or require the findings to be re-checked on whatever version gets pinned.\n- Page: `patterns/anti-patterns/assumption-propagation.md`.",
+      "citations": [
+        "patterns/anti-patterns/assumption-propagation.md"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "CI isn't covered by any acceptance criterion.",
+      "text": "**6. CI isn't covered by any acceptance criterion.** (Layer: verification)\n- The Context says to \"confirm the binary resolves… in CI\", but criterion 13 (`npm run check` exits 0) only proves the local run.\n- The risk is small: the sandbox is x86_64 Linux, like `ubuntu-latest`. A criterion that `package-lock.json` resolves `@rumdl/cli-linux-x64`, or a green CI run, would close it.\n- Page: `verification/deterministic-guardrails.md` (CI as \"a second layer independent of the local environment\").",
+      "citations": [
+        "verification/deterministic-guardrails.md"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Agents may never find the new doc.",
+      "text": "**7. Agents may never find the new doc.** (Layer: context)\n- Criterion 12 adds `tools/` to `docs/README.md`, but CLAUDE.md links only to `docs/decisions/`, not to `docs/README.md`.\n- The parts agents can't discover for themselves, like \"ask from a body line\" and which operations are broken, need a one-line pointer in CLAUDE.md. I can add that line once the doc exists.\n- Page: `instructions/agents-md-as-table-of-contents.md`.",
+      "citations": [
+        "instructions/agents-md-as-table-of-contents.md"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "The doc will go out of date when either tool changes.",
+      "text": "**8. The doc will go out of date when either tool changes.** (Layer: context, minor)\n- Criterion 11 asks for the Claude Code version. It should also record the rumdl version and say when to revisit the doc (when #72316 is fixed or rumdl is upgraded).\n- Page: `patterns/anti-patterns/stale-ai-configuration-artifacts.md`.",
+      "citations": [
+        "patterns/anti-patterns/stale-ai-configuration-artifacts.md"
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Checked but doesn't apply: plugin trust",
+      "text": "**Checked but doesn't apply: plugin trust.**\n- `patterns/anti-patterns/install-once-plugin-trust.md` warns that a plugin vetted at install can change on update. Here the plugin lives in the repo, is tracked by git, and runs a binary pinned by the lockfile. Updates are therefore reviewed changes, so the concern mostly doesn't apply.\n- One thing to check while implementing: Claude Code may still ask the user to trust a marketplace defined by the project. If so, criterion 7's \"no manual plugin install\" can't be fully met.",
+      "citations": [
+        "patterns/anti-patterns/install-once-plugin-trust.md"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Needs your decision",
+      "text": "## Needs your decision\n\n1. **Is the LSP part needed now?**\n   - The repo has 8 Markdown files, and I found no case of an agent struggling to navigate the docs. Agents already have Read and Grep, and a whole file costs little to read.\n   - The main reason given for swapping the linter is avoiding two configs once the LSP exists. Without the LSP, the swap replaces a stable linter with a fast-changing 0.x tool for little gain.\n   - Page: `patterns/anti-patterns/cargo-cult-agent-setup.md` (add setup \"when you've identified a recurring problem\"). Its backfire section is about copying templates and doesn't weaken this point.\n   - This is a stack decision, so it's yours to make.\n2. **Split the task** (finding 2). If you agree, whoever manages the board makes the three tasks.\n3. **The task edits `.claude/settings.json`.** Approving the task should include approving that change.",
+      "citations": [
+        "patterns/anti-patterns/cargo-cult-agent-setup.md"
+      ]
+    }
+  ],
+  "removed": []
+}

@@ -1,0 +1,66 @@
+{
+  "final_verified": [
+    "I1",
+    "I10",
+    "I17",
+    "I2",
+    "I3",
+    "I4"
+  ],
+  "rows": {
+    "R1": {
+      "cond": "lsp",
+      "run": "pilot3-T-0001-lsp-2",
+      "raised": 9,
+      "verified": 3,
+      "accepted": 9,
+      "not_verified": 6,
+      "key_recall": 0.57
+    },
+    "R2": {
+      "cond": "baseline",
+      "run": "pilot-T-0001-baseline-3",
+      "raised": 10,
+      "verified": 5,
+      "accepted": 10,
+      "not_verified": 5,
+      "key_recall": 0.43
+    },
+    "R3": {
+      "cond": "lsp",
+      "run": "pilot3-T-0001-lsp-1",
+      "raised": 8,
+      "verified": 4,
+      "accepted": 8,
+      "not_verified": 4,
+      "key_recall": 0.43
+    },
+    "R4": {
+      "cond": "baseline",
+      "run": "pilot-T-0001-baseline-1",
+      "raised": 7,
+      "verified": 5,
+      "accepted": 6,
+      "not_verified": 2,
+      "key_recall": 0.43
+    },
+    "R5": {
+      "cond": "baseline",
+      "run": "pilot-T-0001-baseline-2",
+      "raised": 7,
+      "verified": 3,
+      "accepted": 6,
+      "not_verified": 4,
+      "key_recall": 0.29
+    },
+    "R6": {
+      "cond": "lsp",
+      "run": "pilot3-T-0001-lsp-3",
+      "raised": 5,
+      "verified": 3,
+      "accepted": 5,
+      "not_verified": 2,
+      "key_recall": 0.43
+    }
+  }
+}

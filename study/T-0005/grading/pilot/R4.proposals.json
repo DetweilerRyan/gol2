@@ -1,0 +1,24 @@
+{
+  "run": "R4",
+  "matches": [
+    {"finding": 1, "key_item": 1, "confidence": "high", "reason": "Same problem: scope grew after the task was written; split the linter swap from the LSP plugin and docs."},
+    {"finding": 2, "key_item": null, "confidence": "medium", "reason": "Questions whether LSP is needed at all and notes the rumdl rationale depends on it. Key 4 is about the missing criterion that checks LSP diagnostics match the gate (and autofix-off); related theme but a different problem (need vs. missing check)."},
+    {"finding": 3, "key_item": 2, "confidence": "high", "reason": "Same problem: worktrees have no node_modules/, so the pinned-binary path and worktree-session criteria can't pass as written."},
+    {"finding": 4, "key_item": 5, "confidence": "medium", "reason": "Session-based criteria (incl. the worktree-session check) have no repeatable command for evidence, matching key 5's core point. Doesn't cover the 'record in Handoff can't fail' part. Not key 6 (planted-error temp file), which F4 doesn't raise."},
+    {"finding": 5, "key_item": null, "confidence": "high", "reason": "Unnamed rumdl version pin; no key item covers this."},
+    {"finding": 6, "key_item": null, "confidence": "medium", "reason": "Mainly about CLAUDE.md pointer to docs/tools/. Its authorship side point (docs criterion belongs to the coach) overlaps part of key 5, but key 5 is better matched by finding 4, and this is a side point."},
+    {"finding": 7, "key_item": null, "confidence": "medium", "reason": "Restrict the plugin to its manifest and .lsp.json. Security-adjacent, but key 7 is about having the user (not an agent) review the executable-config .claude/settings.json change; a different remedy and problem."},
+    {"finding": 8, "key_item": null, "confidence": "high", "reason": "Summary of decisions for the user, not a separate finding."}
+  ],
+  "citations": [
+    {"finding": 1, "page": "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md", "exists": true, "correct": true, "evidence": "When a stalled PR blocks dependent work, you add that work to the same PR — making it larger, slower to review, and harder to merge", "has_backfires": true},
+    {"finding": 1, "page": "code-review/agent-driven-pr-slicing.md", "exists": true, "correct": true, "evidence": "No PR is independently mergeable... Small total diffs — a 200-line change sliced into three 60-line PRs adds queue overhead without lowering per-PR load.", "has_backfires": false},
+    {"finding": 2, "page": "context-engineering/semantic-context-loading.md", "exists": true, "correct": true, "evidence": "Grep is the baseline to beat, not file reading... If a single grep pins the symbol, the LSP round-trip rarely pays for itself.", "has_backfires": false},
+    {"finding": 3, "page": "patterns/agent-design/five-failure-layers-diagnostic.md", "exists": true, "correct": true, "evidence": "Execution environment | Did the agent waste context on broken dev setup, missing deps, or wrong tool versions?", "has_backfires": true},
+    {"finding": 4, "page": "verification/incremental-verification.md", "exists": true, "correct": true, "evidence": "Checkpoints that only inspect the agent's own narration, such as \"I fixed the bug\" or \"all tests pass\", are easy to fool.", "has_backfires": true},
+    {"finding": 4, "page": "patterns/anti-patterns/trust-without-verify.md", "exists": true, "correct": true, "evidence": "Accepting agent output as correct because it looks polished — without independent verification.", "has_backfires": true},
+    {"finding": 5, "page": "patterns/agent-design/five-failure-layers-diagnostic.md", "exists": true, "correct": true, "evidence": "Task specification | Did the prompt define a verifiable goal, or did the agent have to guess?", "has_backfires": true},
+    {"finding": 6, "page": "instructions/agents-md-as-table-of-contents.md", "exists": true, "correct": true, "evidence": "Agents do not reliably follow pointers... The docs/ directory is drafted by an agent rather than maintained by humans.", "has_backfires": true},
+    {"finding": 7, "page": "patterns/anti-patterns/install-once-plugin-trust.md", "exists": true, "correct": true, "evidence": "\"third-party and local development marketplaces have auto-update disabled by default\"... the artifact that executes is the lifecycle-hook configuration", "has_backfires": true}
+  ]
+}

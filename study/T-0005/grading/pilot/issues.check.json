@@ -1,0 +1,63 @@
+{
+  "misfits": [
+    {
+      "finding": "R1-10",
+      "issue": "I13",
+      "why": "R1-10 is one of the two findings R1's preamble labels 'checked and are fine (10-11)'. Its title and main point are that plugin supply-chain risk mostly does not apply. Its only forward-looking content is 'keep the exact pin, review rumdl upgrades separately' plus a hedged aside that the ADR 'could also' record the plugin choice. A user who accepts I13 (the ADR must record the plugin decision and that the user made it) would be crediting R1-10 with a claim it makes only in passing. A user who rejects I13 would be marking down a finding whose main message is 'no problem here'. R1-10 also never says the user must be named as the decision-maker.",
+      "suggest": "exclude (a 'checked, not applicable' note, like R5-8), or keep it in I13 only if the grader accepts that the aside is its one action"
+    },
+    {
+      "finding": "R3-9",
+      "issue": "I14",
+      "why": "I14's statement says the Context overstates the bug and should be reworded. R3-9 makes neither claim. It offers a data point (workspaceSymbol works on a non-gitignored file) that 'fits the bug explanation in the task' and 'could go in its Context'. So it endorses the Context and proposes adding evidence, which is a different fix from rewording it. The issue's own variants note says as much. A user could reject the rewording but still find the added data point useful, or the reverse.",
+      "suggest": "exclude (treat it like R6-6, a corroborating data point), or make it a new low-priority issue 'Add the workspaceSymbol observation to the Context'"
+    },
+    {
+      "finding": "R3-3",
+      "issue": "I3",
+      "why": "R3-3's main fix is to split the claim. The checkable part becomes a script that runs `rumdl server` over raw LSP, bypassing Claude Code entirely. The Claude Code part becomes only an observational note in the Handoff. A claude -p command appears only as a fallback ('if headless mode can do it'). The raw-LSP script proves the binary works, not that the committed plugin loads in Claude Code. That is materially different from I3's fix (a named claude -p command with a pass condition, or user-run manual evidence). A user could accept one and reject the other.",
+      "suggest": "keep it in I3 but put the raw-LSP-script alternative in the statement (see statement_problems), or move it to a new issue 'Replace the session criterion with a scripted raw-LSP check plus an observational note'"
+    },
+    {
+      "finding": "R2-3",
+      "issue": "I3",
+      "why": "For criterion 10 (the Handoff-recording criterion), R2-3 does not ask for a command. It says the criterion is a reporting duty that 'can't catch a failure', and that this is 'fine'. The statement puts the Handoff criterion among those that need a command and expected result, which R2-3 does not claim. R5-2 has the same split: it says criterion 10 should be labelled a research output, not given a command. The criterion 9 part fits I3.",
+      "suggest": "keep, but fix the statement so criterion 10's treatment matches (see statement_problems)"
+    },
+    {
+      "finding": "R5-2",
+      "issue": "I3",
+      "why": "Same as R2-3. R5-2 says criterion 10 'can't fail, so it's a research output, not a pass/fail check... label it that way'. It does not say criterion 10 needs a re-runnable command, as the statement implies.",
+      "suggest": "keep, but fix the statement (see statement_problems)"
+    },
+    {
+      "finding": "R6-1",
+      "issue": "I1",
+      "why": "Low severity. R6-1's reason for splitting is that the session checks can only be run by a person and fall outside the verification budget, so the linter swap should be a small task the gate can verify alone. It never makes the statement's central argument: the one-active-task rule leaves the linter swap stuck in blocked/ if the plugin stalls. The fix is the same, so the rating probably transfers, but the stated rationale is not R6-1's.",
+      "suggest": "keep in I1, with the statement broadened (see statement_problems)"
+    }
+  ],
+  "statement_problems": [
+    {
+      "issue": "I13",
+      "why": "The statement presents recording the plugin decision in the ADR as the finding's fix, but for R1-10 that is only a hedged aside ('could also') inside a 'checked and fine' note. If R1-10 stays, the statement overstates what it says. If R1-10 is removed, the statement is fine as written; 'or approval' comes from R2-10 via also_raises.",
+      "fix": "If R1-10 is excluded, keep the current statement. Otherwise: \"The ADR criterion covers only the linter swap, while enabling a project-wide plugin in .claude/settings.json that starts a process in every session is an architectural choice recorded nowhere. The fix is to have the ADR (or the task approval) also record the plugin decision; one reviewer adds that it should state the user made it.\""
+    },
+    {
+      "issue": "I3",
+      "why": "The statement treats the Handoff-recording criterion (criterion 10) the same as the session criterion: both 'give no command and expected result'. R2-3 and R5-2 say criterion 10 cannot fail and only needs relabelling as a reporting or research duty. The statement also omits R3-3's main alternative (a scripted raw-LSP check plus an observational Handoff note).",
+      "fix": "\"The criteria that say 'in a new Claude Code session...' give no command and expected result, so they cannot produce the {criterion, command, result} evidence the board requires or be re-run by a separate verifier. The fix is to name a command (for example a headless claude -p run with --debug from each directory) and what output counts as a pass, to assign these checks to the user as manual evidence, or to replace them with a scripted raw-LSP check of the pinned binary plus an observational note in the Handoff. The Handoff-recording criterion cannot fail and should be labelled a reporting duty rather than a pass/fail check.\""
+    },
+    {
+      "issue": "I1",
+      "why": "Minor. The only rationale the statement gives is the blocked/ stall under the one-active-task rule. R6-1 never uses that argument; it argues from verification (session checks only a person can run). As written, the statement attributes a claim to all members that one member does not make.",
+      "fix": "\"The task bundles the linter swap with the LSP plugin work (and the docs/tools/ doc), which carry different risk and need different verification: the swap is fully machine-checkable, while the plugin needs fresh sessions and depends on an unfixed Claude Code bug. If the plugin half stalls, the linter swap, which could ship alone, is stuck in blocked/ with it under the one-active-task rule. The suggested fix is to split the work into tasks linked by depends_on, with the linter swap first.\""
+    }
+  ],
+  "exclusion_problems": [
+    {
+      "finding": "R6-6",
+      "why": "Consistency, not a clear error. R6-6 is excluded as a corroborating data point, while R3-9, which is the same kind of workspaceSymbol side observation, is kept as a member of I14. R6-6 correctly proposes no action ('it's only corroboration'). R3-9 goes slightly further ('could go in its Context'). The two should be treated the same way on purpose: either both excluded, or R3-9 made its own tiny issue, not folded into I14."
+    }
+  ]
+}

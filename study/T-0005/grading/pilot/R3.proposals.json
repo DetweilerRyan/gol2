@@ -1,0 +1,24 @@
+{
+  "run": "R3",
+  "matches": [
+    {"finding": 1, "key_item": 1, "confidence": "high", "reason": "Both say the task bundles separate jobs and should be split: lint swap, LSP plugin, and docs."},
+    {"finding": 2, "key_item": 2, "confidence": "high", "reason": "Both say worktrees have no node_modules/, so the pinned-binary path and the worktree criterion can't both pass as written."},
+    {"finding": 3, "key_item": 5, "confidence": "medium", "reason": "Both say the worktree/new-session criterion and the Handoff criterion can't produce the command-based evidence the board requires. The key also flags the docs criterion as a judgment, which this finding doesn't; the core issue is the same."},
+    {"finding": 4, "key_item": null, "confidence": "medium", "reason": "This is about link checking staying on permanently after a one-time planted-link test (config drift). Key 6 is about making the planted-error command create its own temp file so it can be rerun. They touch the same criterion but raise different problems."},
+    {"finding": 5, "key_item": null, "confidence": "high", "reason": "A missing CLAUDE.md pointer to the new doc isn't in the key. Key 5 mentions the docs criterion belonging to the coach only as a side point."},
+    {"finding": 6, "key_item": null, "confidence": "low", "reason": "This is about LSP diagnostics noise on Markdown outside the repo (defaults, not .rumdl.toml). Key 4 is about having no criterion that checks in-repo diagnostics match the gate, plus autofix-off being unchecked. Both concern unspecified diagnostics behavior, but the problem is different. Partial overlap only."},
+    {"finding": 7, "key_item": null, "confidence": "high", "reason": "An unspecified exact rumdl version isn't in the key."},
+    {"finding": 8, "key_item": null, "confidence": "low", "reason": "This says the ADR omits the settings.json plugin change and should record the user's decision. Key 7 (the user, not an agent, should review the executable-config change) overlaps only on the side point that settings.json is a significant change the user owns. It's not the same problem."},
+    {"finding": 9, "key_item": null, "confidence": "high", "reason": "A side observation with a Context suggestion, not a problem finding."}
+  ],
+  "citations": [
+    {"finding": 1, "page": "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md", "exists": true, "correct": true, "evidence": "Atomic PR discipline keeps one logical change per PR, under 400 lines.", "has_backfires": true},
+    {"finding": 1, "page": "verification/risk-based-task-sizing.md", "exists": true, "correct": true, "evidence": "Task size combines scope and file risk ... high-risk files auto-escalate to Large regardless of scope.", "has_backfires": true},
+    {"finding": 2, "page": "workflows/worktree-isolation.md", "exists": true, "correct": true, "evidence": "Every worktree still installs its own dependencies, builds its own artifacts, and starts its own services.", "has_backfires": true},
+    {"finding": 3, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "Design guardrails to be specific. \"File is valid YAML\" is weaker than \"file matches the required schema with all required fields present.\"", "has_backfires": true},
+    {"finding": 4, "page": "verification/deterministic-guardrails.md", "exists": true, "correct": true, "evidence": "The guardrail drifts from the property... the check passes while the thing it protected has changed. / Coverage is thin but visible.", "has_backfires": true},
+    {"finding": 5, "page": "instructions/agents-md-as-table-of-contents.md", "exists": true, "correct": true, "evidence": "AGENTS.md is a brief index — what this project is, where conventions live, what to read first per task type.", "has_backfires": true},
+    {"finding": 6, "page": "patterns/anti-patterns/distractor-interference.md", "exists": true, "correct": true, "evidence": "LLMs perform worse when irrelevant but plausible content sits alongside applicable instructions.", "has_backfires": true},
+    {"finding": 7, "page": "patterns/anti-patterns/assumption-propagation.md", "exists": true, "correct": true, "evidence": "The agent misunderstands a requirement early and builds on the faulty premise, reinforcing the wrong assumption", "has_backfires": true}
+  ]
+}

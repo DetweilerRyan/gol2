@@ -1,0 +1,344 @@
+{
+  "I1": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The one task really does bundle the machine-checkable linter swap with the session-verified plugin and the doc, and the board makes all of them stand or fall together."
+      },
+      "B": {
+        "verdict": "real",
+        "reason": "The WIP rule means a stalled plugin half (plausible given I2 and the known Claude Code bug) would park the fully machine-checkable linter swap in blocked/, and splitting with depends_on costs little."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "The board's WIP rule makes a blocked task hold the slot, the plugin half has concrete stall risks (worktree node_modules, trust prompts, session-only checks) that the machine-checkable swap doesn't share, and depends_on is the board's own way to sequence split work."
+      }
+    },
+    "majority": "real",
+    "status": "unanimous"
+  },
+  "I2": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The task gives a worktree criterion and a ${CLAUDE_PROJECT_DIR}/node_modules launch path but never says how a gitignored, bind-mounted node_modules/ gets into a worktree."
+      },
+      "B": {
+        "verdict": "real",
+        "reason": "node_modules/ is gitignored and exists only as a bind mount in the main checkout, so ${CLAUDE_PROJECT_DIR}/node_modules/rumdl/bin/rumdl will be missing in a .claude/worktrees/ session and the worktree criterion would fail for a setup reason, not the LSP bug."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "By the task's and CLAUDE.md's own statements, node_modules/ is a gitignored bind mount of the main checkout, so a fresh worktree under .claude/worktrees/ has no ${CLAUDE_PROJECT_DIR}/node_modules, and the task never says how the worktree case gets one."
+      }
+    },
+    "majority": "real",
+    "status": "unanimous"
+  },
+  "I3": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The session criteria name no command and no pass output, but the board requires a {criterion, command, result} for every criterion, and the Handoff criterion is a reporting duty."
+      },
+      "B": {
+        "verdict": "real",
+        "reason": "The board requires {criterion, command, result} for every criterion and a separate verifier, yet the session criteria name no command and the Handoff-recording criterion cannot fail, so the verifier has to invent the check (claude -p / --debug exist, so naming one is cheap)."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "The board requires every criterion to have a {criterion, command, result} entry from a separate verifier, but 'in a new Claude Code session' names no command, and headless -p runs skip the trust dialog, so which command is used changes the outcome."
+      }
+    },
+    "majority": "real",
+    "status": "unanimous"
+  },
+  "I4": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "CLAUDE.md's map links only docs/decisions/ and .board/, so the new docs/tools/ doc would be listed only in docs/README.md, which CLAUDE.md does not link."
+      },
+      "B": {
+        "verdict": "real",
+        "reason": "CLAUDE.md's map points only to docs/decisions/ and .board/, not docs/README.md, so a doc whose whole purpose is to change how agents navigate would be hard to find; a one-line pointer is cheap."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "CLAUDE.md is meant to be the map, but it points only to docs/decisions/ and .board/, so an agent-facing usage doc under docs/tools/ would be reachable only through docs/README.md, which nothing points agents to."
+      }
+    },
+    "majority": "real",
+    "status": "unanimous"
+  },
+  "I5": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The pin criterion names no version, though all the research was done on 0.2.77."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The load-bearing findings are re-checked on whatever version gets pinned by the criteria themselves (planted-link test, gitignore test, documentSymbol test, npm run check), so pinning a newer release would not silently rely on untested findings."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "Every finding (parity, gitignore handling, the references cursor behavior that goes into the doc) is stamped 0.2.77, but criterion 2 names no version, and the LSP-behavior claims in the doc aren't re-tested by any criterion."
+      }
+    },
+    "majority": "real",
+    "status": "disputed"
+  },
+  "I6": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The Context asks to confirm the binary resolves in CI, but no acceptance criterion covers that."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "CI runs npm ci then npm run check on every push/PR, so an unresolved binary would fail loudly and immediately; CI is ubuntu (linux-x64), the same platform family as the sandbox."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "The Context explicitly asks for confirmation that the binary resolves in CI, but no acceptance criterion or evidence entry covers it, and the board counts only criteria as verified."
+      }
+    },
+    "majority": "real",
+    "status": "disputed"
+  },
+  "I7": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The doc must mark broken operations with a Claude Code version, but nothing says when to re-test or remove that note (a minor issue)."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The criterion already requires the doc to stamp each non-working operation with the Claude Code version, which tells readers the claim is version-bound; the cost of staleness is at most an agent skipping an operation that now works."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The criterion already requires the doc to date each caveat by Claude Code version, and the coach's standing duty to fix or delete docs that disagree with reality covers retirement; formal retire_when metadata is reserved for a scale this repo hasn't reached."
+      }
+    },
+    "majority": "not_real",
+    "status": "disputed"
+  },
+  "I8": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The criterion checks the configured values, not the stated goal that oxfmt output passes rumdl."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The pinned values (atx, dash, underscore emphasis, asterisk strong) are the Prettier-style output oxfmt is built to match, and any mismatch would surface as a failing gate (format:check and lint:md both run in npm run check), not go unnoticed."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The gate runs oxfmt --check and the linter over every Markdown file on every commit, so a real formatter/linter conflict shows up as a red gate; the extra fixture guards only against a hypothetical future oxfmt change, and pinned tools change only through a new ADR."
+      }
+    },
+    "majority": "not_real",
+    "status": "disputed"
+  },
+  "I9": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "The broken-link check is a single run on a temporary file, so nothing afterward would fail if MD051/MD057 were turned off."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "Regression requires a later deliberate config edit or upgrade that disables MD051/MD057; the ADR records that rumdl replaces relative-links for link checking, and a permanent failing-fixture harness costs more than this speculative risk justifies in a repo with ~7 Markdown files."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The feared regression requires a config edit or a deliberate pinned upgrade, which the ADR process and the task's 'upgrade deliberately' already gate, and the markdownlint relative-links setup it replaces had no lasting fixture either, so adding one is anticipatory."
+      }
+    },
+    "majority": "not_real",
+    "status": "disputed"
+  },
+  "I10": {
+    "verdicts": {
+      "A": {
+        "verdict": "unclear",
+        "reason": "The facts are accurate, but whether the LSP work is premature is the user's call, and the task was written to include it."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The Context says documentSymbol (the core section-line-range use) works despite the bug, the bug affects only three ops and possibly not in worktrees, and the task's author has already made the scope decision."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "The repo's own guidance says to adopt a practice when its conditions hold, not in anticipation, and the task reports only 7 Markdown files and a known bug that may disable 3 of the 5 LSP operations, so asking the user to confirm the need before moving it out of backlog/ is reasonable."
+      }
+    },
+    "majority": null,
+    "status": "disputed"
+  },
+  "I11": {
+    "verdicts": {
+      "A": {
+        "verdict": "not_real",
+        "reason": "The Context's 'writes or reviews' already allows the implementer to write the doc and the coach to review it, which fits the claimed_by/verified_by split."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "\"writes or reviews\" already allows the implementer to write and the coach to review, which is compatible with one claimed_by and a separate verifier; a separate task adds overhead for no demonstrated failure."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The Context's 'writes or reviews' already allows the implementer to write the doc and the coach to review it, and the suggested fix conflicts with the coach role, which may not write to board lanes other than retros/ and so can't claim a task."
+      }
+    },
+    "majority": "not_real",
+    "status": "unanimous"
+  },
+  "I12": {
+    "verdicts": {
+      "A": {
+        "verdict": "unclear",
+        "reason": "The task does say nothing about files outside the repo, but the stated mechanism is wrong in a raw LSP test, and it can't be checked whether Claude Code sends outside files to the plugin."
+      },
+      "B": {
+        "verdict": "unclear",
+        "reason": "rumdl defaults do flag agentpatterns pages (28 issues on one file) and the coach reads ../agentpatterns, but nothing in the material shows Claude Code attaches LSP diagnostics to files that are only read outside the project, so the consequence can't be settled."
+      },
+      "C": {
+        "verdict": "unclear",
+        "reason": "rumdl does flag default-rule issues on the reference pages the coach routinely reads (75 on two pages), but the material doesn't show whether Claude Code surfaces LSP diagnostics for files that are only Read outside the project."
+      }
+    },
+    "majority": "unclear",
+    "status": "disputed"
+  },
+  "I13": {
+    "verdicts": {
+      "A": {
+        "verdict": "unclear",
+        "reason": "The ADR criterion does cover only the linter swap, but the repo's ADR rule is about tools in the stack, and the task file itself records the plugin decision, so whether this needs an ADR is a judgment call."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The ADR's reason for rumdl is the LSP (per Context's \"Why rumdl\"), and the plugin setup is documented in the required docs/tools/ doc; a project dev-tool plugin isn't the kind of app architecture the ADRs cover, so omitting it causes no failure."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The repo's precedent treats agent-environment config (hooks in .claude/settings.json) as outside the ADRs, the linter swap that ADR 0001 requires is already covered, and user approval of a task is recorded by its move to ready/."
+      }
+    },
+    "majority": "not_real",
+    "status": "disputed"
+  },
+  "I14": {
+    "verdicts": {
+      "A": {
+        "verdict": "not_real",
+        "reason": "The Context limits the bug to gitignored files in the very next sentence and explicitly treats non-ignored (worktree) cases as possibly working."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The same bullet immediately qualifies the bug (\"when the queried file is gitignored\") and says worktree sessions \"may be fine\", and criterion 10 asks only to record results, so a successful result wouldn't be mistaken for a setup error."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The same Context paragraph gives the gitignored-file condition and says worktree sessions 'may be fine', and criterion 10 asks the implementer to record whether each operation returns results rather than expecting failure, so a success wouldn't be read as a setup mistake."
+      }
+    },
+    "majority": "not_real",
+    "status": "unanimous"
+  },
+  "I15": {
+    "verdicts": {
+      "A": {
+        "verdict": "unclear",
+        "reason": "Nothing in the allowed material shows that a user-level rumdl plugin exists."
+      },
+      "B": {
+        "verdict": "unclear",
+        "reason": "The claim that a user-level rumdl plugin is already installed is not in the permitted material, and criterion 8 (\"starts the rumdl version pinned ... from node_modules/\") already demands source-specific evidence if checked honestly."
+      },
+      "C": {
+        "verdict": "unclear",
+        "reason": "Nothing in the allowed material shows a user-level rumdl plugin, and criterion 8 already requires showing that the server runs from the project's node_modules rather than a global install, which partly guards against this."
+      }
+    },
+    "majority": "unclear",
+    "status": "disputed"
+  },
+  "I16": {
+    "verdicts": {
+      "A": {
+        "verdict": "not_real",
+        "reason": "The task already flags the setup as unverified, tells the implementer to verify it, and names the check commands; criteria 7-8 fail if the setup is wrong."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The task already says \"verify while implementing\" and names the checks (claude plugin list, --debug), the doc criterion depends on Handoff results so it is naturally written last, and the board's blocked/ lane with Handoff already provides the stop point."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The Context already says to verify the second-hand details while implementing and names the same checks (claude plugin list, --debug), and the board's blocked/ lane with a Handoff is the existing stop point."
+      }
+    },
+    "majority": "not_real",
+    "status": "unanimous"
+  },
+  "I17": {
+    "verdicts": {
+      "A": {
+        "verdict": "real",
+        "reason": "Only a Context note protects the gate hooks in .claude/settings.json, and a bad edit could disable them without any error."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "The Context explicitly warns to preserve the hooks, and even if the Stop hook broke the gate still runs as the pre-commit hook and in CI, so it would not be silently lost; a diff in review catches overwrites."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "The Stop/SubagentStop hooks in .claude/settings.json are one of the gate's named enforcement points, Claude Code silently ignores settings files that fail validation in non-interactive mode, and only a Context note protects them, so a cheap before/after check on .hooks is a reasonable criterion."
+      }
+    },
+    "majority": "real",
+    "status": "disputed"
+  },
+  "I18": {
+    "verdicts": {
+      "A": {
+        "verdict": "not_real",
+        "reason": "The risk is about later changes, which a one-time criterion on this task can't prevent; the plugin's contents are already reviewed as committed files."
+      },
+      "B": {
+        "verdict": "not_real",
+        "reason": "It guards against a hypothetical future change to a committed file, which would itself go through commits, the gate, and review; it has no bearing on this task's outcome."
+      },
+      "C": {
+        "verdict": "not_real",
+        "reason": "The plugin is committed in this repo, so any later hook or component would arrive as a reviewed diff; guarding against a hypothetical future addition is the anticipatory practice the repo's guidance warns against."
+      }
+    },
+    "majority": "not_real",
+    "status": "unanimous"
+  },
+  "I19": {
+    "verdicts": {
+      "A": {
+        "verdict": "unclear",
+        "reason": "The reference says project-scope LSP servers wait for workspace trust, but it's unclear whether a trust or approval prompt counts as a 'manual plugin install', and the allowed material doesn't document marketplace-trust behavior for extraKnownMarketplaces."
+      },
+      "B": {
+        "verdict": "unclear",
+        "reason": "Whether Claude Code prompts to trust or install a project-declared marketplace can't be determined from claude --help or the task, and a trust prompt may or may not count as a \"manual plugin install\"; the suggestion (check while implementing) is already what the task says."
+      },
+      "C": {
+        "verdict": "real",
+        "reason": "The reference documents that project-scope plugins' LSP servers start only after workspace trust and face extra approval, so 'a new session needs no manual plugin install' could hit a prompt, and checking this while implementing is a cheap response."
+      }
+    },
+    "majority": "unclear",
+    "status": "disputed"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "run": "R4",
+  "preamble": "I've finished reviewing T-0001 against the pattern pages. The task is well researched, but I'd split it before approving: the Markdown linter swap is ready to go, and the language-server (LSP) half has an unresolved question about why it's needed now and at least one setup gap. I didn't edit any files.\n\n## What's already good\n- **Context:** it holds only research an agent couldn't get from the repo: parity results, the config-import failure, the LSP behavior, and the bug history (`context-engineering/discoverable-vs-nondiscoverable-context.md`).\n- **Criteria:** they can be checked by running them. The planted-error checks (criterion 4) and the gitignored-path check (criterion 5) test that the linter catches what it should and skips what it should. This is the case where `patterns/agent-design/sprint-contracts.md` says a full sprint contract isn't needed.\n- **Keeping `rumdl fmt` out (criterion 6):** this stops rumdl and oxfmt from rewriting each other's output, based on a conflict that was actually seen in testing.",
+  "findings": [
+    {
+      "id": 1,
+      "title": "Two separate deliverables share one task, and the scope grew after the task was first written",
+      "text": "**Pages:** `patterns/anti-patterns/pr-scope-creep-review-bottleneck.md`, `code-review/agent-driven-pr-slicing.md`\n\nThe task started as a linter swap (1846c06). Two later commits added the LSP doc (9c81f38) and the Claude Code plugin setup (648d64a).\n\nThe two halves need very different checking:\n- **Linter swap (criteria 1–6 and 13):** `npm run check` and planted errors can confirm all of it.\n- **LSP half (criteria 7–12):** needs fresh Claude Code sessions, including one in a worktree, and depends on a Claude Code bug that was closed as \"not planned.\"\n\nThe board allows one task per agent in `active/` or `blocked/`. If the LSP half stalls, the task sits in `blocked/` and the finished linter swap goes nowhere.\n\nThe slicing page's test is that each part can be merged on its own; this split passes it. That page also warns against splitting small diffs. That warning doesn't apply here, because the reason to split is how each half gets verified and what can block it, not diff size.\n\n**Suggestion:** keep T-0001 as the linter swap. Make T-0002 the plugin plus the `docs/tools/` doc, with `depends_on: [T-0001]`.",
+      "citations": [
+        "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md",
+        "code-review/agent-driven-pr-slicing.md"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The LSP half is being set up ahead of a demonstrated need, and the reason for switching linters depends on it",
+      "text": "**Page:** `context-engineering/semantic-context-loading.md` (Trade-offs section and Key Takeaways)\n\nThat page treats grep as the baseline an LSP has to beat. It says LSP pays off when there's a specific target and enough code that reading whole files is expensive.\n- The repo tracks 352 lines of Markdown in total; the largest file (`coach.md`) is 116 lines, and all 3 ADRs are 16 lines or fewer.\n- The task's own Context says 3 of the 5 LSP operations may return nothing because of the Claude Code bug.\n\nThe Context's main reason for switching to rumdl is to avoid \"two configs\" and diagnostics that differ from the gate. That reason only holds if agents actually use the LSP. Without it, what's left is:\n- dropping the `markdownlint-rule-relative-links` custom rule;\n- speed, which the Context itself says \"isn't a factor.\"\n\n**You need to decide:** do you want Markdown navigation over the LSP now? If not, it's an open question whether the linter swap is worth an ADR at all. If you do, the split in finding 1 still applies.",
+      "citations": [
+        "context-engineering/semantic-context-loading.md"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "The worktree criteria may not be achievable as written",
+      "text": "**Page:** `patterns/agent-design/five-failure-layers-diagnostic.md` (environment layer)\n\nCriteria 8 and 9 have the plugin run `${CLAUDE_PROJECT_DIR}/node_modules/rumdl/bin/rumdl` in a session under `.claude/worktrees/`. But `node_modules/` is a bind mount recreated only at the main checkout (see CLAUDE.md), and it's gitignored, so a new worktree has none. The Context doesn't cover this. I couldn't check it, because no worktree exists right now (`git worktree list` shows only main). The existing hooks use the same `$CLAUDE_PROJECT_DIR/node_modules/...` path, so worktree sessions may already hit this.\n\n**Suggestion:** add a line to the Context about how a worktree gets `node_modules/`, or make \"the plugin starts in a worktree\" an explicit thing to investigate and record in the Handoff.",
+      "citations": [
+        "patterns/agent-design/five-failure-layers-diagnostic.md"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "The session-based criteria have no repeatable command for the evidence",
+      "text": "**Pages:** `verification/incremental-verification.md` (\"When this backfires\"), `patterns/anti-patterns/trust-without-verify.md`\n\nThe board requires each piece of evidence to have `{criterion, command, result}`, and the verifier must be a different agent. Criteria 9 and 10 say \"in a new Claude Code session …\" without saying how to start one or what counts as the result. The verifier would end up relying on the implementer's account, which is the \"checkpoint that only inspects the agent's own narration\" case the incremental-verification page warns about.\n\n**Suggestion:** name the command (for example a headless `claude -p` run with a fixed prompt, from each directory), or name a human as the verifier for those criteria.",
+      "citations": [
+        "verification/incremental-verification.md",
+        "patterns/anti-patterns/trust-without-verify.md"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "The rumdl version isn't named, but all the research is specific to 0.2.77",
+      "text": "**Page:** `five-failure-layers-diagnostic.md` (task-spec layer)\n\nCriterion 2 says to \"pin exactly\" but doesn't say which version. The parity results, the `server` subcommand, and the `references` behavior were all checked on 0.2.77, and rumdl \"releases every few days.\"\n\n**Suggestion:** pin 0.2.77 in the criterion, or require re-running the parity checks on whatever version gets installed.",
+      "citations": [
+        "patterns/agent-design/five-failure-layers-diagnostic.md"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Agents have no path to the new `docs/tools/` doc, and it's unclear who writes it",
+      "text": "**Page:** `instructions/agents-md-as-table-of-contents.md` (\"When this backfires\": agents don't reliably follow pointers; docs drafted by agents rather than maintained by humans decay)\n\n- **Path:** Criterion 12 lists `tools/` only in `docs/README.md`. The CLAUDE.md \"Where things are\" section points only to `docs/decisions/`, so an agent would have to find `docs/README.md` first. I'd add a CLAUDE.md pointer as part of the task (I maintain CLAUDE.md), and I'd remove a line to make room for it.\n- **Author:** Criterion 11 reads as the implementer's job, while the Context says \"the coach writes or reviews\" the doc. I suggest the implementer records the results in the Handoff and I write the doc from them. This goes in T-0002 if you split.",
+      "citations": [
+        "instructions/agents-md-as-table-of-contents.md"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Smaller point: keep the committed plugin limited to the language server",
+      "text": "**Page:** `patterns/anti-patterns/install-once-plugin-trust.md`\n\nMost of that page's risk doesn't apply here. The plugin comes from a local directory marketplace, so every change goes through git review and nothing auto-updates. But `enabledPlugins` runs whatever the plugin declares in every session. A one-line criterion like \"the plugin contains only its manifest and `.lsp.json`, no hooks\" would stop the plugin from gaining other components (such as hooks) later without anyone noticing.",
+      "citations": [
+        "patterns/anti-patterns/install-once-plugin-trust.md"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Decisions for you",
+      "text": "1. Split into T-0001 (linter swap) and T-0002 (LSP plugin and doc)?\n2. Do you want LSP navigation for Markdown now (finding 2)? If not, is the rumdl swap still worth doing?\n\nIf you approve, I can make the CLAUDE.md pointer change from finding 6. The task-file changes (the split and the criteria in findings 3–5 and 7) are for whoever manages the board.",
+      "citations": []
+    }
+  ],
+  "removed": []
+}

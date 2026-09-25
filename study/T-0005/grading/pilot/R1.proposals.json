@@ -1,0 +1,27 @@
+{"run": "R1",
+"matches": [
+ {"finding": 1, "key_item": 1, "confidence": "high", "reason": "Both say the task bundles the lint swap with the LSP plugin and the docs and should be split."},
+ {"finding": 2, "key_item": 5, "confidence": "low", "reason": "Says plugin criteria (14-16) have no named evidence command and could pass through the user-level plugin. Key 5 says the worktree-session check has no command and criteria don't fit the evidence rule. Overlaps on missing commands, but F2's main point is that the user-level plugin confounds the result. Could reasonably be null."},
+ {"finding": 3, "key_item": 2, "confidence": "high", "reason": "Same problem: worktree sessions have no node_modules, so the pinned-binary path and the worktree-session criterion conflict."},
+ {"finding": 4, "key_item": 3, "confidence": "medium", "reason": "Both flag that the plugin/marketplace setup is unverified research that the rest of the task builds on. Key 3's fix is to state the outcome, not the mechanism; F4's fix is a stub check with a stop point first. The fixes differ but the problem is the same."},
+ {"finding": 5, "key_item": null, "confidence": "high", "reason": "CI platform-binary check has no criterion; not in key."},
+ {"finding": 6, "key_item": null, "confidence": "high", "reason": "CLAUDE.md pointer to the new doc; not in key."},
+ {"finding": 7, "key_item": null, "confidence": "high", "reason": "Doc staleness and re-test trigger; not in key."},
+ {"finding": 8, "key_item": null, "confidence": "high", "reason": "Bug description broader than evidence; not in key."},
+ {"finding": 9, "key_item": null, "confidence": "medium", "reason": "Linter/formatter agreement behaviour check. Key 4 is also about a missing behaviour check, but for LSP diagnostics matching the gate and autofix-off, which is a different gap."},
+ {"finding": 10, "key_item": null, "confidence": "high", "reason": "Checked-and-fine note (supply-chain risk mostly doesn't apply). It doesn't ask for user review of the executable config (key 7)."},
+ {"finding": 11, "key_item": null, "confidence": "high", "reason": "Checked-and-fine note."}
+],
+"citations": [
+ {"finding": 1, "page": "patterns/anti-patterns/pr-scope-creep-review-bottleneck.md", "exists": true, "correct": true, "evidence": "Atomic PR discipline keeps one logical change per PR, under 400 lines. ... Small or solo teams: one person reviews everything in sequence anyway", "has_backfires": true},
+ {"finding": 1, "page": "verification/risk-based-task-sizing.md", "exists": true, "correct": true, "evidence": "Scale verification effort to match task risk — trivial changes get quick checks, high-risk changes get multi-model adversarial review and human approval gates.", "has_backfires": true},
+ {"finding": 2, "page": "patterns/anti-patterns/artifact-only-verification.md", "exists": true, "correct": false, "evidence": "This anti-pattern only bites when the procedure is part of the specification — when a skill mandates a verification, an approval, or an audit step", "has_backfires": true},
+ {"finding": 3, "page": "patterns/agent-design/five-failure-layers-diagnostic.md", "exists": true, "correct": true, "evidence": "Execution environment | Did the agent waste context on broken dev setup, missing deps, or wrong tool versions?", "has_backfires": true},
+ {"finding": 4, "page": "patterns/anti-patterns/assumption-propagation.md", "exists": true, "correct": true, "evidence": "Level 3: Verification gates. Put a human checkpoint between interpretation and building ... The spec is precise.", "has_backfires": true},
+ {"finding": 5, "page": "verification/risk-based-task-sizing.md", "exists": true, "correct": false, "evidence": "requires at least one tier 7 or 8 check when tiers 1 to 6 yield only static signals. Empty runtime verification is never acceptable.", "has_backfires": true},
+ {"finding": 6, "page": "instructions/agents-md-as-table-of-contents.md", "exists": true, "correct": true, "evidence": "AGENTS.md is a brief index ... Agents do not reliably follow pointers.", "has_backfires": true},
+ {"finding": 7, "page": "patterns/anti-patterns/stale-ai-configuration-artifacts.md", "exists": true, "correct": true, "evidence": "AI configuration files drift out of sync with the code they describe ... Solo or short-lived repos: the silent-failure mode of a stale CLAUDE.md depends on", "has_backfires": true},
+ {"finding": 8, "page": "patterns/anti-patterns/assumption-propagation.md", "exists": true, "correct": true, "evidence": "Every later decision (sandbox architecture, rollback strategy, cleanup logic) stayed consistent with that wrong assumption.", "has_backfires": true},
+ {"finding": 9, "page": "patterns/anti-patterns/spec-complexity-displacement.md", "exists": true, "correct": true, "evidence": "Tests as acceptance criteria | Behavioral requirements | Yes — test runner", "has_backfires": false},
+ {"finding": 10, "page": "patterns/anti-patterns/install-once-plugin-trust.md", "exists": true, "correct": true, "evidence": "Auto-update has to be on for the marketplace the plugin came from ... The plugin also has to be unpinned", "has_backfires": true}
+]}

@@ -1,0 +1,76 @@
+{
+  "run": "R5",
+  "preamble": "I've reviewed `T-0001`. It's well researched, and criteria 4 and 5 are good examples of the board's rule that a criterion names the behavior it checks. My main concern is that it bundles two changes that get verified very differently. All citations are to pages under `/study/agentpatterns` that I read, including their \"When this backfires\" sections. I didn't edit anything.\n\nFindings 1 and 3 change how the task is structured, so they're worth settling before you approve it. The rest are single-criterion edits.",
+  "findings": [
+    {
+      "id": 1,
+      "title": "The task bundles two changes that should be split",
+      "text": "**1. The task bundles two changes that should be split.**\n- **The linter swap** (criteria 1–6 and 13) can be checked with commands. It could reach `done/` in one session.\n- **The LSP plugin and its doc** (criteria 7–12) depend on an unfixed Claude Code bug (#72316) and on fresh interactive sessions. They also rest on plugin-loading details the Context itself says to \"verify while implementing\".\n- **Why it matters:** if the LSP half stalls, a task only enters `done/` when every criterion has evidence, so the finished linter swap is stuck too. The blocked task also keeps holding the agent's single work-in-progress slot.\n- **Suggestion:**\n  - `T-0001`: the rumdl swap plus the ADR.\n  - `T-0002`: the plugin plus the Handoff findings, with `depends_on: [T-0001]` since it needs rumdl pinned.\n  - The `docs/tools/` doc goes with finding 3.\n- **Source:** `verification/incremental-verification.md` says to put a checkpoint after each meaningful unit, and this is a clean one. Its backfire (units too small) doesn't apply here. `patterns/anti-patterns/assumption-propagation.md` warns about too many criteria (Kiro produced 16 for a bug fix). Splitting doesn't add criteria; it divides the 13 that exist.",
+      "citations": [
+        "verification/incremental-verification.md",
+        "patterns/anti-patterns/assumption-propagation.md"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Criteria 9 and 10 can't be re-run by a different verifier as written",
+      "text": "**2. Criteria 9 and 10 can't be re-run by a different verifier as written.**\n- Each evidence entry needs a `command`, and `verified_by` must be a different agent. \"In a new Claude Code session… returns headings\" names no command.\n- **Suggestion:** say how it's checked, for example a headless `claude -p` run in the main checkout and in a worktree, plus the `--debug` log line showing the server started. Or say plainly that this is manual evidence the user records.\n- Criterion 10 (\"records whether…\") can't fail, so it's a research output, not a pass/fail check. It's worth keeping, but label it that way.\n- **Source:** `patterns/anti-patterns/premature-completion.md` says to tie stopping criteria to observable state, not to a transcript saying it works. `verification/incremental-verification.md` makes the same point: \"A checkpoint that reads the agent's self-report is not a checkpoint.\"",
+      "citations": [
+        "patterns/anti-patterns/premature-completion.md",
+        "verification/incremental-verification.md"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Two agents own parts of one task",
+      "text": "**3. Two agents own parts of one task.**\n- The Context gives the `docs/tools/` doc to the coach, and ADRs are the coach's job (\"records decisions the user makes\"). But the task has one `claimed_by`, and the implementer and verifier must be different agents.\n- **Suggestion:** make the doc its own coach-owned task that depends on the LSP task. The coach then works from that task's Handoff section, not from chat history.\n- **Source:** `patterns/agent-design/persona-as-code.md`: when roles overlap on the same artifact, conflicts have \"no principled resolution\", and handing off files instead of chat keeps what was learned.",
+      "citations": [
+        "patterns/agent-design/persona-as-code.md"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Criterion 3 hard-codes rule values instead of the property it protects",
+      "text": "**4. Criterion 3 hard-codes rule values instead of the property it protects.**\n- What matters is that oxfmt and rumdl never disagree. The values listed (MD003 atx, MD004 dash, MD049 underscore, MD050 asterisk) are research findings about what oxfmt writes.\n- **Suggestion:** add a behavioral criterion, and keep the value list or drop it. For example: a temporary file mixing heading, list, and emphasis styles, after `npm run format`, gives zero `npm run lint:md` issues. That catches a wrong value, or a change after an oxfmt upgrade, and a value list can't.\n- **Source:** `patterns/anti-patterns/spec-complexity-displacement.md` says to put precision in things that enforce, like tests and linters, not prose. That page has no \"When this backfires\" section. `verification/deterministic-guardrails.md` covers the risk directly in its backfire item \"the guardrail drifts from the property\".",
+      "citations": [
+        "patterns/anti-patterns/spec-complexity-displacement.md",
+        "verification/deterministic-guardrails.md"
+      ]
+    },
+    {
+      "id": 5,
+      "title": "CI isn't in the acceptance criteria, though the Context asks for it",
+      "text": "**5. CI isn't in the acceptance criteria, though the Context asks for it.**\n- The Context says to confirm the binary resolves \"in CI\", but criterion 13 only proves `npm run check` passes locally.\n- rumdl gets its binary through platform-specific optional dependencies. The sandbox's `node_modules/` is a bind mount, while CI does a clean `npm ci`, so passing locally doesn't show CI passes.\n- The sandbox is x86_64 like `ubuntu-latest`, which lowers the risk without removing it.\n- **Suggestion:** add \"the CI `check` workflow passes on the commit\", or a clean `npm ci && npm run lint:md` in a fresh directory.\n- **Source:** `verification/deterministic-guardrails.md`: CI is \"a second layer independent of the local environment.\"",
+      "citations": [
+        "verification/deterministic-guardrails.md"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Editing `.claude/settings.json` could turn off the gate's hooks, and no criterion protects them",
+      "text": "**6. Editing `.claude/settings.json` could turn off the gate's hooks, and no criterion protects them.**\n- That file holds the Stop/SubagentStop hooks that run `npm run check`. The Context says \"add to it without disturbing them\", but that's only a note.\n- A malformed or overwritten file would quietly disable one layer of the gate, which `CLAUDE.md` lists as a Never.\n- **Suggestion:** add a criterion that the four existing hook entries are unchanged, for example by diffing `.hooks` before and after.\n- **Source:** `verification/deterministic-guardrails.md`: guardrails only work if they \"always run\".",
+      "citations": [
+        "verification/deterministic-guardrails.md"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "The doc's version-specific claims will go stale",
+      "text": "**7. The doc's version-specific claims will go stale.**\n- Criterion 11 already asks the doc to mark broken operations with the Claude Code version, which is good.\n- **Suggestion:** also say when to recheck and delete that note, for example on a Claude Code upgrade or when #72316 is fixed. rumdl's own link checks (MD051/MD057) will catch broken links but not an outdated claim about a bug.\n- **Source:** `patterns/anti-patterns/stale-ai-configuration-artifacts.md`. Its \"pre-stabilization\" backfire fits here: Claude Code's behavior is still changing, so keep that section short.",
+      "citations": [
+        "patterns/anti-patterns/stale-ai-configuration-artifacts.md"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Checked and not raised",
+      "text": "- **Plugin supply-chain risk** (`patterns/anti-patterns/install-once-plugin-trust.md`): doesn't apply. The page's own conditions don't hold: local marketplaces have auto-update off by default, and plugin changes arrive as repo diffs.\n- **Plugin runs code at session start** (`security/pre-trust-execution-surface.md`): its backfire case, a first-party repo you reopen often, is this repo. The existing hooks already run `node_modules/.bin/tsx`, so the plugin adds no new kind of risk.\n- **Context length** (`context-engineering/discoverable-vs-nondiscoverable-context.md`): the long Context section is mostly findings an implementer couldn't get from the repo, like parity tests, the `rumdl fmt` damage, and the bug trace. That's what a task Context is for. Only small bits are discoverable, such as \"settings.json already holds the hooks\".",
+      "citations": [
+        "patterns/anti-patterns/install-once-plugin-trust.md",
+        "security/pre-trust-execution-surface.md",
+        "context-engineering/discoverable-vs-nondiscoverable-context.md"
+      ]
+    }
+  ],
+  "removed": []
+}
