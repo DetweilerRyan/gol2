@@ -1,15 +1,16 @@
 ---
 id: T-0001
 title: Replace markdownlint-cli2 with rumdl for Markdown linting
-depends_on: []
+depends_on: [T-0002]
 claimed_by: null
 verified_by: null
 acceptance:
   - "A new ADR in `docs/decisions/` records replacing markdownlint-cli2 and markdownlint-rule-relative-links with rumdl for Markdown linting, keeps oxfmt as the Markdown formatter, and ADR 0001 links to it as superseding its Markdown line"
-  - "`package.json` pins `rumdl` exactly in devDependencies, no longer lists `markdownlint-cli2` or `markdownlint-rule-relative-links`, and `lint:md` runs rumdl"
+  - "`package.json` no longer lists `markdownlint-cli2` or `markdownlint-rule-relative-links`, and `lint:md` runs the rumdl pinned by T-0002"
   - "`.markdownlint-cli2.jsonc` is removed and `.rumdl.toml` disables MD013 and pins MD003 to atx, MD004 to dash, MD049 to underscore, and MD050 to asterisk"
   - "A single evidence command creates a Markdown file containing a link to a missing file, a missing same-file anchor, and a missing cross-file anchor, runs `npm run lint:md`, which exits non-zero and reports all three, and then deletes the file"
   - "A single evidence command creates a Markdown file with a lint error in a gitignored path such as `.claude/worktrees/`, runs `npm run lint:md`, which exits 0, and then deletes the file"
+  - "An evidence command creates a Markdown file with known lint errors, collects the LSP server's diagnostics for it, and shows they name the same rule IDs as `npm run lint:md` on that file and include no MD013, then deletes the file"
   - "`rumdl fmt` is not wired into any script, hook, or CI step"
   - "`npm run check` exits 0"
 evidence: []
@@ -17,10 +18,10 @@ evidence: []
 
 ## Context
 
-Why rumdl: one tool can lint Markdown in the gate and act as an LSP server that agents use to navigate `docs/`
-(T-0002). Keeping markdownlint for the gate and rumdl for the LSP would mean two configs, and agents would see
-diagnostics that differ from what `npm run check` enforces. Research was done in a session on 2026-09-25; the
-findings the implementer needs:
+Why: T-0002 adds rumdl as the LSP server agents use to navigate `docs/`. Keeping markdownlint for the gate and
+rumdl for the LSP would mean two configs, and agents would see diagnostics that differ from what `npm run check`
+enforces. This task runs only after T-0002 is done; if the plugin didn't work, rumdl isn't adopted and this task
+is dropped. Research was done in a session on 2026-09-25; the findings the implementer needs:
 
 - **Parity.** rumdl 0.2.77 implements all 53 markdownlint rules. With MD013 off, both tools report 0 issues on the
   repo's Markdown. On planted errors both caught a missing file (rumdl MD057), a missing same-file anchor (MD051),
@@ -35,10 +36,8 @@ findings the implementer needs:
 - **Formatting stays with oxfmt.** oxfmt reprints Markdown in a fixed style without changing how it renders.
   `rumdl fmt` only applies lint fixes, and on a test file it removed a hard line break and merged three separate
   lists into one. The two tools rewrite each other's output, so only one of them may format.
-- **Install.** The npm package `rumdl` ships platform binaries as optional dependencies (`@rumdl/cli-linux-x64` and
-  others). Confirm the binary resolves both in the sandbox (`node_modules/` is a bind mount, see `CLAUDE.md`) and
-  in CI.
-- **Churn.** rumdl is 0.x and releases every few days. Pin the exact version and upgrade deliberately.
+- **LSP diagnostics.** The LSP server started by T-0002's plugin reads the same `.rumdl.toml`, so once it exists,
+  agents' diagnostics should match the gate. Before it exists, the LSP reports rumdl's defaults, including MD013.
 - **Time.** On the 7 current files, rumdl takes ~0.07 s and markdownlint-cli2 ~0.6 s, so speed isn't a factor.
 
 ## Handoff
