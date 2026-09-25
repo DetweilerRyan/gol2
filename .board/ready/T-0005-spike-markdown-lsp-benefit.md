@@ -45,8 +45,8 @@ the keys came from, which penalizes an LSP coach that finds different good probl
 **Counting runs.** The main result counts every LSP-condition run as assigned, whether or not it called the LSP,
 because that's what adopting it looks like. Runs that did call it are a secondary result (the user's decision).
 
-**Effectiveness gate (proposed; fix it in the workload file before the first study run; the user may change the
-numbers when approving this task, never after runs start).** Go requires all of these:
+**Effectiveness gate (approved by the user as proposed when approving this task, 2026-09-25; fix it in the
+workload file before the first study run, and never change it after runs start).** Go requires all of these:
 
 - The median number of accepted findings per run is higher in the LSP condition in every review task, by at least
   one finding in at least half of them, and each gap is larger than the spread of the runs within each condition.
@@ -54,14 +54,14 @@ numbers when approving this task, never after runs start).** Go requires all of 
 - The LSP condition is not worse on incorrect citations, rejected findings (noise), or the share of cited pages
   whose "When this backfires" section was read.
 
-**Efficiency guardrail (proposed, fixed the same way).** Outcomes: held, breached, or not measurable. A breach,
+**Efficiency guardrail (approved as proposed, 2026-09-25; fixed the same way).** Outcomes: held, breached, or not measurable. A breach,
 which is a no-go even if the gate passes, needs both: in some review task, the LSP condition's median cost in USD or
 median tokens returned by agentpatterns-reading tools is more than 10% higher than the baseline's, and that gap is
 larger than the spread of the runs within each condition. It's not measurable when the pilot shows the smallest
 detectable cost difference at the planned number of runs is above 10%; run-to-run cost for the same setup varies by
 about ×1.34, so at 3 runs "held" can be close to the default.
 
-**Uptake rule (proposed).** The LSP condition counts as tested only if the coach made at least one LSP call in at
+**Uptake rule (approved as proposed, 2026-09-25).** The LSP condition counts as tested only if the coach made at least one LSP call in at
 least two thirds of its runs. Otherwise the result is "not tested", not no-go: agents often skip an optional tool.
 
 **Pilot stop conditions.** Stop and ask the user before fixing the workload if any of these hold: LSP uptake in the
@@ -136,7 +136,7 @@ irrelevant share is small in both conditions, a quality null is "not measurable"
 before citing it. An LSP-guided coach reading a single section may skip it, and pruning context too hard can
 under-inform the model, which is why the gate checks backfire-section reads in both conditions.
 
-**Rubric (proposed).** For each review: relevant findings (would the user act on it), correct citations (the cited
+**Rubric (approved as proposed, 2026-09-25).** For each review: relevant findings (would the user act on it), correct citations (the cited
 page says what the review claims), and noise (findings that don't apply). Rate each pair as LSP better, same, or
 baseline better, per dimension. Pair run 1 with run 1, run 2 with run 2, and so on, within each review task.
 
@@ -184,4 +184,5 @@ production plugin (T-0002).
 
 ## Handoff
 
-Not started.
+Not started. The user approved the task on 2026-09-25 ("approve task 05"), with the proposed gate, guardrail,
+uptake rule, and rubric unchanged; it moved from `backlog/` to `ready/` with T-0006 and T-0010 in `done/`.
